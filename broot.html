@@ -165,6 +165,15 @@
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
   }
 
+  .premium-inline {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    display: inline-block;
+    vertical-align: middle;
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+  }
+
   .info {
     position: absolute;
     left: 14px;
@@ -423,9 +432,6 @@
   }
   .share-option-arrow { width: 18px; height: 18px; flex-shrink: 0; opacity: 0.4; }
 
-  /* ============================================================
-     ШТОРКА КОММЕНТАРИЕВ
-     ============================================================ */
   .comments-sheet {
     position: fixed;
     left: 8px; right: 8px; bottom: 8px;
@@ -555,6 +561,32 @@
     margin-top: 2px;
     object-fit: contain;
   }
+  /* Голосовой комментарий */
+  .comment-voice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(42, 171, 238, 0.12);
+    border: 1px solid rgba(42, 171, 238, 0.25);
+    border-radius: 14px;
+    padding: 8px 12px;
+    margin-top: 4px;
+    max-width: 260px;
+  }
+  .comment-voice svg {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    color: #2AABEE;
+  }
+  .comment-voice audio {
+    flex: 1;
+    min-width: 0;
+    height: 32px;
+  }
+  .comment-voice audio::-webkit-media-controls-panel {
+    background: transparent;
+  }
+
   .comment-actions {
     display: flex;
     gap: 12px;
@@ -615,7 +647,6 @@
   }
   .comments-empty svg { width: 44px; height: 44px; opacity: 0.35; }
 
-  /* ============ ФОРМА ВВОДА + ЭМОДЗИ + СТИКЕРЫ ============ */
   .comment-input-wrap {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(22, 22, 24, 0.98);
@@ -685,6 +716,47 @@
   .reply-cancel:active { background: rgba(255, 255, 255, 0.2); }
   .reply-cancel svg { width: 11px; height: 11px; display: block; }
 
+  /* Индикатор записи голоса */
+  .recording-indicator {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 0;
+    font-size: 12.5px;
+    color: #ff3b30;
+    font-weight: 600;
+  }
+  .recording-indicator.show { display: flex; }
+  .recording-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #ff3b30;
+    animation: recPulse 1s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes recPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+  .recording-time {
+    font-variant-numeric: tabular-nums;
+    color: #fff;
+  }
+  .recording-cancel {
+    margin-left: auto;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 59, 48, 0.2);
+    color: #ff3b30;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .recording-cancel:active { background: rgba(255, 59, 48, 0.4); }
+  .recording-cancel svg { width: 11px; height: 11px; display: block; }
+
   .comment-input-row {
     display: flex;
     align-items: flex-end;
@@ -730,7 +802,8 @@
   .comment-send:disabled { opacity: 0.4; pointer-events: none; }
   .comment-send svg { width: 18px; height: 18px; display: block; }
 
-  .comment-sticker-btn {
+  .comment-sticker-btn,
+  .comment-voice-btn {
     width: 38px; height: 38px;
     border-radius: 50%;
     border: none;
@@ -742,11 +815,28 @@
     padding: 0;
     transition: background 0.2s ease, transform 0.15s ease;
   }
-  .comment-sticker-btn:active { background: rgba(255, 255, 255, 0.16); transform: scale(0.92); }
-  .comment-sticker-btn svg { width: 20px; height: 20px; display: block; }
+  .comment-sticker-btn:active,
+  .comment-voice-btn:active { background: rgba(255, 255, 255, 0.16); transform: scale(0.92); }
+  .comment-sticker-btn svg,
+  .comment-voice-btn svg { width: 20px; height: 20px; display: block; }
   .comment-sticker-btn.active { background: rgba(42, 171, 238, 0.25); color: #2AABEE; }
 
-  /* Панель стикеров */
+  /* Кнопка записи — активное состояние */
+  .comment-voice-btn.recording {
+    background: rgba(255, 59, 48, 0.25);
+    color: #ff3b30;
+    animation: recBtnPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes recBtnPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  .comment-voice-btn.uploading {
+    background: rgba(42, 171, 238, 0.25);
+    color: #2AABEE;
+    pointer-events: none;
+  }
+
   .sticker-picker {
     display: none;
     background: rgba(18, 18, 20, 0.98);
@@ -789,7 +879,6 @@
     display: block;
   }
 
-  /* Кнопка загрузки стикера */
   .sticker-upload {
     background: rgba(42, 171, 238, 0.08);
     border: 1.5px dashed rgba(42, 171, 238, 0.45);
@@ -801,7 +890,6 @@
     pointer-events: none;
   }
 
-  /* Кнопка удаления пользовательского стикера */
   .sticker-remove {
     position: absolute;
     top: 6px; right: 6px;
@@ -824,7 +912,6 @@
   .sticker-remove:active { background: #ff3b30; }
   .sticker-remove svg { width: 11px; height: 11px; display: block; }
 
-  /* Индикатор загрузки на кнопке "+" */
   .sticker-upload.loading { pointer-events: none; opacity: 0.6; }
   .sticker-upload.loading::after {
     content: '';
@@ -1229,6 +1316,16 @@
       </button>
     </div>
 
+    <div class="recording-indicator" id="recordingIndicator">
+      <div class="recording-dot"></div>
+      <span>Запись <span class="recording-time" id="recordingTime">0:00</span></span>
+      <button class="recording-cancel" id="recordingCancel" aria-label="Отменить">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
     <div class="emoji-strip" id="emojiStrip"></div>
 
     <div class="sticker-picker" id="stickerPicker">
@@ -1236,6 +1333,14 @@
     </div>
 
     <div class="comment-input-row">
+      <button class="comment-voice-btn" id="voiceBtn" aria-label="Голосовое">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="3" width="6" height="12" rx="3"/>
+          <path d="M5 11v1a7 7 0 0 0 14 0v-1"/>
+          <line x1="12" y1="19" x2="12" y2="22"/>
+          <line x1="8" y1="22" x2="16" y2="22"/>
+        </svg>
+      </button>
       <button class="comment-sticker-btn" id="stickerBtn" aria-label="Стикеры">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/>
@@ -1313,9 +1418,16 @@
   };
 
   const IMGBB_KEY = "0618fb35ec6cc96b0ffd8a92eeaba109";
+  const POSTFILE_KEY = "pf_zIOEPsJKHjEzvudK9i811lX7izb8kf4Hrhx8t06pMMw";
+  const POSTFILE_UPLOAD_URL = "https://postfile.net/v1/upload";
+
+  const BOT_USERNAME = (function() {
+    const s = String('{{BOT_USERNAME_TEXT}}').trim();
+    return (s.indexOf('{{') === -1 && s) ? s : 'BrootsBot';
+  })();
+  const APP_LINK_BASE = "https://t.me/" + BOT_USERNAME + "?startapp=";
 
   const APP_START_ID = "9d164c68b5de57c1";
-  const APP_LINK_BASE = "https://t.me/BrootsBot?startapp=";
 
   const INTRO_VIDEO_URL = "https://cdn.videovssylku.ru/2026/09/28/IMG_8158.mov";
   const SITE_LOADER_TIMEOUT = 4000;
@@ -1329,6 +1441,7 @@
     "https://i.postimg.cc/L6JPPLFS/catsunicmass-Ag-ADtz-QAAu-YZw-Ug.gif"
   ];
   const STICKER_PREFIX = '[STICKER]';
+  const VOICE_PREFIX = '[VOICE]';
 
   const EMOJIS = [
     "😀","😁","😂","🤣","😊","😍","🥰","😘","😎","🤩","😭","😢","😡","🥺","🤔",
@@ -1360,16 +1473,25 @@
     const username  = readTpl('{{USERNAME_TEXT}}');
     const userId    = readTpl('{{USER_ID_TEXT}}');
     const avatar    = readTpl('{{USER_AVATAR_URL}}');
+    const hasPremium = readTpl('{{HAS_PREMIUM_BOOL}}') === '1';
+    const platform  = readTpl('{{PLATFORM}}') || 'tg';
 
     let name = fullName;
     if (!name) name = [firstName, lastName].filter(Boolean).join(' ').trim();
     if (!name && username) name = '@' + username.replace(/^@/, '');
     if (!name) name = 'Пользователь';
 
-    return { id: userId, name: name, username: username, avatar: avatar };
+    return {
+      id: userId,
+      name: name,
+      username: username,
+      avatar: avatar,
+      hasPremium: hasPremium,
+      platform: platform
+    };
   })();
 
-  // ==================== КАСТОМНЫЕ СТИКЕРЫ (localStorage) ====================
+  // ==================== КАСТОМНЫЕ СТИКЕРЫ ====================
   const CUSTOM_STICKERS_KEY = 'custom_stickers_' + (USER.id || 'guest');
 
   function getCustomStickers() {
@@ -1493,6 +1615,12 @@
     const yr = Math.floor(mo / 12);
     return yr + ' г';
   }
+  function fmtDuration(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return m + ':' + (s < 10 ? '0' + s : s);
+  }
 
   // ==================== ЗАГРУЗЧИК ====================
   let siteLoaderHidden = false;
@@ -1511,7 +1639,6 @@
     const slide = document.createElement('div');
     slide.className = 'reel intro-slide';
     slide.dataset.index = 0;
-    // Intro preload=auto т.к. это первый слайд
     slide.innerHTML = `
       <video class="intro-video" src="${INTRO_VIDEO_URL}"
         loop muted autoplay playsinline webkit-playsinline
@@ -1537,9 +1664,6 @@
     return slide;
   }
 
-  // ============ ЛЕНИВАЯ ЗАГРУЗКА ВИДЕО ============
-  // Видео НЕ грузится сразу. URL хранится в data-src, src ставится,
-  // когда слайд становится активным или соседним с активным.
   function ensureVideoLoaded(reel) {
     if (!reel) return;
     const v = reel.querySelector('video[data-src]');
@@ -1572,7 +1696,6 @@
       ? `<img class="premium-badge" src="${premiumImg}" alt="" onerror="this.style.display='none'">`
       : '';
 
-    // Ключевое: video без src, с data-src и preload="none"
     reel.innerHTML = `
       <video data-src="${videoUrl}" muted preload="none"
         playsinline webkit-playsinline disablepictureinpicture></video>
@@ -1662,7 +1785,6 @@
         if (firstVideoReel) firstVideoReel.scrollIntoView({ behavior: 'smooth' });
       }
     });
-    // НЕ вызываем forcePlay здесь — ждём observer
     return reel;
   }
 
@@ -1683,7 +1805,6 @@
       if (items.length > 0) items.forEach((item, i) => feed.appendChild(createReel(item, i + 1)));
       initReels();
       scrollToStartVideo();
-      // Прогреваем первый и второй слайды (интро и первое видео)
       setTimeout(() => {
         const allReels = document.querySelectorAll('.reel');
         if (allReels[1]) ensureVideoLoaded(allReels[1]);
@@ -1829,11 +1950,215 @@
   const stickerGrid = document.getElementById('stickerGrid');
   const emojiStrip = document.getElementById('emojiStrip');
   const stickerUploadInput = document.getElementById('stickerUploadInput');
+  const voiceBtn = document.getElementById('voiceBtn');
+  const recordingIndicator = document.getElementById('recordingIndicator');
+  const recordingTime = document.getElementById('recordingTime');
+  const recordingCancel = document.getElementById('recordingCancel');
 
   let replyTarget = null;
   const commentsCache = {};
 
-  // Сетка стикеров (со своими + кнопка загрузки)
+  // ----- Запись голоса -----
+  let mediaRecorder = null;
+  let mediaChunks = [];
+  let mediaStream = null;
+  let recStartTime = 0;
+  let recTimerId = null;
+  let recCancelled = false;
+
+  function resetRecordingUI() {
+    if (voiceBtn) {
+      voiceBtn.classList.remove('recording', 'uploading');
+    }
+    if (recordingIndicator) {
+      recordingIndicator.classList.remove('show');
+    }
+    if (recTimerId) {
+      clearInterval(recTimerId);
+      recTimerId = null;
+    }
+  }
+
+  function startRecording() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
+      showToast('Запись недоступна на этом устройстве');
+      return;
+    }
+    if (mediaRecorder) return;
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        mediaStream = stream;
+        mediaChunks = [];
+        recCancelled = false;
+
+        // Выбираем поддерживаемый формат
+        let mime = '';
+        const candidates = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/ogg;codecs=opus',
+          'audio/mp4'
+        ];
+        for (let i = 0; i < candidates.length; i++) {
+          if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(candidates[i])) {
+            mime = candidates[i];
+            break;
+          }
+        }
+
+        try {
+          mediaRecorder = mime
+            ? new MediaRecorder(stream, { mimeType: mime })
+            : new MediaRecorder(stream);
+        } catch (e) {
+          try { mediaRecorder = new MediaRecorder(stream); }
+          catch (e2) {
+            showToast('Запись недоступна');
+            cleanupStream();
+            return;
+          }
+        }
+
+        mediaRecorder.ondataavailable = (ev) => {
+          if (ev.data && ev.data.size > 0) mediaChunks.push(ev.data);
+        };
+        mediaRecorder.onstop = () => {
+          cleanupStream();
+          if (recCancelled) {
+            resetRecordingUI();
+            return;
+          }
+          const blob = new Blob(mediaChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+          if (blob.size < 500) {
+            resetRecordingUI();
+            showToast('Слишком короткая запись');
+            return;
+          }
+          // Показываем что грузим
+          if (voiceBtn) {
+            voiceBtn.classList.remove('recording');
+            voiceBtn.classList.add('uploading');
+          }
+          uploadVoiceAndSend(blob).finally(() => resetRecordingUI());
+        };
+
+        mediaRecorder.start();
+        recStartTime = Date.now();
+
+        if (voiceBtn) voiceBtn.classList.add('recording');
+        if (recordingIndicator) recordingIndicator.classList.add('show');
+        if (recordingTime) recordingTime.textContent = '0:00';
+
+        recTimerId = setInterval(() => {
+          const elapsed = (Date.now() - recStartTime) / 1000;
+          if (recordingTime) recordingTime.textContent = fmtDuration(elapsed);
+          // Ограничение: 2 минуты
+          if (elapsed >= 120) stopRecording();
+        }, 200);
+
+        // Автостоп через 2 минуты
+      })
+      .catch(err => {
+        console.error('getUserMedia error:', err);
+        let msg = 'Нет доступа к микрофону';
+        if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) msg = 'Разрешите доступ к микрофону';
+        if (err && err.name === 'NotFoundError') msg = 'Микрофон не найден';
+        showToast(msg);
+      });
+  }
+
+  function cleanupStream() {
+    if (mediaStream) {
+      try { mediaStream.getTracks().forEach(t => t.stop()); } catch (e) {}
+      mediaStream = null;
+    }
+    mediaRecorder = null;
+    mediaChunks = [];
+  }
+
+  function stopRecording() {
+    if (!mediaRecorder) return;
+    try {
+      if (mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+    } catch (e) {}
+    if (recTimerId) { clearInterval(recTimerId); recTimerId = null; }
+  }
+
+  function cancelRecording() {
+    if (!mediaRecorder) { resetRecordingUI(); return; }
+    recCancelled = true;
+    try {
+      if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+    } catch (e) {}
+    if (recTimerId) { clearInterval(recTimerId); recTimerId = null; }
+    if (recordingIndicator) recordingIndicator.classList.remove('show');
+  }
+
+  function toggleRecording() {
+    if (mediaRecorder) {
+      // Идёт запись → стоп и отправка
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  }
+
+  if (voiceBtn) {
+    voiceBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleRecording();
+    });
+  }
+  if (recordingCancel) {
+    recordingCancel.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cancelRecording();
+    });
+  }
+
+  // Загрузка в PostFile и отправка в комментарии
+  async function uploadVoiceAndSend(blob) {
+    try {
+      // Имя файла с расширением
+      const ext = (blob.type.indexOf('ogg') !== -1) ? 'ogg'
+                : (blob.type.indexOf('mp4') !== -1) ? 'm4a'
+                : 'webm';
+      const filename = 'voice_' + Date.now() + '.' + ext;
+
+      const fd = new FormData();
+      fd.append('file', blob, filename);
+
+      const res = await fetch(POSTFILE_UPLOAD_URL, {
+        method: 'POST',
+        headers: { 'X-API-Key': POSTFILE_KEY },
+        body: fd
+      });
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        throw new Error('HTTP ' + res.status + ' ' + txt.slice(0, 150));
+      }
+      const data = await res.json();
+      const url = data && data.url;
+      if (!url) throw new Error('Не получена ссылка');
+
+      // Отправляем как комментарий с префиксом
+      const videoId = await postComment(VOICE_PREFIX + url);
+      delete commentsCache[videoId];
+      await loadComments(videoId);
+      setTimeout(() => {
+        if (commentsList) commentsList.scrollTop = commentsList.scrollHeight;
+      }, 100);
+    } catch (err) {
+      console.error('Voice upload error:', err);
+      showToast('Ошибка загрузки голосового: ' + err.message);
+    }
+  }
+
+  // ==================== РЕНДЕР СТИКЕРОВ ====================
   function renderStickerGrid() {
     if (!stickerGrid) return;
     const custom = getCustomStickers();
@@ -1867,7 +2192,6 @@
 
     stickerGrid.innerHTML = uploadHtml + customHtml + baseHtml;
 
-    // Клик по стикеру → отправить
     stickerGrid.querySelectorAll('.sticker-item').forEach(item => {
       if (item.id === 'stickerUploadBtn') return;
       item.addEventListener('click', (e) => {
@@ -1877,7 +2201,6 @@
       });
     });
 
-    // Кнопка загрузки
     const uploadBtn = document.getElementById('stickerUploadBtn');
     if (uploadBtn) {
       uploadBtn.addEventListener('click', (e) => {
@@ -1886,7 +2209,6 @@
       });
     }
 
-    // Кнопки удаления своих стикеров
     stickerGrid.querySelectorAll('.sticker-remove').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1901,7 +2223,6 @@
     });
   }
 
-  // Загрузка файла в imgbb
   async function uploadStickerToImgbb(file) {
     const form = new FormData();
     form.append('image', file);
@@ -1913,7 +2234,6 @@
     if (!res.ok || !data.success || !data.data) {
       throw new Error((data && data.error && data.error.message) || 'Upload failed');
     }
-    // display_url — прямая ссылка, удобнее для <img>
     return data.data.display_url || data.data.url || '';
   }
 
@@ -1939,7 +2259,7 @@
     });
   }
 
-  // Панель эмодзи
+  // ==================== ЭМОДЗИ ====================
   (function renderEmojiStrip() {
     if (!emojiStrip) return;
     emojiStrip.innerHTML = EMOJIS.map(e =>
@@ -2007,6 +2327,7 @@
     commentsSheet.classList.remove('show');
     setReplyTarget(null);
     toggleStickerPicker(false);
+    if (mediaRecorder) cancelRecording();
   }
 
   async function loadComments(videoId) {
@@ -2103,7 +2424,9 @@
 
   function renderCommentItem(c, parentComment) {
     const isSticker = c.text.indexOf(STICKER_PREFIX) === 0;
+    const isVoice = c.text.indexOf(VOICE_PREFIX) === 0;
     const stickerUrl = isSticker ? c.text.slice(STICKER_PREFIX.length) : '';
+    const voiceUrl = isVoice ? c.text.slice(VOICE_PREFIX.length) : '';
     const safeName = escapeHtml(c.name);
     const av = c.avatar || `https://i.pravatar.cc/100?u=${encodeURIComponent(c.name)}`;
     const timeHtml = c.createdAt
@@ -2116,9 +2439,24 @@
       ? `<span class="reply-to-badge">→ ${escapeHtml(parentComment.name)}</span>`
       : '';
 
-    const bodyContent = isSticker
-      ? `<img class="comment-sticker" src="${escapeHtml(stickerUrl)}" alt="sticker" onerror="this.style.display='none'">`
-      : `<span>${replyTo}${escapeHtml(c.text)}</span>`;
+    let bodyContent;
+    if (isSticker) {
+      bodyContent = `<img class="comment-sticker" src="${escapeHtml(stickerUrl)}" alt="sticker" onerror="this.style.display='none'">`;
+    } else if (isVoice) {
+      bodyContent = `
+        <div class="comment-voice">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="3" width="6" height="12" rx="3"/>
+            <path d="M5 11v1a7 7 0 0 0 14 0v-1"/>
+            <line x1="12" y1="19" x2="12" y2="22"/>
+            <line x1="8" y1="22" x2="16" y2="22"/>
+          </svg>
+          <audio controls preload="metadata" src="${escapeHtml(voiceUrl)}"></audio>
+        </div>
+      `;
+    } else {
+      bodyContent = `<span>${replyTo}${escapeHtml(c.text)}</span>`;
+    }
 
     const deleteBtn = c.isOwn
       ? `<button class="comment-action-btn danger" data-action="delete" data-id="${escapeHtml(c.id)}">
@@ -2456,11 +2794,9 @@
           else updateCommentBadge(0);
         }
 
-        // Ленивая загрузка: текущий, предыдущий и следующий слайды
         reels.forEach((r, i) => {
           const v = r.querySelector('video');
           if (!v) return;
-          // Загружаем соседей (текущий, ±1)
           if (i === index || i === index - 1 || i === index + 1) {
             ensureVideoLoaded(r);
           }
