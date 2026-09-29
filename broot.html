@@ -164,7 +164,6 @@
     display: block;
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
   }
-
   .premium-inline {
     width: 14px;
     height: 14px;
@@ -561,7 +560,6 @@
     margin-top: 2px;
     object-fit: contain;
   }
-  /* Голосовой комментарий */
   .comment-voice {
     display: flex;
     align-items: center;
@@ -582,9 +580,6 @@
     flex: 1;
     min-width: 0;
     height: 32px;
-  }
-  .comment-voice audio::-webkit-media-controls-panel {
-    background: transparent;
   }
 
   .comment-actions {
@@ -716,7 +711,6 @@
   .reply-cancel:active { background: rgba(255, 255, 255, 0.2); }
   .reply-cancel svg { width: 11px; height: 11px; display: block; }
 
-  /* Индикатор записи голоса */
   .recording-indicator {
     display: none;
     align-items: center;
@@ -796,11 +790,15 @@
     display: flex; align-items: center; justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
-    transition: transform 0.15s ease, opacity 0.2s ease;
+    transition: transform 0.15s ease, opacity 0.2s ease, background 0.2s ease;
   }
   .comment-send:active { transform: scale(0.92); }
   .comment-send:disabled { opacity: 0.4; pointer-events: none; }
   .comment-send svg { width: 18px; height: 18px; display: block; }
+  .comment-send.send-recording {
+    background: linear-gradient(135deg, #ff3b30 0%, #d70015 100%);
+    animation: recBtnPulse 1.2s ease-in-out infinite;
+  }
 
   .comment-sticker-btn,
   .comment-voice-btn {
@@ -821,7 +819,6 @@
   .comment-voice-btn svg { width: 20px; height: 20px; display: block; }
   .comment-sticker-btn.active { background: rgba(42, 171, 238, 0.25); color: #2AABEE; }
 
-  /* Кнопка записи — активное состояние */
   .comment-voice-btn.recording {
     background: rgba(255, 59, 48, 0.25);
     color: #ff3b30;
@@ -835,6 +832,16 @@
     background: rgba(42, 171, 238, 0.25);
     color: #2AABEE;
     pointer-events: none;
+  }
+  .comment-voice-btn.uploading svg { display: none; }
+  .comment-voice-btn.uploading::after {
+    content: '';
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.25);
+    border-top-color: #2AABEE;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    position: absolute;
   }
 
   .sticker-picker {
@@ -1333,7 +1340,7 @@
     </div>
 
     <div class="comment-input-row">
-      <button class="comment-voice-btn" id="voiceBtn" aria-label="Голосовое">
+      <button class="comment-voice-btn" id="voiceBtn" aria-label="Голосовое" style="position:relative;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <rect x="9" y="3" width="6" height="12" rx="3"/>
           <path d="M5 11v1a7 7 0 0 0 14 0v-1"/>
@@ -1967,21 +1974,20 @@
   let recCancelled = false;
 
   function resetRecordingUI() {
-    if (voiceBtn) {
-      voiceBtn.classList.remove('recording', 'uploading');
-    }
-    if (recordingIndicator) {
-      recordingIndicator.classList.remove('show');
-    }
-    if (recTimerId) {
-      clearInterval(recTimerId);
-      recTimerId = null;
-    }
+    if (voiceBtn) voiceBtn.classList.remove('recording', 'uploading');
+    if (recordingIndicator) recordingIndicator.classList.remove('show');
+    if (commentSend) commentSend.classList.remove('send-recording');
+    if (recTimerId) { clearInterval(recTimerId); recTimerId = null; }
   }
 
   function startRecording() {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || typeof MediaRecorder === 'undefined') {
-      showToast('Запись недоступна на этом устройстве');
+    console.log('[VOICE] startRecording');
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showToast('getUserMedia не поддерживается');
+      return;
+    }
+    if (typeof MediaRecorder === 'undefined') {
+      showToast('MediaRecorder не поддерживается');
       return;
     }
     if (mediaRecorder) return;
@@ -1992,7 +1998,6 @@
         mediaChunks = [];
         recCancelled = false;
 
-        // Выбираем поддерживаемый формат
         let mime = '';
         const candidates = [
           'audio/webm;codecs=opus',
@@ -2023,19 +2028,21 @@
         mediaRecorder.ondataavailable = (ev) => {
           if (ev.data && ev.data.size > 0) mediaChunks.push(ev.data);
         };
+
+        mediaRecorder.onerror = (ev) => {
+          console.error('[VOICE] onerror:', ev && ev.error);
+        };
+
         mediaRecorder.onstop = () => {
+          const stoppedMime = mediaRecorder ? mediaRecorder.mimeType : '';
           cleanupStream();
-          if (recCancelled) {
-            resetRecordingUI();
-            return;
-          }
-          const blob = new Blob(mediaChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+          if (recCancelled) { resetRecordingUI(); return; }
+          const blob = new Blob(mediaChunks, { type: stoppedMime || 'audio/webm' });
           if (blob.size < 500) {
             resetRecordingUI();
             showToast('Слишком короткая запись');
             return;
           }
-          // Показываем что грузим
           if (voiceBtn) {
             voiceBtn.classList.remove('recording');
             voiceBtn.classList.add('uploading');
@@ -2048,22 +2055,21 @@
 
         if (voiceBtn) voiceBtn.classList.add('recording');
         if (recordingIndicator) recordingIndicator.classList.add('show');
+        if (commentSend) commentSend.classList.add('send-recording');
         if (recordingTime) recordingTime.textContent = '0:00';
 
         recTimerId = setInterval(() => {
           const elapsed = (Date.now() - recStartTime) / 1000;
           if (recordingTime) recordingTime.textContent = fmtDuration(elapsed);
-          // Ограничение: 2 минуты
           if (elapsed >= 120) stopRecording();
         }, 200);
-
-        // Автостоп через 2 минуты
       })
       .catch(err => {
-        console.error('getUserMedia error:', err);
+        console.error('[VOICE] getUserMedia error:', err);
         let msg = 'Нет доступа к микрофону';
-        if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) msg = 'Разрешите доступ к микрофону';
-        if (err && err.name === 'NotFoundError') msg = 'Микрофон не найден';
+        if (err && err.name === 'NotAllowedError') msg = 'Разрешите доступ к микрофону';
+        else if (err && err.name === 'NotFoundError') msg = 'Микрофон не найден';
+        else if (err && err.name === 'NotReadableError') msg = 'Микрофон занят';
         showToast(msg);
       });
   }
@@ -2080,9 +2086,7 @@
   function stopRecording() {
     if (!mediaRecorder) return;
     try {
-      if (mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
-      }
+      if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
     } catch (e) {}
     if (recTimerId) { clearInterval(recTimerId); recTimerId = null; }
   }
@@ -2094,16 +2098,12 @@
       if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
     } catch (e) {}
     if (recTimerId) { clearInterval(recTimerId); recTimerId = null; }
-    if (recordingIndicator) recordingIndicator.classList.remove('show');
+    resetRecordingUI();
   }
 
   function toggleRecording() {
-    if (mediaRecorder) {
-      // Идёт запись → стоп и отправка
-      stopRecording();
-    } else {
-      startRecording();
-    }
+    if (mediaRecorder) stopRecording();
+    else startRecording();
   }
 
   if (voiceBtn) {
@@ -2119,33 +2119,62 @@
     });
   }
 
-  // Загрузка в PostFile и отправка в комментарии
+  // === Загрузка голосового: PostFile → base64 fallback ===
   async function uploadVoiceAndSend(blob) {
-    try {
-      // Имя файла с расширением
-      const ext = (blob.type.indexOf('ogg') !== -1) ? 'ogg'
-                : (blob.type.indexOf('mp4') !== -1) ? 'm4a'
-                : 'webm';
-      const filename = 'voice_' + Date.now() + '.' + ext;
+    console.log('[VOICE] start, size =', blob.size, 'type =', blob.type);
 
+    const ext = (blob.type.indexOf('ogg') !== -1) ? 'ogg'
+              : (blob.type.indexOf('mp4') !== -1) ? 'm4a'
+              : 'webm';
+    const filename = 'voice_' + Date.now() + '.' + ext;
+
+    let url = '';
+
+    // --- Попытка 1: PostFile (multipart) ---
+    try {
+      console.log('[VOICE] try PostFile');
       const fd = new FormData();
       fd.append('file', blob, filename);
-
       const res = await fetch(POSTFILE_UPLOAD_URL, {
         method: 'POST',
         headers: { 'X-API-Key': POSTFILE_KEY },
         body: fd
       });
-
-      if (!res.ok) {
+      console.log('[VOICE] PostFile status:', res.status);
+      if (res.ok) {
+        const data = await res.json();
+        console.log('[VOICE] PostFile data:', data);
+        if (data && data.url) url = data.url;
+      } else {
         const txt = await res.text().catch(() => '');
-        throw new Error('HTTP ' + res.status + ' ' + txt.slice(0, 150));
+        console.warn('[VOICE] PostFile not ok:', res.status, txt.slice(0, 200));
       }
-      const data = await res.json();
-      const url = data && data.url;
-      if (!url) throw new Error('Не получена ссылка');
+    } catch (err) {
+      console.warn('[VOICE] PostFile fetch error (CORS?):', err && err.message);
+    }
 
-      // Отправляем как комментарий с префиксом
+    // --- Попытка 2: если PostFile не дал URL — сохраняем как base64 ---
+    if (!url) {
+      try {
+        console.log('[VOICE] fallback: base64 inline');
+        const reader = new FileReader();
+        const base64Full = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(String(reader.result || ''));
+          reader.onerror = () => reject(new Error('FileReader error'));
+          reader.readAsDataURL(blob);
+        });
+        // Оставляем полный data URL — так проще воспроизводить
+        url = base64Full; // "data:audio/webm;base64,...."
+        console.log('[VOICE] base64 length =', base64Full.length);
+      } catch (err) {
+        console.error('[VOICE] base64 error:', err);
+        showToast('Не удалось сохранить голосовое');
+        return;
+      }
+    }
+
+    // --- Отправка комментария ---
+    try {
       const videoId = await postComment(VOICE_PREFIX + url);
       delete commentsCache[videoId];
       await loadComments(videoId);
@@ -2153,8 +2182,8 @@
         if (commentsList) commentsList.scrollTop = commentsList.scrollHeight;
       }, 100);
     } catch (err) {
-      console.error('Voice upload error:', err);
-      showToast('Ошибка загрузки голосового: ' + err.message);
+      console.error('[VOICE] postComment error:', err);
+      showToast('Ошибка отправки: ' + err.message);
     }
   }
 
@@ -2523,6 +2552,11 @@
   }
 
   async function sendComment() {
+    // Если идёт запись — останавливаем её и отправляем голос
+    if (mediaRecorder) {
+      stopRecording();
+      return;
+    }
     const text = (commentInput.value || '').trim();
     if (!text) return;
     commentSend.disabled = true;
