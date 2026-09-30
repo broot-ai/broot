@@ -6,44 +6,37 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Reels">
 <meta name="theme-color" content="#000000">
-<link rel="apple-touch-icon" href="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
-<link rel="apple-touch-icon" sizes="180x180" href="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
-<link rel="apple-touch-icon-precomposed" href="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
+<title>Reels Feed</title>
+
+<!-- ===== ИКОНКА ПРИЛОЖЕНИЯ ===== -->
 <link rel="icon" type="image/jpeg" href="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
 <link rel="shortcut icon" type="image/jpeg" href="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
-<title>Reels Feed</title>
+<link rel="apple-touch-icon" href="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
+<link rel="apple-touch-icon" sizes="180x180" href="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
+<link rel="apple-touch-icon" sizes="192x192" href="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
+<link rel="apple-touch-icon" sizes="512x512" href="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
+<meta name="msapplication-TileImage" content="https://i.postimg.cc/G3qnRW4w/IMG-8250-(1).jpg">
+<link rel="manifest" href="manifest.webmanifest">
+
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-  html {
+  html, body {
     width: 100%;
-    height: 100%;
     height: 100vh;
     height: 100dvh;
     height: -webkit-fill-available;
-    overflow: hidden;
-    background: #000;
-  }
-  body {
-    width: 100%;
-    height: 100%;
-    height: 100vh;
-    height: 100dvh;
-    height: -webkit-fill-available;
-    overflow: hidden;
-    background: #000;
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+    overflow: hidden; background: #000;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #fff;
-    overscroll-behavior: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    touch-action: pan-y;
-    padding: 0 !important;
-    margin: 0 !important;
+    color: #fff; overscroll-behavior: none;
+    position: fixed; inset: 0; touch-action: pan-y;
   }
+  body { padding: 0 !important; margin: 0 !important; }
 
   @property --mo-amp { syntax:"<number>"; inherits:true; initial-value:0 }
   @property --mo-esx { syntax:"<number>"; inherits:true; initial-value:1 }
@@ -149,7 +142,10 @@
   }
 
   .site-loader {
-    position: fixed; inset: 0; background: #000;
+    position: fixed; inset: 0;
+    height: 100dvh;
+    height: -webkit-fill-available;
+    background: #000;
     z-index: 9999;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 18px;
@@ -167,17 +163,17 @@
   .site-loader-text { color: rgba(255,255,255,0.55); font-size: 13px; font-weight: 500; }
 
   .feed {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    position: fixed; inset: 0;
     width: 100vw;
     height: 100vh;
     height: 100dvh;
     height: -webkit-fill-available;
+    min-height: 100vh;
+    min-height: 100dvh;
     overflow-y: scroll;
     scroll-snap-type: y mandatory;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    scrollbar-width: none; -ms-overflow-style: none;
   }
   .feed::-webkit-scrollbar { display: none; }
   .reel {
@@ -186,13 +182,11 @@
     height: 100vh;
     height: 100dvh;
     height: -webkit-fill-available;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-    overflow: hidden;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    scroll-snap-align: start; scroll-snap-stop: always;
+    overflow: hidden; background: #000;
+    display: flex; align-items: center; justify-content: center;
   }
   .reel video, .reel .bg-image {
     position: absolute; inset: 0;
@@ -217,11 +211,8 @@
     -webkit-appearance: none !important;
   }
   .swipe-hint {
-    position: absolute;
-    bottom: calc(110px + env(safe-area-inset-bottom, 0px));
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 8;
+    position: absolute; bottom: 110px; left: 50%;
+    transform: translateX(-50%); z-index: 8;
     display: flex; flex-direction: column;
     align-items: center; gap: 6px;
     pointer-events: none;
@@ -308,7 +299,7 @@
     position: absolute;
     left: 14px;
     right: 78px;
-    bottom: calc(108px + env(safe-area-inset-bottom, 0px));
+    bottom: 108px;
     z-index: 5;
   }
   .caption-box {
@@ -393,6 +384,7 @@
   }
   .pause-icon.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 
+  /* ===== SIDE PANELS ===== */
   .side-panel {
     position: fixed; right: 8px; top: 34%;
     transform: translateY(-50%);
@@ -533,8 +525,7 @@
     border-radius: 24px;
     padding: 12px;
     z-index: 9999;
-    max-height: calc(100vh - env(safe-area-inset-top, 0px) - 75px);
-    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 75px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 75px);
     display: flex; flex-direction: column;
     transform: translateY(-24px);
     opacity: 0;
@@ -733,7 +724,7 @@
   .share-modal {
     position: fixed;
     left: 16px; right: 16px;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
     background: rgba(28, 28, 30, 0.92);
     backdrop-filter: blur(30px) saturate(180%);
     -webkit-backdrop-filter: blur(30px) saturate(180%);
@@ -780,7 +771,7 @@
   .comments-sheet {
     position: fixed;
     left: 8px; right: 8px;
-    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
     height: 80vh; max-height: 700px;
     background: rgba(22, 22, 24, 0.97);
     backdrop-filter: blur(30px) saturate(180%);
@@ -1110,7 +1101,7 @@
 
   .bottom-menu {
     position: fixed;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
     left: 16px; right: 16px;
     height: 68px;
     background: rgba(20, 20, 22, 0.72);
@@ -1241,6 +1232,7 @@
 
 <input type="file" id="stickerUploadInput" accept="image/*" style="display:none">
 
+<!-- ============= SEARCH BUTTON ============= -->
 <button class="search-btn hidden" id="btnSearch" aria-label="Поиск">
   <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <circle cx="11" cy="11" r="7" stroke="#ffffff" stroke-width="1.8"/>
@@ -1248,6 +1240,7 @@
   </svg>
 </button>
 
+<!-- ============= ВЕРХНИЙ КОНТЕЙНЕР ============= -->
 <div class="side-panel" id="sidePanel">
   <button id="btnMute" class="muted" title="Звук">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1275,6 +1268,7 @@
   </button>
 </div>
 
+<!-- ============= НИЖНИЙ КОНТЕЙНЕР ============= -->
 <div class="side-panel-actions" id="sidePanelActions">
   <button id="btnLike" title="Нравится">
     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1294,6 +1288,7 @@
   </button>
 </div>
 
+<!-- ============= SEARCH SHEET ============= -->
 <div class="search-sheet" id="searchSheet">
   <div class="search-input-wrap">
     <svg class="search-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2702,7 +2697,7 @@
     toast.textContent = message;
     toast.style.cssText = `
       position: fixed;
-      bottom: calc(110px + env(safe-area-inset-bottom, 0px));
+      bottom: 110px;
       left: 50%;
       transform: translateX(-50%) translateY(20px);
       background: rgba(30, 30, 32, 0.95);
