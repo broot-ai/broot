@@ -6,35 +6,20 @@
 <meta name="theme-color" content="#0d0b13">
 <title>HeartLink — знакомства</title>
 <style>
-/* ============================================================
-   BASE
-   ============================================================ */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
-  --bg:#0d0b13;
-  --card:#1b1729;
-  --card-2:#241e35;
-  --text:#f4f1fa;
-  --muted:#9b93b2;
-  --accent:#ff4d79;
-  --accent2:#ff8a5b;
-  --green:#28d17c;
-  --danger:#ff5f5f;
-  --border:rgba(255,255,255,.09);
-  --radius:24px;
+  --bg:#0d0b13;--card:#1b1729;--card-2:#241e35;--text:#f4f1fa;--muted:#9b93b2;
+  --accent:#ff4d79;--accent2:#ff8a5b;--green:#28d17c;--danger:#ff5f5f;
+  --border:rgba(255,255,255,.09);--radius:24px;
 }
 html,body{height:100%;}
 body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-  color:var(--text);
-  background-color:#0d0b13;
+  margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  color:var(--text);background-color:#0d0b13;
   background-image:
     radial-gradient(900px 520px at 12% -12%, rgba(255,77,121,.25), transparent 62%),
     radial-gradient(820px 520px at 92% -4%, rgba(122,86,255,.22), transparent 62%);
-  background-attachment:fixed;
-  -webkit-font-smoothing:antialiased;
-  overflow-x:hidden;
+  background-attachment:fixed;-webkit-font-smoothing:antialiased;overflow-x:hidden;
 }
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
 input,textarea,select{font-family:inherit;font-size:16px;}
@@ -43,81 +28,40 @@ h1,h2,h3{margin:0;}
 .muted-text{color:var(--muted);font-size:14.5px;line-height:1.5;}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 
-/* ============================================================
-   APP SHELL
-   ============================================================ */
 #app{max-width:520px;margin:0 auto;padding:0 0 110px;min-height:100%;}
-#topbar{
-  position:sticky;top:0;z-index:40;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 18px 14px;
-  background:linear-gradient(180deg, rgba(13,11,19,.96) 65%, rgba(13,11,19,0));
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-}
-.logo{
-  font-weight:800;font-size:19px;letter-spacing:.3px;
-  background:linear-gradient(90deg,#ff4d79,#ff8a5b);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
+#topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;background:linear-gradient(180deg, rgba(13,11,19,.96) 65%, rgba(13,11,19,0));
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+.logo{font-weight:800;font-size:19px;letter-spacing:.3px;
+  background:linear-gradient(90deg,#ff4d79,#ff8a5b);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .top-emoji{font-size:20px;}
 
-/* bottom nav */
-#bottomNav{
-  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
-  width:min(520px,100%);
-  display:grid;grid-template-columns:repeat(4,1fr);
-  padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));
-  background:rgba(20,16,30,.92);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border-top:1px solid var(--border);
-  z-index:60;
-}
-.nav-btn{
-  display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:8px 4px;border-radius:16px;color:var(--muted);
-  transition:background .2s, color .2s, transform .15s;
-}
+#bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);
+  display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));
+  background:rgba(20,16,30,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);z-index:60;}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:16px;
+  color:var(--muted);transition:background .2s, color .2s, transform .15s;}
 .nav-btn span{font-size:20px;line-height:1;transition:transform .2s;}
 .nav-btn em{font-style:normal;font-size:10.5px;font-weight:600;letter-spacing:.1px;}
 .nav-btn.active{color:#fff;background:rgba(255,77,121,.14);}
 .nav-btn.active span{transform:translateY(-1px) scale(1.12);}
 .nav-btn:active{transform:scale(.94);}
 
-/* ============================================================
-   FILTERS
-   ============================================================ */
 .filters{padding:0 16px 14px;}
-.filters-toggle{
-  width:100%;padding:13px 16px;border-radius:18px;
-  background:var(--card);border:1px solid var(--border);
-  font-size:14px;font-weight:600;color:#d8d3e6;text-align:left;
-  display:flex;align-items:center;justify-content:space-between;
-  transition:transform .15s;
-}
+.filters-toggle{width:100%;padding:13px 16px;border-radius:18px;background:var(--card);
+  border:1px solid var(--border);font-size:14px;font-weight:600;color:#d8d3e6;text-align:left;
+  display:flex;align-items:center;justify-content:space-between;transition:transform .15s;}
 .filters-toggle:active{transform:scale(.98);}
 .filters-toggle .chev{transition:transform .25s;color:var(--muted);font-size:12px;}
 .filters.open .filters-toggle .chev{transform:rotate(180deg);}
-.filters-body{
-  display:none;flex-direction:column;gap:11px;
-  margin-top:11px;padding:16px;border-radius:20px;
-  background:var(--card);border:1px solid var(--border);
-  animation:cardIn .3s ease;
-}
+.filters-body{display:none;flex-direction:column;gap:11px;margin-top:11px;padding:16px;border-radius:20px;
+  background:var(--card);border:1px solid var(--border);animation:cardIn .3s ease;}
 .filters.open .filters-body{display:flex;}
 
-/* ============================================================
-   DECK / CARD
-   ============================================================ */
 .deck{padding:0 16px;}
-.card{
-  position:relative;border-radius:28px;overflow:hidden;
-  background:var(--card);border:1px solid var(--border);
-  box-shadow:0 24px 60px rgba(0,0,0,.55);
-  animation:cardIn .42s cubic-bezier(.2,.8,.25,1);
-  will-change:transform,opacity;
-}
+.card{position:relative;border-radius:28px;overflow:hidden;background:var(--card);border:1px solid var(--border);
+  box-shadow:0 24px 60px rgba(0,0,0,.55);animation:cardIn .42s cubic-bezier(.2,.8,.25,1);will-change:transform,opacity;}
 @keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97);}to{opacity:1;transform:none;}}
 .card.fly-right{animation:flyRight .32s ease forwards;}
 @keyframes flyRight{to{opacity:0;transform:translateX(125%) rotate(14deg);}}
@@ -125,78 +69,48 @@ h1,h2,h3{margin:0;}
 .card-photo img{width:100%;height:100%;object-fit:cover;}
 .photo-shade{position:absolute;left:0;right:0;bottom:0;height:45%;
   background:linear-gradient(180deg,transparent,rgba(20,16,30,.92));pointer-events:none;}
-.card-counter{
-  position:absolute;top:12px;right:12px;padding:5px 11px;border-radius:20px;
-  font-size:12px;font-weight:600;background:rgba(0,0,0,.45);
-  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-}
+.card-counter{position:absolute;top:12px;right:12px;padding:5px 11px;border-radius:20px;font-size:12px;
+  font-weight:600;background:rgba(0,0,0,.45);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
 .card-body{padding:16px 18px 20px;}
 .card-body h2{font-size:23px;font-weight:800;line-height:1.15;}
 .card-city{color:var(--muted);font-size:13.5px;margin-top:4px;}
 .card-desc{margin:11px 0 0;font-size:14.5px;line-height:1.5;color:#d8d3e6;}
 .tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
-.tag{font-size:12px;padding:5px 11px;border-radius:20px;
-  background:rgba(255,77,121,.13);color:#ff9db6;font-weight:600;}
-
+.tag{font-size:12px;padding:5px 11px;border-radius:20px;background:rgba(255,77,121,.13);color:#ff9db6;font-weight:600;}
 .deck-actions{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:20px;}
-.act{
-  width:64px;height:64px;border-radius:50%;font-size:26px;
-  display:grid;place-items:center;
-  background:var(--card);border:1px solid var(--border);
-  box-shadow:0 10px 26px rgba(0,0,0,.45);
-  transition:transform .16s ease, box-shadow .2s;
-}
+.act{width:64px;height:64px;border-radius:50%;font-size:26px;display:grid;place-items:center;
+  background:var(--card);border:1px solid var(--border);box-shadow:0 10px 26px rgba(0,0,0,.45);
+  transition:transform .16s ease, box-shadow .2s;}
 .act:active{transform:scale(.9);}
 .act-like{background:linear-gradient(135deg,#ff4d79,#ff7a4d);border-color:transparent;
   box-shadow:0 12px 30px rgba(255,77,121,.45);}
 .act-skip{width:52px;height:52px;font-size:18px;color:var(--muted);}
 .act-comment{background:var(--card-2);}
-.btn-open-profile{
-  display:block;width:100%;margin:16px 0 0;padding:14px;border-radius:18px;
-  background:var(--card);border:1px solid var(--border);
-  font-weight:600;font-size:15px;color:#d8d3e6;transition:transform .15s;
-}
+.btn-open-profile{display:block;width:100%;margin:16px 0 0;padding:14px;border-radius:18px;
+  background:var(--card);border:1px solid var(--border);font-weight:600;font-size:15px;color:#d8d3e6;transition:transform .15s;}
 .btn-open-profile:active{transform:scale(.98);}
 
-/* ============================================================
-   TABS / GRID / MINI CARDS
-   ============================================================ */
 .tabs{display:flex;gap:7px;padding:0 16px 14px;overflow-x:auto;scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
-.tab{
-  padding:9px 16px;border-radius:20px;background:var(--card);
-  border:1px solid var(--border);color:var(--muted);
-  font-size:13.5px;font-weight:600;white-space:nowrap;transition:.2s;
-}
+.tab{padding:9px 16px;border-radius:20px;background:var(--card);border:1px solid var(--border);
+  color:var(--muted);font-size:13.5px;font-weight:600;white-space:nowrap;transition:.2s;}
 .tab.active{background:linear-gradient(135deg,#ff4d79,#ff7a4d);color:#fff;border-color:transparent;}
 .tab:active{transform:scale(.95);}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:0 16px;}
-.mini{
-  background:var(--card);border:1px solid var(--border);border-radius:20px;
-  overflow:hidden;animation:cardIn .35s ease;
-}
+.mini{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;animation:cardIn .35s ease;}
 .mini-photo{height:168px;background:var(--card-2);}
 .mini-photo img{width:100%;height:100%;object-fit:cover;}
 .mini-body{padding:10px 12px 6px;}
 .mini-name{font-weight:700;font-size:14.5px;}
 .mini-city{font-size:12px;color:var(--muted);margin-top:2px;}
 .mini-actions{display:flex;gap:6px;padding:8px 10px 10px;}
-.mini-actions button{
-  flex:1;padding:9px;border-radius:12px;background:var(--card-2);
-  font-size:15px;transition:transform .15s;
-}
+.mini-actions button{flex:1;padding:9px;border-radius:12px;background:var(--card-2);font-size:15px;transition:transform .15s;}
 .mini-actions button:active{transform:scale(.93);}
 
-/* ============================================================
-   MY PROFILE
-   ============================================================ */
 .me{padding:0 16px;}
-.me-photo{
-  position:relative;border-radius:26px;overflow:hidden;
-  height:clamp(240px,40vh,380px);background:var(--card-2);
-  border:1px solid var(--border);
-}
+.me-photo{position:relative;border-radius:26px;overflow:hidden;height:clamp(240px,40vh,380px);
+  background:var(--card-2);border:1px solid var(--border);}
 .me-photo img{width:100%;height:100%;object-fit:cover;}
 .me-info{margin-top:16px;}
 .me-info h2{font-size:24px;font-weight:800;}
@@ -204,108 +118,61 @@ h1,h2,h3{margin:0;}
 .me-info .desc{margin-top:12px;font-size:14.5px;line-height:1.55;color:#d8d3e6;}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
 .stat{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;text-align:center;}
-.stat b{
-  display:block;font-size:26px;font-weight:800;
-  background:linear-gradient(90deg,#ff4d79,#ff8a5b);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-}
+.stat b{display:block;font-size:26px;font-weight:800;
+  background:linear-gradient(90deg,#ff4d79,#ff8a5b);-webkit-background-clip:text;background-clip:text;color:transparent;}
 .stat span{font-size:12.5px;color:var(--muted);}
 .actions-col{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
 
-/* ============================================================
-   PROFILE VIEW
-   ============================================================ */
 .pv{padding:0 16px;}
-.pv-photo{
-  position:relative;border-radius:26px;overflow:hidden;
-  height:clamp(300px,52vh,520px);background:var(--card-2);
-  border:1px solid var(--border);
-}
+.pv-photo{position:relative;border-radius:26px;overflow:hidden;height:clamp(300px,52vh,520px);
+  background:var(--card-2);border:1px solid var(--border);}
 .pv-photo img{width:100%;height:100%;object-fit:cover;}
-.pv-back{
-  position:absolute;top:14px;left:14px;width:42px;height:42px;border-radius:50%;
+.pv-back{position:absolute;top:14px;left:14px;width:42px;height:42px;border-radius:50%;
   background:rgba(0,0,0,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-  display:grid;place-items:center;font-size:18px;z-index:3;
-}
+  display:grid;place-items:center;font-size:18px;z-index:3;}
 .pv-body{padding:18px 4px 0;}
 .pv-body h2{font-size:25px;font-weight:800;}
 .pv-body .city{color:var(--muted);font-size:14px;margin-top:4px;}
 .pv-body .desc{margin-top:13px;font-size:15px;line-height:1.55;color:#d8d3e6;}
 
-/* ============================================================
-   FORMS
-   ============================================================ */
 .form{display:flex;flex-direction:column;gap:12px;}
 .form label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);font-weight:600;}
-.form input,.form textarea,.form select{
-  width:100%;padding:13px 14px;border-radius:14px;
-  background-color:rgba(255,255,255,.05);
-  border:1px solid var(--border);color:var(--text);
-  outline:none;transition:border-color .2s, background .2s;
-}
-.form input:focus,.form textarea:focus,.form select:focus{
-  border-color:var(--accent);background-color:rgba(255,77,121,.07);
-}
+.form input,.form textarea,.form select{width:100%;padding:13px 14px;border-radius:14px;
+  background-color:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);
+  outline:none;transition:border-color .2s, background .2s;}
+.form input:focus,.form textarea:focus,.form select:focus{border-color:var(--accent);background-color:rgba(255,77,121,.07);}
 .form textarea{resize:vertical;min-height:80px;}
-.form select{
-  appearance:none;-webkit-appearance:none;
-  background-image:linear-gradient(45deg,transparent 50%,#9b93b2 50%),
-                   linear-gradient(135deg,#9b93b2 50%,transparent 50%);
-  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;
-  background-size:5px 5px,5px 5px;background-repeat:no-repeat;
-  padding-right:38px;
-}
+.form select{appearance:none;-webkit-appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,#9b93b2 50%),linear-gradient(135deg,#9b93b2 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;
+  background-repeat:no-repeat;padding-right:38px;}
 option{background:#1b1729;color:#f4f1fa;}
 .form .check{flex-direction:row;align-items:center;gap:9px;font-size:13.5px;color:#d8d3e6;}
 .form .check input{width:18px;height:18px;accent-color:#ff4d79;padding:0;}
 
-.btn-primary{
-  width:100%;padding:15px;border-radius:16px;font-weight:700;font-size:15.5px;color:#fff;
-  background:linear-gradient(135deg,#ff4d79,#ff7a4d);
-  box-shadow:0 12px 28px rgba(255,77,121,.35);
-  transition:transform .16s;
-}
+.btn-primary{width:100%;padding:15px;border-radius:16px;font-weight:700;font-size:15.5px;color:#fff;
+  background:linear-gradient(135deg,#ff4d79,#ff7a4d);box-shadow:0 12px 28px rgba(255,77,121,.35);transition:transform .16s;}
 .btn-primary:active{transform:scale(.97);}
 .btn-primary:disabled{opacity:.55;}
-.btn-ghost{
-  width:100%;padding:15px;border-radius:16px;font-weight:600;font-size:15px;
-  background:rgba(255,255,255,.06);border:1px solid var(--border);color:#d8d3e6;
-  transition:transform .16s;
-}
+.btn-ghost{width:100%;padding:15px;border-radius:16px;font-weight:600;font-size:15px;
+  background:rgba(255,255,255,.06);border:1px solid var(--border);color:#d8d3e6;transition:transform .16s;}
 .btn-ghost:active{transform:scale(.97);}
 
 .photo-picker{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:16px;}
-.photo-picker img{
-  width:130px;height:130px;border-radius:50%;object-fit:cover;
-  border:3px solid rgba(255,77,121,.4);background:var(--card-2);
-}
-.photo-btn{
-  padding:10px 18px;border-radius:14px;background:rgba(255,255,255,.07);
-  border:1px solid var(--border);font-size:13.5px;font-weight:600;cursor:pointer;
-  transition:transform .15s;
-}
+.photo-picker img{width:130px;height:130px;border-radius:50%;object-fit:cover;
+  border:3px solid rgba(255,77,121,.4);background:var(--card-2);}
+.photo-btn{padding:10px 18px;border-radius:14px;background:rgba(255,255,255,.07);
+  border:1px solid var(--border);font-size:13.5px;font-weight:600;cursor:pointer;transition:transform .15s;}
 .photo-btn:active{transform:scale(.96);}
 
-/* ============================================================
-   MODALS
-   ============================================================ */
-.modal-backdrop{
-  position:fixed;inset:0;z-index:100;
-  display:flex;align-items:flex-end;justify-content:center;
-  background:rgba(5,4,10,.72);
-  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
-  opacity:0;transition:opacity .22s ease;
-}
+.modal-backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;
+  background:rgba(5,4,10,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  opacity:0;transition:opacity .22s ease;}
 .modal-backdrop.show{opacity:1;}
-.modal{
-  width:min(520px,100%);max-height:92vh;overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-  background:#171323;border:1px solid var(--border);
-  border-radius:26px 26px 0 0;
+.modal{width:min(520px,100%);max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:#171323;border:1px solid var(--border);border-radius:26px 26px 0 0;
   padding:18px 18px calc(20px + env(safe-area-inset-bottom,0px));
-  transform:translateY(26px);
-  transition:transform .28s cubic-bezier(.2,.8,.25,1);
-}
+  transform:translateY(26px);transition:transform .28s cubic-bezier(.2,.8,.25,1);}
 .modal-backdrop.show .modal{transform:none;}
 @media (min-width:640px){
   .modal-backdrop{align-items:center;padding:24px;}
@@ -313,11 +180,8 @@ option{background:#1b1729;color:#f4f1fa;}
 }
 .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
 .modal-head h3{font-size:18px;font-weight:800;}
-.modal-close{
-  flex:0 0 auto;width:34px;height:34px;border-radius:50%;
-  background:rgba(255,255,255,.07);font-size:15px;color:var(--muted);
-  display:grid;place-items:center;transition:transform .15s;
-}
+.modal-close{flex:0 0 auto;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.07);
+  font-size:15px;color:var(--muted);display:grid;place-items:center;transition:transform .15s;}
 .modal-close:active{transform:scale(.9);}
 .modal-foot{margin-top:16px;}
 .err{color:var(--danger);font-size:13px;min-height:16px;font-weight:600;}
@@ -333,45 +197,27 @@ option{background:#1b1729;color:#f4f1fa;}
 @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.16);}}
 .match-box h2{margin:12px 0 6px;font-size:23px;font-weight:800;}
 .match-box p{margin:0 0 16px;color:var(--muted);font-size:14px;}
-.match-photo{
-  width:120px;height:120px;border-radius:50%;object-fit:cover;
-  margin:0 auto;border:3px solid rgba(40,209,124,.55);background:var(--card-2);
-}
+.match-photo{width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto;
+  border:3px solid rgba(40,209,124,.55);background:var(--card-2);}
 .match-name{margin-top:10px;font-weight:700;font-size:16px;}
 
-/* ============================================================
-   AUTH OVERLAY
-   ============================================================ */
-.auth-overlay{
-  position:fixed;inset:0;z-index:150;overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
+.auth-overlay{position:fixed;inset:0;z-index:150;overflow-y:auto;-webkit-overflow-scrolling:touch;
   background-color:#0d0b13;
   background-image:
     radial-gradient(900px 520px at 12% -12%, rgba(255,77,121,.25), transparent 62%),
     radial-gradient(820px 520px at 92% -4%, rgba(122,86,255,.22), transparent 62%);
-  padding:32px 18px calc(44px + env(safe-area-inset-bottom,0px));
-}
+  padding:32px 18px calc(44px + env(safe-area-inset-bottom,0px));}
 .auth-card{max-width:480px;margin:0 auto;}
 .auth-logo{font-size:54px;text-align:center;line-height:1;}
 .auth-card h1{text-align:center;margin:8px 0 6px;font-size:27px;font-weight:800;}
 .auth-sub{text-align:center;color:var(--muted);font-size:14px;margin:0 0 24px;}
 
-/* ============================================================
-   TOASTS / EMPTY
-   ============================================================ */
-#toastRoot{
-  position:fixed;left:50%;transform:translateX(-50%);
-  bottom:calc(100px + env(safe-area-inset-bottom,0px));
-  z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;
-  pointer-events:none;width:min(440px,92vw);
-}
-.toast{
-  width:100%;padding:13px 16px;border-radius:16px;
-  font-size:14px;font-weight:600;text-align:center;
+#toastRoot{position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(100px + env(safe-area-inset-bottom,0px));z-index:200;
+  display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(440px,92vw);}
+.toast{width:100%;padding:13px 16px;border-radius:16px;font-size:14px;font-weight:600;text-align:center;
   background:rgba(30,24,44,.97);border:1px solid var(--border);color:#f4f1fa;
-  box-shadow:0 14px 34px rgba(0,0,0,.5);
-  opacity:0;transform:translateY(14px);transition:.28s;
-}
+  box-shadow:0 14px 34px rgba(0,0,0,.5);opacity:0;transform:translateY(14px);transition:.28s;}
 .toast.show{opacity:1;transform:none;}
 .toast-success{border-color:rgba(40,209,124,.5);}
 .toast-error{border-color:rgba(255,95,95,.55);}
@@ -382,9 +228,11 @@ option{background:#1b1729;color:#f4f1fa;}
 .empty h3{color:var(--text);margin:0 0 8px;font-size:19px;}
 .empty p{margin:0 0 20px;font-size:14px;line-height:1.5;}
 .empty .btn-primary{max-width:280px;margin:0 auto;}
-
 .section-title{padding:0 16px 12px;font-size:13px;font-weight:700;color:var(--muted);
   text-transform:uppercase;letter-spacing:.8px;}
+
+.badge-auto{display:inline-block;margin-left:6px;font-size:10px;padding:2px 6px;border-radius:8px;
+  background:rgba(40,209,124,.18);color:#6ee9a4;font-weight:700;letter-spacing:.3px;vertical-align:middle;}
 </style>
 </head>
 <body>
@@ -411,104 +259,154 @@ option{background:#1b1729;color:#f4f1fa;}
 "use strict";
 
 /* ================================================================
-   ================================================================
    CONFIGURATION
-   ================================================================
-   ВСТАВЬТЕ СВОИ ДАННЫЕ НИЖЕ.
    ================================================================ */
 
-/* ----------------------------------------------------------------
-   DEMO_MODE
-   true  -> приложение работает полностью на localStorage,
-            данные не уходят на сервер. Можно открыть index.html
-            и сразу всё попробовать.
-   false -> приложение работает через NocoDB API + Telegram Bot API.
-   ---------------------------------------------------------------- */
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 
 const CONFIG = {
+  usersTableUrl:         "https://nocodb.puzzlebot.top/api/v2/tables/myavvyt83qvewaf/records",
+  profilesTableUrl:      "https://nocodb.puzzlebot.top/api/v2/tables/mygnkngvzgdml67/records",
+  likesTableUrl:         "https://nocodb.puzzlebot.top/api/v2/tables/mfqpfkxnfy261v6/records",
+  matchesTableUrl:       "https://nocodb.puzzlebot.top/api/v2/tables/muyc3dcysl45uji/records",
+  commentsTableUrl:      "https://nocodb.puzzlebot.top/api/v2/tables/m17mzz95ypg36u5/records",
+  notificationsTableUrl: "https://nocodb.puzzlebot.top/api/v2/tables/mxr1i1f2fypq0bm/records",
 
-  /* --- NocoDB: URL таблиц (API v2) ------------------------------ */
-  usersTableUrl:         "https://nocodb.puzzlebot.top/api/v2/tables/mfx0pd9mbsh10oe/records",
-  profilesTableUrl:      "https://nocodb.puzzlebot.top/api/v2/tables/YOUR_PROFILES_TABLE_ID/records",
-  likesTableUrl:         "https://nocodb.puzzlebot.top/api/v2/tables/YOUR_LIKES_TABLE_ID/records",
-  matchesTableUrl:       "https://nocodb.puzzlebot.top/api/v2/tables/YOUR_MATCHES_TABLE_ID/records",
-  commentsTableUrl:      "https://nocodb.puzzlebot.top/api/v2/tables/YOUR_COMMENTS_TABLE_ID/records",
-  notificationsTableUrl: "https://nocodb.puzzlebot.top/api/v2/tables/YOUR_NOTIFICATIONS_TABLE_ID/records",
+  /* ============ НОВЫЙ API-ТОКЕН ============ */
+  apiToken: "kFqvkaYA9_ZMb3oTH4D8m0Brsj84hJRDN68RDP9O",
+  /* ========================================= */
 
-  /* --- NocoDB API TOKEN ----------------------------------------- */
-  /* Вставьте сюда свой xc-token из NocoDB */
-  apiToken: "YOUR_NOCODB_TOKEN",
+  telegramBotToken: "8842784777:AAFG_J4NEmV_8hmXPgw8gToaASnWB0dmS68",
 
-  /* --- Telegram Bot --------------------------------------------- */
-  /* Вставьте сюда токен вашего бота */
-  telegramBotToken: "YOUR_TELEGRAM_BOT_TOKEN",
-
-  /* Необязательно: если у вас появится свой backend-прокси,
-     который безопасно пересылает сообщение в Telegram,
-     укажите его URL здесь. Тогда токен бота не нужен в браузере. */
   telegramProxyUrl: "",
 
-  /* --- Домен приложения (для генерации ссылок) ------------------ */
-  publicBaseUrl: ""   /* если пусто — вычисляется автоматически */
+  publicBaseUrl: ""
 };
 
-/* ================================================================
-   КОНЕЦ БЛОКА КОНФИГУРАЦИИ
-   ================================================================ */
+const FIELD_ID      = 'Id';
+const FIELD_CREATED = 'created_att';
+const FIELD_UPDATED = 'updated_att';
+
+function getRecordId(rec){
+  if (!rec) return undefined;
+  if (rec.Id !== undefined && rec.Id !== null) return rec.Id;
+  if (rec.id !== undefined && rec.id !== null) return rec.id;
+  return undefined;
+}
+
 
 /* ================================================================
-   ДЕМО-АНКЕТЫ
+   ПЕРЕМЕННЫЕ ПЛАТФОРМЫ
+   ================================================================ */
+function readPlatformVars(){
+  const out = {};
+  function set(key, value){
+    if (value === null || value === undefined) return;
+    const s = String(value).trim();
+    if (!s) return;
+    if (out[key] === undefined) out[key] = s;
+  }
+  try {
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if (u){
+      set('USER_ID_TEXT', u.id);
+      set('FIRST_NAME_TEXT', u.first_name);
+      set('LAST_NAME_TEXT', u.last_name);
+      set('USERNAME_TEXT', u.username);
+      set('USER_AVATAR_URL', u.photo_url);
+      set('HAS_PREMIUM_BOOL', u.is_premium ? '1' : '0');
+      set('HAS_PREMIUM', u.is_premium ? 'Есть' : 'Нет');
+      set('MINI_APP_SESSION_LANG_CODE', u.language_code);
+      const full = [u.first_name, u.last_name].filter(Boolean).join(' ');
+      set('FULL_NAME', full);
+      set('FIRST_AND_LAST_NAME_TEXT', full);
+    }
+  } catch(e){}
+  try {
+    const params = new URLSearchParams(location.search || '');
+    params.forEach(function(v, k){ set(k, v); });
+  } catch(e){}
+  try {
+    const hash = location.hash || '';
+    const qIndex = hash.indexOf('?');
+    if (qIndex !== -1){
+      const params = new URLSearchParams(hash.slice(qIndex + 1));
+      params.forEach(function(v, k){ set(k, v); });
+    }
+  } catch(e){}
+  const sources = ['BROOT_VARS', 'PLATFORM_VARS', 'BOT_VARS', 'INIT_VARS', 'TG_USER_VARS'];
+  sources.forEach(function(name){
+    const obj = window[name];
+    if (obj && typeof obj === 'object'){
+      for (const key in obj){
+        if (Object.prototype.hasOwnProperty.call(obj, key)) set(key, obj[key]);
+      }
+    }
+  });
+  return out;
+}
+const PLATFORM = readPlatformVars();
+
+function platformName(){
+  return (
+    PLATFORM.FIRST_AND_LAST_NAME_TEXT ||
+    PLATFORM.FULL_NAME ||
+    [PLATFORM.FIRST_NAME_TEXT, PLATFORM.LAST_NAME_TEXT].filter(Boolean).join(' ') ||
+    ''
+  ).slice(0, 50);
+}
+function platformChatId(){ return PLATFORM.USER_ID_TEXT || ''; }
+function platformAvatarUrl(){ return PLATFORM.USER_AVATAR_URL || ''; }
+function platformUsername(){ return PLATFORM.USERNAME_TEXT || ''; }
+
+
+/* ================================================================
+   ДЕМО-АНКЕТЫ (для DEMO_MODE = true)
    ================================================================ */
 const DEMO_PROFILES = [
   { name:'Алина', age:24, city:'Москва', gender:'female', looking_for:'male',
-    description:'Люблю путешествия, утренний кофе и хорошие фильмы. Ищу того, с кем можно встретить закат на набережной и не думать о времени.',
+    description:'Люблю путешествия, утренний кофе и хорошие фильмы.',
     interests:'путешествия, музыка, кофе, кино',
     photo:'https://picsum.photos/seed/alina-heart/700/900' },
-
   { name:'Мария', age:27, city:'Санкт-Петербург', gender:'female', looking_for:'male',
-    description:'Архитектор. Обожаю свой город, книги и вечерние прогулки. Расскажу, где варят лучший кофе в Питере.',
+    description:'Архитектор. Обожаю свой город, книги и вечерние прогулки.',
     interests:'архитектура, книги, прогулки, фотография',
     photo:'https://picsum.photos/seed/maria-heart/700/900' },
-
   { name:'Екатерина', age:25, city:'Казань', gender:'female', looking_for:'male',
-    description:'Врач-ординатор. В свободное время танцую и готовлю десерты. Ищу спокойного и надёжного человека.',
+    description:'Врач-ординатор. Танцую и готовлю десерты.',
     interests:'танцы, кулинария, медицина, йога',
     photo:'https://picsum.photos/seed/ekaterina-heart/700/900' },
-
   { name:'Анна', age:23, city:'Москва', gender:'female', looking_for:'male',
-    description:'Студентка, будущий дизайнер. Люблю спонтанные поездки и новые знакомства.',
+    description:'Студентка, будущий дизайнер.',
     interests:'дизайн, искусство, велопрогулки, кино',
     photo:'https://picsum.photos/seed/anna-heart/700/900' },
-
   { name:'Даша', age:28, city:'Екатеринбург', gender:'female', looking_for:'male',
-    description:'Маркетолог. Умею находить общий язык с кем угодно. Ценю честность и чувство юмора.',
+    description:'Маркетолог. Ценю честность и чувство юмора.',
     interests:'маркетинг, бег, вино, путешествия',
     photo:'https://picsum.photos/seed/dasha-heart/700/900' },
-
   { name:'София', age:26, city:'Краснодар', gender:'female', looking_for:'male',
-    description:'Люблю море, музыку и уютные вечера. Ищу человека, с которым будет тепло и спокойно.',
+    description:'Люблю море, музыку и уютные вечера.',
     interests:'море, музыка, кулинария, психология',
     photo:'https://picsum.photos/seed/sofia-heart/700/900' },
-
   { name:'Ирина', age:24, city:'Сочи', gender:'female', looking_for:'male',
-    description:'Инструктор по йоге. Живу у моря и радуюсь каждому дню. Покажу лучшие закаты Сочи.',
+    description:'Инструктор по йоге. Живу у моря.',
     interests:'йога, серфинг, природа, медитация',
     photo:'https://picsum.photos/seed/irina-heart/700/900' },
-
   { name:'Виктория', age:29, city:'Новосибирск', gender:'female', looking_for:'male',
-    description:'Предприниматель. Люблю горы, лыжи и большие цели. Ищу партнёра по жизни и по приключениям.',
+    description:'Предприниматель. Люблю горы и лыжи.',
     interests:'бизнес, горы, лыжи, авто',
     photo:'https://picsum.photos/seed/viktoria-heart/700/900' }
 ];
 
+
 /* ================================================================
    КОНСТАНТЫ / УТИЛИТЫ
    ================================================================ */
-const SESSION_KEY   = 'heartlink_session_v1';
-const DEMO_DB_KEY   = 'heartlink_demo_db_v1';
-const SEQ_KEY       = 'heartlink_seq_v1';
-const SENT_KEY      = 'heartlink_sent_notifications_v1';
+const SESSION_KEY = 'heartlink_session_v3';
+const DEMO_DB_KEY = 'heartlink_demo_db_v3';
+const SEQ_KEY     = 'heartlink_seq_v3';
+const SENT_KEY    = 'heartlink_sent_notifications_v3';
 
 const FALLBACK_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800">' +
@@ -527,11 +425,8 @@ const nowIso = () => new Date().toISOString();
 
 function esc(v){
   return String(v === null || v === undefined ? '' : v)
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#39;');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function clampNum(v, min, max, def){
   const n = Number(v);
@@ -543,10 +438,9 @@ function lsGet(key, def){
   catch(e){ return def; }
 }
 function lsSet(key, val){
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){ console.warn('localStorage:', e); }
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){ console.warn(e); }
 }
 function lsDel(key){ try { localStorage.removeItem(key); } catch(e){} }
-
 function nextSeq(name, start){
   const all = lsGet(SEQ_KEY, {});
   const cur = Number(all[name]) || (start - 1);
@@ -555,19 +449,20 @@ function nextSeq(name, start){
   lsSet(SEQ_KEY, all);
   return next;
 }
-
 function wasSent(key){ return !!lsGet(SENT_KEY, {})[key]; }
 function markSent(key){ const s = lsGet(SENT_KEY, {}); s[key] = 1; lsSet(SENT_KEY, s); }
 
+
 /* ================================================================
-   СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+   СОСТОЯНИЕ
    ================================================================ */
 const state = {
-  user: null,              // запись из таблицы Users
-  profile: null,           // запись из таблицы Profiles
-  view: 'discover',        // discover | likes | matches | me | profile
+  user: null,
+  profile: null,
+  pendingRegistration: null,
+  view: 'discover',
   viewProfileId: null,
-  likedTab: 'incoming',    // incoming | outgoing | mutual
+  likedTab: 'incoming',
   deckIndex: 0,
   filtersOpen: false,
   filters: { ageFrom: 18, ageTo: 100, city: '', gender: '', lookingFor: '' },
@@ -578,12 +473,13 @@ const state = {
   busy: false
 };
 
+
 /* ================================================================
    URL ROUTING
    ================================================================ */
 function computeBaseUrl(){
   if (CONFIG.publicBaseUrl) return CONFIG.publicBaseUrl.replace(/\/?$/, '/');
-  if (location.protocol === 'file:') {
+  if (location.protocol === 'file:'){
     return location.href.split('#')[0].split('?')[0];
   }
   let p = location.pathname.replace(/\/(profile|p)\/[^\/]+\/?$/i, '/');
@@ -592,7 +488,6 @@ function computeBaseUrl(){
   if (!p) p = '/';
   return location.origin + p;
 }
-
 function profileLink(profileId){
   const base = computeBaseUrl();
   if (location.protocol === 'file:'){
@@ -600,20 +495,16 @@ function profileLink(profileId){
   }
   return base.replace(/\/$/, '') + '/profile/' + profileId;
 }
-
 function getRoute(){
   const path = location.pathname || '';
   let m = path.match(/\/(?:profile|p)\/([^\/?#]+)/i);
   if (m) return { view: 'profile', profileId: decodeURIComponent(m[1]) };
-
   const hash = (location.hash || '').replace(/^#\/?/, '');
   m = hash.match(/^(?:profile|p)\/([^\/?#]+)/i);
   if (m) return { view: 'profile', profileId: decodeURIComponent(m[1]) };
-
   if (['discover','likes','matches','me'].indexOf(hash) !== -1) return { view: hash };
   return { view: 'discover' };
 }
-
 function navigateTo(view){
   state.view = view;
   state.viewProfileId = null;
@@ -625,11 +516,10 @@ function navigateTo(view){
     } else {
       history.pushState({}, '', computeBaseUrl() + '#' + view);
     }
-  } catch(e){ /* игнорируем */ }
+  } catch(e){}
   render();
   window.scrollTo(0, 0);
 }
-
 function goToProfile(profileId){
   if (!profileId) return;
   state.view = 'profile';
@@ -646,6 +536,7 @@ function goToProfile(profileId){
   render();
   window.scrollTo(0, 0);
 }
+
 
 /* ================================================================
    TOASTS
@@ -664,11 +555,11 @@ function toast(message, type){
   }, 2800);
 }
 
+
 /* ================================================================
    MODALS
    ================================================================ */
 function escKeyHandler(e){ if (e.key === 'Escape') closeModal(); }
-
 function closeModal(){
   const root = $('#modalRoot');
   if (!root) return;
@@ -678,7 +569,6 @@ function closeModal(){
   document.removeEventListener('keydown', escKeyHandler);
   setTimeout(() => wrap.remove(), 260);
 }
-
 function openModal(opts){
   const o = opts || {};
   const root = $('#modalRoot');
@@ -709,10 +599,10 @@ function openModal(opts){
   return wrap;
 }
 
-/* ================================================================
-   ХРАНИЛИЩЕ: DEMO (localStorage) + NOCODB
-   ================================================================ */
 
+/* ================================================================
+   ХРАНИЛИЩЕ
+   ================================================================ */
 function tableUrl(table){
   switch(table){
     case 'users':         return CONFIG.usersTableUrl;
@@ -724,16 +614,14 @@ function tableUrl(table){
     default: throw new Error('Неизвестная таблица: ' + table);
   }
 }
-
 function ncHeaders(){
   const h = { 'Content-Type': 'application/json' };
-  if (CONFIG.apiToken && CONFIG.apiToken.indexOf('YOUR_') !== 0){
+  if (CONFIG.apiToken){
     h['xc-token'] = CONFIG.apiToken;
   }
   return h;
 }
 
-/* ---------- DEMO база ---------- */
 function seedDemoDb(){
   const now = nowIso();
   const db = { users: [], profiles: [], likes: [], matches: [], comments: [], notifications: [] };
@@ -741,19 +629,23 @@ function seedDemoDb(){
     const uid = 'USER_' + (200001 + i);
     const pid = 'PROFILE_' + (200001 + i);
     db.users.push({
-      id: i + 1, user_id: uid, telegram_chat_id: '',
-      name: p.name, age: p.age, gender: p.gender, city: p.city, created_at: now
+      Id: i + 1,
+      user_id: uid, telegram_chat_id: '',
+      name: p.name, age: p.age, gender: p.gender, city: p.city,
+      [FIELD_CREATED]: now
     });
     db.profiles.push({
-      id: i + 1, profile_id: pid, user_id: uid,
+      Id: i + 1,
+      profile_id: pid, user_id: uid,
       name: p.name, age: p.age, gender: p.gender, looking_for: p.looking_for,
       city: p.city, description: p.description, interests: p.interests,
-      photo_url: p.photo, created_at: now, updated_at: now, is_visible: true
+      photo_url: p.photo,
+      [FIELD_CREATED]: now, [FIELD_UPDATED]: now,
+      is_visible: true
     });
   });
   return db;
 }
-
 function demoDb(){
   let db = lsGet(DEMO_DB_KEY, null);
   if (!db || !db.profiles || !db.profiles.length){
@@ -764,84 +656,109 @@ function demoDb(){
 }
 function saveDemoDb(db){ lsSet(DEMO_DB_KEY, db); }
 
-/* ---------- Универсальные CRUD ---------- */
+async function parseNocoResponse(res, action){
+  const text = await res.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch(e){}
+  if (!res.ok){
+    const msg = (json && (json.msg || json.message || json.error)) || text || res.statusText;
+    console.error('[NocoDB] ' + action + ' ОШИБКА', res.status, msg, json);
+    throw new Error('NocoDB ' + res.status + ': ' + msg);
+  }
+  return json;
+}
+
 async function dbList(table){
   if (DEMO_MODE){
     const db = demoDb();
     return (db[table] || []).slice();
   }
   const url = tableUrl(table) + '?limit=1000';
+  console.log('[NocoDB] GET', url);
   const res = await fetch(url, { method: 'GET', headers: ncHeaders() });
-  if (!res.ok) throw new Error('NocoDB: ошибка загрузки (' + res.status + ')');
-  const json = await res.json();
-  return json.list || json.records || [];
+  const json = await parseNocoResponse(res, 'GET ' + table);
+  const list = (json && (json.list || json.records)) || [];
+  console.log('[NocoDB] GET ' + table + ' ->', list.length, 'записей');
+  return list;
 }
 
 async function dbInsert(table, record){
   if (DEMO_MODE){
     const db = demoDb();
     const arr = db[table] || (db[table] = []);
-    const maxId = arr.reduce(function(m, r){ return Math.max(m, Number(r.id) || 0); }, 0);
-    const rec = Object.assign({}, record, { id: maxId + 1 });
+    const maxId = arr.reduce(function(m, r){
+      const id = getRecordId(r);
+      return Math.max(m, Number(id) || 0);
+    }, 0);
+    const rec = Object.assign({}, record);
+    rec.Id = maxId + 1;
     arr.push(rec);
     saveDemoDb(db);
     return rec;
   }
-  const res = await fetch(tableUrl(table), {
+  const url = tableUrl(table);
+  console.log('[NocoDB] POST', url, record);
+  const res = await fetch(url, {
     method: 'POST',
     headers: ncHeaders(),
     body: JSON.stringify(record)
   });
-  if (!res.ok){
-    const txt = await res.text().catch(function(){ return ''; });
-    throw new Error('NocoDB: ошибка создания (' + res.status + ') ' + txt);
-  }
-  return await res.json();
+  const json = await parseNocoResponse(res, 'POST ' + table);
+  console.log('[NocoDB] POST ' + table + ' ->', json);
+  return json;
 }
 
 async function dbUpdate(table, id, patch){
   if (DEMO_MODE){
     const db = demoDb();
     const arr = db[table] || [];
-    const idx = arr.findIndex(function(r){ return String(r.id) === String(id); });
+    const idx = arr.findIndex(function(r){ return String(getRecordId(r)) === String(id); });
     if (idx === -1) throw new Error('Запись не найдена');
-    arr[idx] = Object.assign({}, arr[idx], patch, { updated_at: nowIso() });
+    arr[idx] = Object.assign({}, arr[idx], patch, { [FIELD_UPDATED]: nowIso() });
     saveDemoDb(db);
     return arr[idx];
   }
-  const res = await fetch(tableUrl(table), {
+  const payload = Object.assign({}, patch);
+  payload[FIELD_ID] = id;
+  const url = tableUrl(table);
+  console.log('[NocoDB] PATCH', url, payload);
+  const res = await fetch(url, {
     method: 'PATCH',
     headers: ncHeaders(),
-    body: JSON.stringify(Object.assign({ id: id }, patch))
+    body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error('NocoDB: ошибка обновления (' + res.status + ')');
-  return await res.json();
+  const json = await parseNocoResponse(res, 'PATCH ' + table);
+  console.log('[NocoDB] PATCH ' + table + ' ->', json);
+  return json;
 }
 
 async function dbDelete(table, id){
   if (DEMO_MODE){
     const db = demoDb();
     const arr = db[table] || [];
-    const idx = arr.findIndex(function(r){ return String(r.id) === String(id); });
+    const idx = arr.findIndex(function(r){ return String(getRecordId(r)) === String(id); });
     if (idx === -1) return false;
     arr.splice(idx, 1);
     saveDemoDb(db);
     return true;
   }
-  const res = await fetch(tableUrl(table), {
+  const url = tableUrl(table);
+  const body = JSON.stringify([{ [FIELD_ID]: id }]);
+  console.log('[NocoDB] DELETE', url, body);
+  const res = await fetch(url, {
     method: 'DELETE',
     headers: ncHeaders(),
-    body: JSON.stringify([{ id: id }])
+    body: body
   });
-  if (!res.ok) throw new Error('NocoDB: ошибка удаления (' + res.status + ')');
+  await parseNocoResponse(res, 'DELETE ' + table);
+  console.log('[NocoDB] DELETE ' + table + ' -> OK');
   return true;
 }
 
-/* ================================================================
-   API ФУНКЦИИ ПРИЛОЖЕНИЯ
-   ================================================================ */
 
-/* ---------- USERS ---------- */
+/* ================================================================
+   API ФУНКЦИИ
+   ================================================================ */
 async function createUser(data){
   const seq = nextSeq('user', 100001);
   const userId = 'USER_' + seq;
@@ -852,23 +769,21 @@ async function createUser(data){
     age: Number(data.age),
     gender: data.gender,
     city: String(data.city || '').trim(),
-    created_at: nowIso()
+    [FIELD_CREATED]: nowIso()
   };
   const created = await dbInsert('users', record);
-  if (!DEMO_MODE && !created.id){
+  if (!DEMO_MODE && !getRecordId(created)){
     const list = await dbList('users');
     return list.filter(function(u){ return u.user_id === userId; })[0] || record;
   }
   return created;
 }
-
 async function getUser(userId){
   if (!userId) return null;
   const list = await dbList('users');
   return list.filter(function(u){ return u.user_id === userId; })[0] || null;
 }
 
-/* ---------- PROFILES ---------- */
 async function createProfile(data){
   const seq = nextSeq('profile', 100001);
   const profileId = 'PROFILE_' + seq;
@@ -883,67 +798,59 @@ async function createProfile(data){
     description: String(data.description || ''),
     interests: String(data.interests || ''),
     photo_url: data.photo_url || FALLBACK_IMG,
-    created_at: nowIso(),
-    updated_at: nowIso(),
+    [FIELD_CREATED]: nowIso(),
+    [FIELD_UPDATED]: nowIso(),
     is_visible: data.is_visible !== false
   };
   const created = await dbInsert('profiles', record);
-  if (!DEMO_MODE && !created.id){
+  if (!DEMO_MODE && !getRecordId(created)){
     const list = await dbList('profiles');
     return list.filter(function(p){ return p.profile_id === profileId; })[0] || record;
   }
   return created;
 }
-
 async function getProfile(profileId){
   if (!profileId) return null;
   const list = await dbList('profiles');
   return list.filter(function(p){ return p.profile_id === profileId; })[0] || null;
 }
-
-async function getProfiles(){
-  return await dbList('profiles');
-}
-
+async function getProfiles(){ return await dbList('profiles'); }
 async function updateProfile(id, patch){
-  return await dbUpdate('profiles', id, Object.assign({}, patch, { updated_at: nowIso() }));
+  const p = Object.assign({}, patch);
+  p[FIELD_UPDATED] = nowIso();
+  return await dbUpdate('profiles', id, p);
 }
 
-/* ---------- LIKES ---------- */
 async function createLike(fromUserId, toUserId){
   if (!fromUserId || !toUserId) throw new Error('Не указаны пользователи');
   if (fromUserId === toUserId) throw new Error('Нельзя лайкнуть самого себя');
-
   const likes = await dbList('likes');
   const exists = likes.filter(function(l){
     return l.from_user_id === fromUserId && l.to_user_id === toUserId;
   })[0];
   if (exists) return exists;
-
   return await dbInsert('likes', {
     from_user_id: fromUserId,
     to_user_id: toUserId,
-    created_at: nowIso()
+    [FIELD_CREATED]: nowIso()
   });
 }
-
 async function removeLike(fromUserId, toUserId){
   const likes = await dbList('likes');
   const like = likes.filter(function(l){
     return l.from_user_id === fromUserId && l.to_user_id === toUserId;
   })[0];
   if (!like) return false;
-  await dbDelete('likes', like.id);
+  await dbDelete('likes', getRecordId(like));
 
   const matches = await dbList('matches');
   const m = matches.filter(function(x){
     return (x.user1_id === fromUserId && x.user2_id === toUserId) ||
            (x.user1_id === toUserId   && x.user2_id === fromUserId);
   })[0];
-  if (m) await dbDelete('matches', m.id);
+  if (m) await dbDelete('matches', getRecordId(m));
   return true;
 }
-
 async function checkMutualLike(fromUserId, toUserId){
   const likes = await dbList('likes');
   return likes.filter(function(l){
@@ -951,7 +858,6 @@ async function checkMutualLike(fromUserId, toUserId){
   })[0] || null;
 }
 
-/* ---------- MATCHES ---------- */
 async function createMatch(user1, user2){
   const matches = await dbList('matches');
   const exists = matches.filter(function(m){
@@ -959,31 +865,27 @@ async function createMatch(user1, user2){
            (m.user1_id === user2 && m.user2_id === user1);
   })[0];
   if (exists) return exists;
-
   return await dbInsert('matches', {
     user1_id: user1,
     user2_id: user2,
-    created_at: nowIso()
+    [FIELD_CREATED]: nowIso()
   });
 }
 
-/* ---------- COMMENTS ---------- */
 async function createComment(data){
   return await dbInsert('comments', {
     from_user_id: data.from_user_id,
     to_user_id: data.to_user_id,
     profile_id: data.profile_id,
     text: String(data.text || ''),
-    created_at: nowIso()
+    [FIELD_CREATED]: nowIso()
   });
 }
-
 async function getComments(profileId){
   const list = await dbList('comments');
   return list.filter(function(c){ return c.profile_id === profileId; });
 }
 
-/* ---------- NOTIFICATIONS ---------- */
 async function createNotification(data){
   return await dbInsert('notifications', {
     user_id: data.user_id,
@@ -992,63 +894,46 @@ async function createNotification(data){
     message: data.message || '',
     profile_id: data.profile_id || '',
     is_read: data.is_read === true,
-    created_at: nowIso()
+    [FIELD_CREATED]: nowIso()
   });
 }
 
-/* ---------- TELEGRAM ---------- */
 async function sendTelegramMessage(chatId, text){
-  if (!chatId) return null;
-
-  /* Если настроен backend-прокси — используем его (безопасный вариант) */
-  if (CONFIG.telegramProxyUrl){
-    try {
-      const res = await fetch(CONFIG.telegramProxyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text: text })
-      });
-      if (!res.ok) throw new Error('Прокси вернул ' + res.status);
-      return await res.json();
-    } catch(err){
-      console.error('Telegram (прокси) ошибка:', err);
-      return null;
-    }
-  }
-
-  /* Прямой запрос к Telegram Bot API */
-  if (!CONFIG.telegramBotToken || CONFIG.telegramBotToken.indexOf('YOUR_') === 0){
-    console.warn('[DEMO] Telegram не настроен. Сообщение для chat_id=' + chatId + ':\n' + text);
+  if (!chatId){
+    console.warn('[Telegram] chatId пустой — пропускаем');
     return null;
   }
-
+  if (!CONFIG.telegramBotToken || CONFIG.telegramBotToken.indexOf('YOUR_') === 0){
+    console.warn('[Telegram] токен не настроен');
+    return null;
+  }
+  const url = 'https://api.telegram.org/bot' + CONFIG.telegramBotToken + '/sendMessage';
+  const body = { chat_id: String(chatId), text: String(text) };
+  console.log('[Telegram] POST', url, body);
   try {
-    const url = 'https://api.telegram.org/bot' + CONFIG.telegramBotToken + '/sendMessage';
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chatId, text: text })
+      body: JSON.stringify(body)
     });
     const json = await response.json();
+    console.log('[Telegram] ответ:', json);
     if (!response.ok || json.ok === false){
-      console.error('Telegram API ошибка:', json);
+      console.error('[Telegram] ошибка:', json);
     }
     return json;
   } catch(err){
-    console.error('Telegram ошибка сети:', err);
+    console.error('[Telegram] ошибка сети:', err);
     return null;
   }
 }
+
 
 /* ================================================================
    СЕССИЯ
    ================================================================ */
 function saveSession(){
-  lsSet(SESSION_KEY, {
-    user: state.user,
-    profile: state.profile,
-    saved_at: nowIso()
-  });
+  lsSet(SESSION_KEY, { user: state.user, profile: state.profile, saved_at: nowIso() });
 }
 function loadSession(){
   const s = lsGet(SESSION_KEY, null);
@@ -1061,23 +946,24 @@ function loadSession(){
 async function refreshData(){
   try {
     state.profiles = await getProfiles();
-    state.likes = await dbList('likes');
-    state.matches = await dbList('matches');
+    state.likes    = await dbList('likes');
+    state.matches  = await dbList('matches');
 
     if (state.profile){
       const fresh = state.profiles.filter(function(p){
         return p.profile_id === state.profile.profile_id;
       })[0];
-      if (fresh) { state.profile = fresh; saveSession(); }
+      if (fresh){ state.profile = fresh; saveSession(); }
     }
   } catch(err){
-    console.error(err);
+    console.error('[refreshData]', err);
     toast('Ошибка загрузки данных: ' + err.message, 'error');
   }
 }
 
+
 /* ================================================================
-   ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДАННЫХ
+   ВСПОМОГАТЕЛЬНЫЕ
    ================================================================ */
 function profileByUserId(uid){
   if (!uid) return null;
@@ -1108,16 +994,17 @@ function lookingLabel(g){
 }
 function genderOptions(sel){
   return '<option value="female"' + (sel === 'female' ? ' selected' : '') + '>Женщина</option>' +
-         '<option value="male"' + (sel === 'male' ? ' selected' : '') + '>Мужчина</option>';
+         '<option value="male"'   + (sel === 'male'   ? ' selected' : '') + '>Мужчина</option>';
 }
 function lookingOptions(sel){
-  return '<option value="male"' + (sel === 'male' ? ' selected' : '') + '>Мужчину</option>' +
+  return '<option value="male"'   + (sel === 'male'   ? ' selected' : '') + '>Мужчину</option>' +
          '<option value="female"' + (sel === 'female' ? ' selected' : '') + '>Женщину</option>' +
-         '<option value="any"' + (sel === 'any' ? ' selected' : '') + '>Не важно</option>';
+         '<option value="any"'    + (sel === 'any'    ? ' selected' : '') + '>Не важно</option>';
 }
 
+
 /* ================================================================
-   АВТОРИЗАЦИЯ / РЕГИСТРАЦИЯ
+   АВТОРИЗАЦИЯ
    ================================================================ */
 function hideAuthOverlay(){
   const ov = document.getElementById('authOverlay');
@@ -1127,6 +1014,16 @@ function hideAuthOverlay(){
 function showAuthOverlay(){
   if (document.getElementById('authOverlay')) return;
 
+  const prefName     = platformName();
+  const prefChatId   = platformChatId();
+  const prefAvatar   = platformAvatarUrl();
+  const prefUsername = platformUsername();
+
+  const nameBadge  = prefName    ? '<span class="badge-auto">из Telegram</span>' : '';
+  const chatBadge  = prefChatId  ? '<span class="badge-auto">из Telegram</span>' : '';
+  const photoBadge = prefAvatar  ? '<span class="badge-auto">из Telegram</span>' : '';
+  const userLine   = prefUsername ? '<div style="font-size:12px;color:var(--muted);margin-top:-4px;">@' + esc(prefUsername) + '</div>' : '';
+
   const ov = document.createElement('div');
   ov.id = 'authOverlay';
   ov.className = 'auth-overlay';
@@ -1135,35 +1032,30 @@ function showAuthOverlay(){
       '<div class="auth-logo">💖</div>' +
       '<h1>HeartLink</h1>' +
       '<p class="auth-sub">Создайте аккаунт, чтобы начать знакомиться</p>' +
-      '<form id="regForm" class="form" novalidate>' +
-        '<label>Имя' +
-          '<input name="name" type="text" placeholder="Как вас зовут" maxlength="50" autocomplete="given-name">' +
+      userLine +
+      '<form id="regForm" class="form" novalidate style="margin-top:16px;">' +
+        '<label>Имя' + nameBadge +
+          '<input name="name" type="text" placeholder="Как вас зовут" maxlength="50" ' +
+            'autocomplete="given-name" value="' + esc(prefName) + '">' +
         '</label>' +
         '<div class="row2">' +
-          '<label>Возраст' +
-            '<input name="age" type="number" min="18" max="100" placeholder="18+">' +
-          '</label>' +
-          '<label>Пол' +
-            '<select name="gender">' + genderOptions('female') + '</select>' +
-          '</label>' +
+          '<label>Возраст<input name="age" type="number" min="18" max="100" placeholder="18+"></label>' +
+          '<label>Пол<select name="gender">' + genderOptions('female') + '</select></label>' +
         '</div>' +
-        '<label>Город' +
-          '<input name="city" type="text" placeholder="Москва" maxlength="60">' +
-        '</label>' +
-        '<label>О себе' +
-          '<textarea name="description" rows="3" maxlength="1000" placeholder="Пара слов о себе"></textarea>' +
-        '</label>' +
-        '<label>Кого ищу' +
-          '<select name="looking_for">' + lookingOptions('male') + '</select>' +
-        '</label>' +
+        '<label>Город<input name="city" type="text" placeholder="Москва" maxlength="60"></label>' +
+        '<label>О себе<textarea name="description" rows="3" maxlength="1000" placeholder="Пара слов о себе"></textarea></label>' +
+        '<label>Кого ищу<select name="looking_for">' + lookingOptions('male') + '</select></label>' +
         '<div class="photo-picker">' +
-          '<img id="regPhotoPreview" src="' + FALLBACK_IMG + '" alt="">' +
+          (photoBadge ? '<div>' + photoBadge + '</div>' : '') +
+          '<img id="regPhotoPreview" src="' + esc(prefAvatar || FALLBACK_IMG) +
+            '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'" alt="">' +
           '<label class="photo-btn">📷 Выбрать фото' +
             '<input id="regPhotoInput" type="file" accept="image/*" hidden>' +
           '</label>' +
         '</div>' +
-        '<label>Telegram Chat ID' +
-          '<input name="telegram_chat_id" type="text" placeholder="например 123456789" maxlength="40">' +
+        '<label>Telegram Chat ID' + chatBadge +
+          '<input name="telegram_chat_id" type="text" placeholder="например 123456789" maxlength="40" ' +
+            'value="' + esc(prefChatId) + '">' +
         '</label>' +
         '<div class="err" id="regErr"></div>' +
         '<button class="btn-primary" type="submit">Создать аккаунт</button>' +
@@ -1172,7 +1064,7 @@ function showAuthOverlay(){
 
   document.body.appendChild(ov);
 
-  let photoData = '';
+  let photoData = prefAvatar || '';
 
   const input = $('#regPhotoInput', ov);
   const preview = $('#regPhotoPreview', ov);
@@ -1195,29 +1087,25 @@ function showAuthOverlay(){
     errBox.textContent = '';
 
     const fd = new FormData(form);
-    const name = String(fd.get('name') || '').trim();
-    const age = Number(fd.get('age'));
-    const city = String(fd.get('city') || '').trim();
-    const gender = fd.get('gender');
+    const name      = String(fd.get('name') || '').trim();
+    const age       = Number(fd.get('age'));
+    const city      = String(fd.get('city') || '').trim();
+    const gender    = fd.get('gender');
     const lookingFor = fd.get('looking_for');
     const description = String(fd.get('description') || '').trim();
-    const chatId = String(fd.get('telegram_chat_id') || '').trim();
+    const chatId    = String(fd.get('telegram_chat_id') || '').trim();
 
     if (name.length < 2 || name.length > 50){
-      errBox.textContent = 'Имя должно быть от 2 до 50 символов.';
-      return;
+      errBox.textContent = 'Имя должно быть от 2 до 50 символов.'; return;
     }
     if (!isFinite(age) || age < 18 || age > 100){
-      errBox.textContent = 'Возраст должен быть от 18 до 100 лет.';
-      return;
+      errBox.textContent = 'Возраст должен быть от 18 до 100 лет.'; return;
     }
     if (city.length < 2){
-      errBox.textContent = 'Укажите город.';
-      return;
+      errBox.textContent = 'Укажите город.'; return;
     }
     if (description.length > 1000){
-      errBox.textContent = 'Описание не должно превышать 1000 символов.';
-      return;
+      errBox.textContent = 'Описание не должно превышать 1000 символов.'; return;
     }
 
     const btn = form.querySelector('button[type=submit]');
@@ -1243,7 +1131,6 @@ function showAuthOverlay(){
 
       openProfileEditor(true);
       render();
-
     } catch(err){
       console.error(err);
       errBox.textContent = 'Ошибка: ' + err.message;
@@ -1253,8 +1140,9 @@ function showAuthOverlay(){
   });
 }
 
+
 /* ================================================================
-   РАБОТА С ИЗОБРАЖЕНИЯМИ
+   ИЗОБРАЖЕНИЯ
    ================================================================ */
 function fileToDataUrl(file, maxSize, quality){
   maxSize = maxSize || 900;
@@ -1286,6 +1174,7 @@ function fileToDataUrl(file, maxSize, quality){
   });
 }
 
+
 /* ================================================================
    РЕДАКТОР АНКЕТЫ
    ================================================================ */
@@ -1295,15 +1184,15 @@ function openProfileEditor(isFirstTime){
   const u = state.user || {};
 
   const base = {
-    name: p.name || pend.name || u.name || '',
-    age: p.age || pend.age || u.age || '',
-    city: p.city || pend.city || u.city || '',
-    gender: p.gender || pend.gender || u.gender || 'female',
+    name:        p.name        || pend.name        || u.name  || '',
+    age:         p.age         || pend.age         || u.age   || '',
+    city:        p.city        || pend.city        || u.city  || '',
+    gender:      p.gender      || pend.gender      || u.gender || 'female',
     looking_for: p.looking_for || pend.looking_for || 'male',
     description: p.description || pend.description || '',
-    interests: p.interests || '',
-    photo_url: p.photo_url || pend.photo_url || '',
-    is_visible: p.is_visible !== false
+    interests:   p.interests   || '',
+    photo_url:   p.photo_url   || pend.photo_url   || '',
+    is_visible:  p.is_visible !== false
   };
 
   let photoData = base.photo_url || '';
@@ -1312,7 +1201,8 @@ function openProfileEditor(isFirstTime){
     title: isFirstTime ? '📝 Создайте свою анкету' : '✏️ Редактировать анкету',
     body:
       '<div class="photo-picker">' +
-        '<img id="pePreview" src="' + esc(photoData || FALLBACK_IMG) + '" alt="">' +
+        '<img id="pePreview" src="' + esc(photoData || FALLBACK_IMG) +
+          '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'" alt="">' +
         '<label class="photo-btn">📷 Загрузить фото' +
           '<input type="file" accept="image/*" id="pePhoto" hidden>' +
         '</label>' +
@@ -1368,20 +1258,16 @@ function openProfileEditor(isFirstTime){
         const visible = $('#peVisible', wrap).checked;
 
         if (name.length < 2 || name.length > 50){
-          errBox.textContent = 'Имя должно быть от 2 до 50 символов.';
-          return;
+          errBox.textContent = 'Имя должно быть от 2 до 50 символов.'; return;
         }
         if (!isFinite(age) || age < 18 || age > 100){
-          errBox.textContent = 'Возраст должен быть от 18 до 100 лет.';
-          return;
+          errBox.textContent = 'Возраст должен быть от 18 до 100 лет.'; return;
         }
         if (city.length < 2){
-          errBox.textContent = 'Укажите город.';
-          return;
+          errBox.textContent = 'Укажите город.'; return;
         }
         if (description.length > 1000){
-          errBox.textContent = 'Описание не должно превышать 1000 символов.';
-          return;
+          errBox.textContent = 'Описание не должно превышать 1000 символов.'; return;
         }
 
         const btn = $('#peSave', wrap);
@@ -1389,8 +1275,8 @@ function openProfileEditor(isFirstTime){
         btn.textContent = 'Сохраняем…';
 
         try {
-          if (state.profile && state.profile.id){
-            const updated = await updateProfile(state.profile.id, {
+          if (state.profile && getRecordId(state.profile)){
+            const updated = await updateProfile(getRecordId(state.profile), {
               name: name, age: age, city: city, gender: gender,
               looking_for: lookingFor, description: description,
               interests: interests, photo_url: photoData || FALLBACK_IMG,
@@ -1420,7 +1306,6 @@ function openProfileEditor(isFirstTime){
           closeModal();
           await refreshData();
           render();
-
         } catch(err){
           console.error(err);
           errBox.textContent = 'Ошибка: ' + err.message;
@@ -1431,6 +1316,7 @@ function openProfileEditor(isFirstTime){
     }
   });
 }
+
 
 /* ================================================================
    ЛАЙК / МАТЧ / КОММЕНТАРИЙ
@@ -1443,7 +1329,6 @@ async function handleLike(profile){
   state.busy = true;
   try {
     const me = state.user;
-
     if (profile.user_id === me.user_id){
       toast('Нельзя лайкнуть самого себя', 'error');
       return;
@@ -1453,7 +1338,6 @@ async function handleLike(profile){
     const already = likes.filter(function(l){
       return l.from_user_id === me.user_id && l.to_user_id === profile.user_id;
     })[0];
-
     if (already){
       toast('Вы уже лайкнули эту анкету', 'warn');
       return;
@@ -1462,12 +1346,6 @@ async function handleLike(profile){
     await createLike(me.user_id, profile.user_id);
     toast('❤️ Лайк отправлен', 'success');
 
-    /* DEMO: имитация ответного лайка от демо-пользователя */
-    if (DEMO_MODE && Math.random() < 0.55){
-      try { await createLike(profile.user_id, me.user_id); } catch(e){}
-    }
-
-    /* --- Уведомление владельцу анкеты --- */
     const myLink = state.profile ? profileLink(state.profile.profile_id) : '';
     const owner = await getUser(profile.user_id);
 
@@ -1482,16 +1360,17 @@ async function handleLike(profile){
       }
     }
 
-    await createNotification({
-      user_id: profile.user_id,
-      from_user_id: me.user_id,
-      type: 'like',
-      message: '❤️ Вам поставили лайк',
-      profile_id: profile.profile_id,
-      is_read: false
-    });
+    try {
+      await createNotification({
+        user_id: profile.user_id,
+        from_user_id: me.user_id,
+        type: 'like',
+        message: '❤️ Вам поставили лайк',
+        profile_id: profile.profile_id,
+        is_read: false
+      });
+    } catch(e){ console.warn('Notification error:', e); }
 
-    /* --- Проверка взаимности --- */
     const mutual = await checkMutualLike(me.user_id, profile.user_id);
 
     if (mutual){
@@ -1505,7 +1384,6 @@ async function handleLike(profile){
 
     await refreshData();
     render();
-
   } catch(err){
     console.error(err);
     toast('Ошибка: ' + err.message, 'error');
@@ -1518,7 +1396,6 @@ async function notifyMatch(me, profile){
   const myLink = state.profile ? profileLink(state.profile.profile_id) : '';
   const theirLink = profileLink(profile.profile_id);
 
-  /* Мне */
   if (me.telegram_chat_id){
     const key1 = 'match_' + me.user_id + '_' + profile.user_id;
     if (!wasSent(key1)){
@@ -1530,7 +1407,6 @@ async function notifyMatch(me, profile){
     }
   }
 
-  /* Ему */
   const owner = await getUser(profile.user_id);
   if (owner && owner.telegram_chat_id){
     const key2 = 'match_' + profile.user_id + '_' + me.user_id;
@@ -1543,14 +1419,16 @@ async function notifyMatch(me, profile){
     }
   }
 
-  await createNotification({
-    user_id: profile.user_id,
-    from_user_id: me.user_id,
-    type: 'match',
-    message: '💚 Взаимная симпатия',
-    profile_id: profile.profile_id,
-    is_read: false
-  });
+  try {
+    await createNotification({
+      user_id: profile.user_id,
+      from_user_id: me.user_id,
+      type: 'match',
+      message: '💚 Взаимная симпатия',
+      profile_id: profile.profile_id,
+      is_read: false
+    });
+  } catch(e){ console.warn('Notification error:', e); }
 }
 
 function showMatchModal(profile){
@@ -1591,7 +1469,7 @@ function openCommentModal(profile){
         '<div><b>' + esc(profile.name) + ', ' + esc(profile.age) + '</b>' +
         '<span>📍 ' + esc(profile.city) + '</span></div>' +
       '</div>' +
-      '<textarea id="commentText" class="input" rows="4" maxlength="500" ' +
+      '<textarea id="commentText" rows="4" maxlength="500" ' +
         'style="width:100%;padding:13px 14px;border-radius:14px;background:rgba(255,255,255,.05);' +
         'border:1px solid rgba(255,255,255,.09);color:#f4f1fa;outline:none;resize:vertical;font-size:16px;" ' +
         'placeholder="Напишите сообщение..."></textarea>' +
@@ -1603,23 +1481,14 @@ function openCommentModal(profile){
       const counter = $('#commentCount', wrap);
       const errBox = $('#commentErr', wrap);
 
-      ta.addEventListener('input', function(){
-        counter.textContent = ta.value.length;
-      });
+      ta.addEventListener('input', function(){ counter.textContent = ta.value.length; });
       setTimeout(function(){ ta.focus(); }, 250);
 
       $('#commentSend', wrap).addEventListener('click', async function(){
         const text = ta.value.trim();
         errBox.textContent = '';
-
-        if (!text){
-          errBox.textContent = 'Сообщение не может быть пустым.';
-          return;
-        }
-        if (text.length > 500){
-          errBox.textContent = 'Сообщение слишком длинное (максимум 500 символов).';
-          return;
-        }
+        if (!text){ errBox.textContent = 'Сообщение не может быть пустым.'; return; }
+        if (text.length > 500){ errBox.textContent = 'Сообщение слишком длинное (максимум 500 символов).'; return; }
 
         const btn = $('#commentSend', wrap);
         btn.disabled = true;
@@ -1633,7 +1502,6 @@ function openCommentModal(profile){
             text: text
           });
 
-          /* Telegram владельцу анкеты */
           const owner = await getUser(profile.user_id);
           const myLink = state.profile ? profileLink(state.profile.profile_id) : '';
           if (owner && owner.telegram_chat_id){
@@ -1643,18 +1511,19 @@ function openCommentModal(profile){
             );
           }
 
-          await createNotification({
-            user_id: profile.user_id,
-            from_user_id: state.user.user_id,
-            type: 'comment',
-            message: '💬 Вам написали: ' + text.slice(0, 80),
-            profile_id: profile.profile_id,
-            is_read: false
-          });
+          try {
+            await createNotification({
+              user_id: profile.user_id,
+              from_user_id: state.user.user_id,
+              type: 'comment',
+              message: '💬 Вам написали: ' + text.slice(0, 80),
+              profile_id: profile.profile_id,
+              is_read: false
+            });
+          } catch(e){ console.warn('Notification error:', e); }
 
           toast('💬 Сообщение отправлено', 'success');
           closeModal();
-
         } catch(err){
           console.error(err);
           errBox.textContent = 'Ошибка: ' + err.message;
@@ -1692,14 +1561,12 @@ function openUnlikeConfirm(profile){
   });
 }
 
+
 /* ================================================================
-   КОПИРОВАНИЕ ССЫЛКИ
+   ССЫЛКА
    ================================================================ */
 async function copyMyLink(){
-  if (!state.profile){
-    toast('Сначала создайте анкету', 'warn');
-    return;
-  }
+  if (!state.profile){ toast('Сначала создайте анкету', 'warn'); return; }
   const link = profileLink(state.profile.profile_id);
   try {
     if (navigator.clipboard && navigator.clipboard.writeText){
@@ -1725,13 +1592,14 @@ async function copyMyLink(){
   }
 }
 
+
 /* ================================================================
    ВЫХОД
    ================================================================ */
 function logout(){
   openModal({
     title: 'Выйти из аккаунта?',
-    body: '<p class="muted-text">Сессия будет удалена. В DEMO-режиме созданные данные останутся в localStorage.</p>',
+    body: '<p class="muted-text">Сессия будет удалена.</p>',
     footer:
       '<div class="row2">' +
         '<button class="btn-ghost" data-close="1" type="button">Отмена</button>' +
@@ -1757,11 +1625,11 @@ function logout(){
   });
 }
 
+
 /* ================================================================
-   ПРЕДСТАВЛЕНИЯ (VIEWS)
+   ПРЕДСТАВЛЕНИЯ
    ================================================================ */
 
-/* ---------- Знакомства ---------- */
 function viewDiscover(){
   const me = state.user;
   if (!me) return '';
@@ -1787,7 +1655,6 @@ function viewDiscover(){
   });
 
   state._deck = list;
-
   if (state.deckIndex >= list.length) state.deckIndex = 0;
   if (state.deckIndex < 0) state.deckIndex = 0;
 
@@ -1833,7 +1700,7 @@ function viewDiscover(){
 
   const p = list[state.deckIndex];
 
-  const cardHtml =
+  return filtersHtml +
     '<div class="deck">' +
       '<div class="card" id="mainCard">' +
         '<div class="card-photo">' +
@@ -1858,11 +1725,8 @@ function viewDiscover(){
         '👤 Открыть профиль' +
       '</button>' +
     '</div>';
-
-  return filtersHtml + cardHtml;
 }
 
-/* ---------- Лайки ---------- */
 function viewLikes(){
   const me = state.user;
   if (!me) return '';
@@ -1901,7 +1765,7 @@ function viewLikes(){
     const texts = {
       incoming: ['💌', 'Пока никто не лайкнул', 'Создайте красивую анкету и делитесь ссылкой — лайки появятся здесь.'],
       outgoing: ['❤️', 'Вы ещё никого не лайкнули', 'Перейдите в «Знакомства» и поставьте первый лайк.'],
-      mutual: ['💚', 'Взаимных симпатий пока нет', 'Когда вы и другой человек лайкнете друг друга — это появится здесь.']
+      mutual:   ['💚', 'Взаимных симпатий пока нет', 'Когда вы и другой человек лайкнете друг друга — это появится здесь.']
     };
     const t = texts[tab];
     return tabsHtml +
@@ -1942,7 +1806,6 @@ function viewLikes(){
   return tabsHtml + '<div class="grid">' + cards + '</div>';
 }
 
-/* ---------- Взаимные ---------- */
 function viewMatches(){
   const me = state.user;
   if (!me) return '';
@@ -1985,7 +1848,6 @@ function viewMatches(){
          '<div class="grid">' + cards + '</div>';
 }
 
-/* ---------- Моя анкета ---------- */
 function viewMe(){
   const me = state.user;
   if (!me) return '';
@@ -2001,8 +1863,8 @@ function viewMe(){
   }
 
   const likesReceived = state.likes.filter(function(l){ return l.to_user_id === me.user_id; }).length;
-  const likesGiven = state.likes.filter(function(l){ return l.from_user_id === me.user_id; }).length;
-  const matchCount = state.matches.filter(function(m){
+  const likesGiven    = state.likes.filter(function(l){ return l.from_user_id === me.user_id; }).length;
+  const matchCount    = state.matches.filter(function(m){
     return m.user1_id === me.user_id || m.user2_id === me.user_id;
   }).length;
 
@@ -2038,7 +1900,6 @@ function viewMe(){
   '</div>';
 }
 
-/* ---------- Просмотр анкеты по ссылке ---------- */
 function viewProfile(profileId){
   const p = profileByProfileId(profileId);
 
@@ -2100,13 +1961,13 @@ function viewProfile(profileId){
   '</div>';
 }
 
+
 /* ================================================================
    RENDER
    ================================================================ */
 function render(){
   const view = document.getElementById('view');
 
-  /* Если пользователя нет и мы не смотрим чужую анкету — показываем регистрацию */
   if (!state.user && state.view !== 'profile'){
     showAuthOverlay();
     view.innerHTML = '';
@@ -2115,7 +1976,6 @@ function render(){
   }
   hideAuthOverlay();
 
-  /* Пользователь есть, но анкеты ещё нет */
   if (state.user && !state.profile && state.view !== 'profile'){
     view.innerHTML =
       '<div class="empty">' +
@@ -2148,13 +2008,13 @@ function updateNav(){
   }
 }
 
+
 /* ================================================================
-   ДЕЛЕГИРОВАНИЕ СОБЫТИЙ
+   СОБЫТИЯ
    ================================================================ */
 async function onViewClick(e){
   const el = e.target.closest('[data-act]');
   if (!el) return;
-
   const act = el.dataset.act;
 
   if (act === 'toggleFilters'){
@@ -2171,9 +2031,7 @@ async function onViewClick(e){
       gender: $('#fGender') ? $('#fGender').value : '',
       lookingFor: $('#fLookingFor') ? $('#fLookingFor').value : ''
     };
-    if (f.ageFrom > f.ageTo){
-      const t = f.ageFrom; f.ageFrom = f.ageTo; f.ageTo = t;
-    }
+    if (f.ageFrom > f.ageTo){ const t = f.ageFrom; f.ageFrom = f.ageTo; f.ageTo = t; }
     state.filters = f;
     state.deckIndex = 0;
     state.filtersOpen = true;
@@ -2195,15 +2053,9 @@ async function onViewClick(e){
     return;
   }
 
-  if (act === 'goHome'){
-    navigateTo('discover');
-    return;
-  }
+  if (act === 'goHome'){ navigateTo('discover'); return; }
 
-  if (act === 'open'){
-    goToProfile(el.dataset.pid);
-    return;
-  }
+  if (act === 'open'){ goToProfile(el.dataset.pid); return; }
 
   if (act === 'comment'){
     const p = profileByUserId(el.dataset.uid);
@@ -2237,37 +2089,30 @@ async function onViewClick(e){
     return;
   }
 
-  if (act === 'editProfile'){
-    openProfileEditor(false);
-    return;
-  }
-
-  if (act === 'copyLink'){
-    copyMyLink();
-    return;
-  }
+  if (act === 'editProfile'){ openProfileEditor(false); return; }
+  if (act === 'copyLink'){ copyMyLink(); return; }
 
   if (act === 'openMine'){
     if (state.profile) goToProfile(state.profile.profile_id);
     return;
   }
 
-  if (act === 'logout'){
-    logout();
-    return;
-  }
+  if (act === 'logout'){ logout(); return; }
 }
+
 
 /* ================================================================
    ЗАПУСК
    ================================================================ */
 async function start(){
-  /* Инициализируем демо-базу заранее */
   if (DEMO_MODE) demoDb();
 
   loadSession();
 
-  /* Подписываемся на клики внутри #view один раз */
+  console.log('[HeartLink] DEMO_MODE =', DEMO_MODE);
+  console.log('[HeartLink] PLATFORM vars:', PLATFORM);
+  console.log('[HeartLink] apiToken starts with:', CONFIG.apiToken.slice(0, 8) + '...');
+
   document.getElementById('view').addEventListener('click', function(e){
     onViewClick(e).catch(function(err){
       console.error(err);
@@ -2275,18 +2120,13 @@ async function start(){
     });
   });
 
-  /* Нижняя навигация */
   $$('#bottomNav .nav-btn').forEach(function(btn){
     btn.addEventListener('click', function(){
-      if (!state.user){
-        showAuthOverlay();
-        return;
-      }
+      if (!state.user){ showAuthOverlay(); return; }
       navigateTo(btn.dataset.view);
     });
   });
 
-  /* Кнопка "назад" в браузере */
   window.addEventListener('popstate', function(){
     const r = getRoute();
     if (r.view === 'profile'){
@@ -2299,7 +2139,6 @@ async function start(){
     render();
   });
 
-  /* Загружаем данные и открываем нужный маршрут */
   await refreshData();
 
   const route = getRoute();
