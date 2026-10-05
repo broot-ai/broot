@@ -34,7 +34,7 @@ h1,h2,h3{margin:0;}
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
 .logo{font-weight:800;font-size:19px;letter-spacing:.3px;
   background:linear-gradient(90deg,#ff4d79,#ff8a5b);-webkit-background-clip:text;background-clip:text;color:transparent;}
-.top-emoji{font-size:20px;}
+.top-emoji{font-size:20px;cursor:pointer;}
 
 #bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);
   display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0px));
@@ -233,6 +233,22 @@ option{background:#1b1729;color:#f4f1fa;}
 
 .badge-auto{display:inline-block;margin-left:6px;font-size:10px;padding:2px 6px;border-radius:8px;
   background:rgba(40,209,124,.18);color:#6ee9a4;font-weight:700;letter-spacing:.3px;vertical-align:middle;}
+
+/* ===== DEBUG PANEL ===== */
+#debugPanel{
+  position:fixed;left:8px;right:8px;bottom:calc(120px + env(safe-area-inset-bottom,0px));
+  max-height:44vh;overflow-y:auto;background:rgba(10,8,16,.94);
+  border:1px solid rgba(255,255,255,.15);border-radius:14px;
+  padding:10px 12px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;
+  color:#cfc8e0;z-index:90;display:none;line-height:1.5;white-space:pre-wrap;word-break:break-word;
+}
+#debugPanel.show{display:block;}
+#debugPanel .dbg-ok{color:#6ee9a4;}
+#debugPanel .dbg-err{color:#ff8080;}
+#debugPanel .dbg-info{color:#9cc2ff;}
+#debugPanel .dbg-hd{padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid rgba(255,255,255,.12);
+  display:flex;justify-content:space-between;color:#fff;font-weight:700;}
+#debugPanel .dbg-hd span{cursor:pointer;color:#ff8080;}
 </style>
 </head>
 <body>
@@ -240,7 +256,7 @@ option{background:#1b1729;color:#f4f1fa;}
 <div id="app">
   <header id="topbar">
     <div class="logo">💖 HeartLink</div>
-    <div class="top-emoji" id="topEmoji">✦</div>
+    <div class="top-emoji" id="topEmoji" title="Отладка">🐞</div>
   </header>
   <main id="view"></main>
 </div>
@@ -252,6 +268,11 @@ option{background:#1b1729;color:#f4f1fa;}
   <button class="nav-btn" data-view="me"><span>👤</span><em>Моя анкета</em></button>
 </nav>
 
+<div id="debugPanel">
+  <div class="dbg-hd">🐞 Отладка <span id="dbgClose">закрыть</span></div>
+  <div id="dbgBody"></div>
+</div>
+
 <div id="modalRoot"></div>
 <div id="toastRoot"></div>
 
@@ -261,7 +282,6 @@ option{background:#1b1729;color:#f4f1fa;}
 /* ================================================================
    CONFIGURATION
    ================================================================ */
-
 const DEMO_MODE = false;
 
 const CONFIG = {
@@ -271,153 +291,51 @@ const CONFIG = {
   matchesTableUrl:       "https://nocodb.puzzlebot.top/api/v2/tables/muyc3dcysl45uji/records",
   commentsTableUrl:      "https://nocodb.puzzlebot.top/api/v2/tables/m17mzz95ypg36u5/records",
   notificationsTableUrl: "https://nocodb.puzzlebot.top/api/v2/tables/mxr1i1f2fypq0bm/records",
-
-  /* ============ НОВЫЙ API-ТОКЕН ============ */
   apiToken: "kFqvkaYA9_ZMb3oTH4D8m0Brsj84hJRDN68RDP9O",
-  /* ========================================= */
-
   telegramBotToken: "8842784777:AAFG_J4NEmV_8hmXPgw8gToaASnWB0dmS68",
-
   telegramProxyUrl: "",
-
   publicBaseUrl: ""
 };
 
+/* ============ ИМЕНА ПОЛЕЙ ============
+   Id — системное поле NocoDB.
+   created_att / updated_att — ваши переименования.
+   Если у вас они называются иначе, поменяйте ЗДЕСЬ.
+   Если в базе created_at (без второго t), поставьте 'created_at'.
+   ВАЖНО: код умеет работать, даже если колонки нет — просто не будет её заполнять.
+======================================== */
 const FIELD_ID      = 'Id';
 const FIELD_CREATED = 'created_att';
 const FIELD_UPDATED = 'updated_att';
 
-function getRecordId(rec){
-  if (!rec) return undefined;
-  if (rec.Id !== undefined && rec.Id !== null) return rec.Id;
-  if (rec.id !== undefined && rec.id !== null) return rec.id;
-  return undefined;
-}
-
-
 /* ================================================================
-   ПЕРЕМЕННЫЕ ПЛАТФОРМЫ
+   DEBUG PANEL
    ================================================================ */
-function readPlatformVars(){
-  const out = {};
-  function set(key, value){
-    if (value === null || value === undefined) return;
-    const s = String(value).trim();
-    if (!s) return;
-    if (out[key] === undefined) out[key] = s;
+const DEBUG_LOG = [];
+function dlog(type, text){
+  const time = new Date().toLocaleTimeString();
+  const line = '[' + time + '] ' + text;
+  DEBUG_LOG.push({ type: type, text: line });
+  if (DEBUG_LOG.length > 200) DEBUG_LOG.shift();
+  const box = document.getElementById('dbgBody');
+  if (box){
+    const cls = type === 'ok' ? 'dbg-ok' : type === 'err' ? 'dbg-err' : 'dbg-info';
+    const div = document.createElement('div');
+    div.className = cls;
+    div.textContent = line;
+    box.appendChild(div);
+    box.parentElement.scrollTop = box.parentElement.scrollHeight;
   }
-  try {
-    const tg = window.Telegram && window.Telegram.WebApp;
-    const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
-    if (u){
-      set('USER_ID_TEXT', u.id);
-      set('FIRST_NAME_TEXT', u.first_name);
-      set('LAST_NAME_TEXT', u.last_name);
-      set('USERNAME_TEXT', u.username);
-      set('USER_AVATAR_URL', u.photo_url);
-      set('HAS_PREMIUM_BOOL', u.is_premium ? '1' : '0');
-      set('HAS_PREMIUM', u.is_premium ? 'Есть' : 'Нет');
-      set('MINI_APP_SESSION_LANG_CODE', u.language_code);
-      const full = [u.first_name, u.last_name].filter(Boolean).join(' ');
-      set('FULL_NAME', full);
-      set('FIRST_AND_LAST_NAME_TEXT', full);
-    }
-  } catch(e){}
-  try {
-    const params = new URLSearchParams(location.search || '');
-    params.forEach(function(v, k){ set(k, v); });
-  } catch(e){}
-  try {
-    const hash = location.hash || '';
-    const qIndex = hash.indexOf('?');
-    if (qIndex !== -1){
-      const params = new URLSearchParams(hash.slice(qIndex + 1));
-      params.forEach(function(v, k){ set(k, v); });
-    }
-  } catch(e){}
-  const sources = ['BROOT_VARS', 'PLATFORM_VARS', 'BOT_VARS', 'INIT_VARS', 'TG_USER_VARS'];
-  sources.forEach(function(name){
-    const obj = window[name];
-    if (obj && typeof obj === 'object'){
-      for (const key in obj){
-        if (Object.prototype.hasOwnProperty.call(obj, key)) set(key, obj[key]);
-      }
-    }
-  });
-  return out;
+  if (type === 'err') console.error(line);
+  else if (type === 'ok') console.log(line);
+  else console.log(line);
 }
-const PLATFORM = readPlatformVars();
-
-function platformName(){
-  return (
-    PLATFORM.FIRST_AND_LAST_NAME_TEXT ||
-    PLATFORM.FULL_NAME ||
-    [PLATFORM.FIRST_NAME_TEXT, PLATFORM.LAST_NAME_TEXT].filter(Boolean).join(' ') ||
-    ''
-  ).slice(0, 50);
-}
-function platformChatId(){ return PLATFORM.USER_ID_TEXT || ''; }
-function platformAvatarUrl(){ return PLATFORM.USER_AVATAR_URL || ''; }
-function platformUsername(){ return PLATFORM.USERNAME_TEXT || ''; }
-
+function showDebug(){ document.getElementById('debugPanel').classList.add('show'); }
+function hideDebug(){ document.getElementById('debugPanel').classList.remove('show'); }
 
 /* ================================================================
-   ДЕМО-АНКЕТЫ (для DEMO_MODE = true)
+   ВСПОМОГАТЕЛЬНЫЕ
    ================================================================ */
-const DEMO_PROFILES = [
-  { name:'Алина', age:24, city:'Москва', gender:'female', looking_for:'male',
-    description:'Люблю путешествия, утренний кофе и хорошие фильмы.',
-    interests:'путешествия, музыка, кофе, кино',
-    photo:'https://picsum.photos/seed/alina-heart/700/900' },
-  { name:'Мария', age:27, city:'Санкт-Петербург', gender:'female', looking_for:'male',
-    description:'Архитектор. Обожаю свой город, книги и вечерние прогулки.',
-    interests:'архитектура, книги, прогулки, фотография',
-    photo:'https://picsum.photos/seed/maria-heart/700/900' },
-  { name:'Екатерина', age:25, city:'Казань', gender:'female', looking_for:'male',
-    description:'Врач-ординатор. Танцую и готовлю десерты.',
-    interests:'танцы, кулинария, медицина, йога',
-    photo:'https://picsum.photos/seed/ekaterina-heart/700/900' },
-  { name:'Анна', age:23, city:'Москва', gender:'female', looking_for:'male',
-    description:'Студентка, будущий дизайнер.',
-    interests:'дизайн, искусство, велопрогулки, кино',
-    photo:'https://picsum.photos/seed/anna-heart/700/900' },
-  { name:'Даша', age:28, city:'Екатеринбург', gender:'female', looking_for:'male',
-    description:'Маркетолог. Ценю честность и чувство юмора.',
-    interests:'маркетинг, бег, вино, путешествия',
-    photo:'https://picsum.photos/seed/dasha-heart/700/900' },
-  { name:'София', age:26, city:'Краснодар', gender:'female', looking_for:'male',
-    description:'Люблю море, музыку и уютные вечера.',
-    interests:'море, музыка, кулинария, психология',
-    photo:'https://picsum.photos/seed/sofia-heart/700/900' },
-  { name:'Ирина', age:24, city:'Сочи', gender:'female', looking_for:'male',
-    description:'Инструктор по йоге. Живу у моря.',
-    interests:'йога, серфинг, природа, медитация',
-    photo:'https://picsum.photos/seed/irina-heart/700/900' },
-  { name:'Виктория', age:29, city:'Новосибирск', gender:'female', looking_for:'male',
-    description:'Предприниматель. Люблю горы и лыжи.',
-    interests:'бизнес, горы, лыжи, авто',
-    photo:'https://picsum.photos/seed/viktoria-heart/700/900' }
-];
-
-
-/* ================================================================
-   КОНСТАНТЫ / УТИЛИТЫ
-   ================================================================ */
-const SESSION_KEY = 'heartlink_session_v3';
-const DEMO_DB_KEY = 'heartlink_demo_db_v3';
-const SEQ_KEY     = 'heartlink_seq_v3';
-const SENT_KEY    = 'heartlink_sent_notifications_v3';
-
-const FALLBACK_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800">' +
-  '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
-  '<stop offset="0" stop-color="#3a2b52"/><stop offset="1" stop-color="#1b1729"/>' +
-  '</linearGradient></defs>' +
-  '<rect width="600" height="800" fill="url(#g)"/>' +
-  '<text x="300" y="430" font-size="120" text-anchor="middle" fill="#ffffff44" font-family="sans-serif">📷</text>' +
-  '</svg>'
-);
-
 const $  = (sel, root) => (root || document).querySelector(sel);
 const $$ = (sel, root) => Array.prototype.slice.call((root || document).querySelectorAll(sel));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -429,71 +347,130 @@ function esc(v){
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 function clampNum(v, min, max, def){
-  const n = Number(v);
-  if (!isFinite(n)) return def;
+  const n = Number(v); if (!isFinite(n)) return def;
   return Math.min(max, Math.max(min, n));
 }
-function lsGet(key, def){
-  try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : def; }
-  catch(e){ return def; }
-}
-function lsSet(key, val){
-  try { localStorage.setItem(key, JSON.stringify(val)); } catch(e){ console.warn(e); }
-}
-function lsDel(key){ try { localStorage.removeItem(key); } catch(e){} }
+function lsGet(k, d){ try{ const r = localStorage.getItem(k); return r ? JSON.parse(r) : d; }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+const SESSION_KEY = 'heartlink_session_v4';
+const SEQ_KEY     = 'heartlink_seq_v4';
+const SENT_KEY    = 'heartlink_sent_v4';
+
 function nextSeq(name, start){
   const all = lsGet(SEQ_KEY, {});
   const cur = Number(all[name]) || (start - 1);
   const next = cur + 1;
-  all[name] = next;
-  lsSet(SEQ_KEY, all);
+  all[name] = next; lsSet(SEQ_KEY, all);
   return next;
 }
-function wasSent(key){ return !!lsGet(SENT_KEY, {})[key]; }
-function markSent(key){ const s = lsGet(SENT_KEY, {}); s[key] = 1; lsSet(SENT_KEY, s); }
+function wasSent(k){ return !!lsGet(SENT_KEY, {})[k]; }
+function markSent(k){ const s = lsGet(SENT_KEY, {}); s[k] = 1; lsSet(SENT_KEY, s); }
 
+function getRecordId(rec){
+  if (!rec) return undefined;
+  if (rec.Id   !== undefined && rec.Id   !== null) return rec.Id;
+  if (rec.id   !== undefined && rec.id   !== null) return rec.id;
+  return undefined;
+}
+
+const FALLBACK_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800">' +
+  '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
+  '<stop offset="0" stop-color="#3a2b52"/><stop offset="1" stop-color="#1b1729"/>' +
+  '</linearGradient></defs>' +
+  '<rect width="600" height="800" fill="url(#g)"/>' +
+  '<text x="300" y="430" font-size="120" text-anchor="middle" fill="#ffffff44" font-family="sans-serif">📷</text>' +
+  '</svg>'
+);
+
+/* ================================================================
+   ПЛАТФОРМА
+   ================================================================ */
+function readPlatformVars(){
+  const out = {};
+  function set(k, v){
+    if (v === null || v === undefined) return;
+    const s = String(v).trim(); if (!s) return;
+    if (out[k] === undefined) out[k] = s;
+  }
+  try {
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
+    if (u){
+      set('USER_ID_TEXT', u.id);
+      set('FIRST_NAME_TEXT', u.first_name);
+      set('LAST_NAME_TEXT', u.last_name);
+      set('USERNAME_TEXT', u.username);
+      set('USER_AVATAR_URL', u.photo_url);
+      set('HAS_PREMIUM_BOOL', u.is_premium ? '1' : '0');
+      set('MINI_APP_SESSION_LANG_CODE', u.language_code);
+      const full = [u.first_name, u.last_name].filter(Boolean).join(' ');
+      set('FULL_NAME', full);
+      set('FIRST_AND_LAST_NAME_TEXT', full);
+    }
+  } catch(e){}
+  try {
+    const p = new URLSearchParams(location.search || '');
+    p.forEach(function(v, k){ set(k, v); });
+  } catch(e){}
+  try {
+    const h = location.hash || '';
+    const qi = h.indexOf('?');
+    if (qi !== -1){
+      const p = new URLSearchParams(h.slice(qi + 1));
+      p.forEach(function(v, k){ set(k, v); });
+    }
+  } catch(e){}
+  ['BROOT_VARS','PLATFORM_VARS','BOT_VARS','INIT_VARS','TG_USER_VARS'].forEach(function(n){
+    const o = window[n];
+    if (o && typeof o === 'object'){
+      for (const k in o) if (Object.prototype.hasOwnProperty.call(o, k)) set(k, o[k]);
+    }
+  });
+  return out;
+}
+const PLATFORM = readPlatformVars();
+
+function platformName(){
+  return (
+    PLATFORM.FIRST_AND_LAST_NAME_TEXT ||
+    PLATFORM.FULL_NAME ||
+    [PLATFORM.FIRST_NAME_TEXT, PLATFORM.LAST_NAME_TEXT].filter(Boolean).join(' ') || ''
+  ).slice(0, 50);
+}
+function platformChatId(){ return PLATFORM.USER_ID_TEXT || ''; }
+function platformAvatarUrl(){ return PLATFORM.USER_AVATAR_URL || ''; }
+function platformUsername(){ return PLATFORM.USERNAME_TEXT || ''; }
 
 /* ================================================================
    СОСТОЯНИЕ
    ================================================================ */
 const state = {
-  user: null,
-  profile: null,
-  pendingRegistration: null,
-  view: 'discover',
-  viewProfileId: null,
-  likedTab: 'incoming',
-  deckIndex: 0,
-  filtersOpen: false,
+  user: null, profile: null, pendingRegistration: null,
+  view: 'discover', viewProfileId: null,
+  likedTab: 'incoming', deckIndex: 0, filtersOpen: false,
   filters: { ageFrom: 18, ageTo: 100, city: '', gender: '', lookingFor: '' },
-  profiles: [],
-  likes: [],
-  matches: [],
-  _deck: [],
-  busy: false
+  profiles: [], likes: [], matches: [], _deck: [], busy: false
 };
 
-
 /* ================================================================
-   URL ROUTING
+   ROUTING
    ================================================================ */
 function computeBaseUrl(){
   if (CONFIG.publicBaseUrl) return CONFIG.publicBaseUrl.replace(/\/?$/, '/');
-  if (location.protocol === 'file:'){
-    return location.href.split('#')[0].split('?')[0];
-  }
+  if (location.protocol === 'file:') return location.href.split('#')[0].split('?')[0];
   let p = location.pathname.replace(/\/(profile|p)\/[^\/]+\/?$/i, '/');
   p = p.replace(/index\.html$/i, '');
   if (!p.endsWith('/')) p = p.replace(/\/[^\/]*$/, '/');
   if (!p) p = '/';
   return location.origin + p;
 }
-function profileLink(profileId){
+function profileLink(pid){
   const base = computeBaseUrl();
-  if (location.protocol === 'file:'){
-    return base + '#/profile/' + profileId;
-  }
-  return base.replace(/\/$/, '') + '/profile/' + profileId;
+  if (location.protocol === 'file:') return base + '#/profile/' + pid;
+  return base.replace(/\/$/, '') + '/profile/' + pid;
 }
 function getRoute(){
   const path = location.pathname || '';
@@ -505,66 +482,45 @@ function getRoute(){
   if (['discover','likes','matches','me'].indexOf(hash) !== -1) return { view: hash };
   return { view: 'discover' };
 }
-function navigateTo(view){
-  state.view = view;
-  state.viewProfileId = null;
-  if (view === 'discover') state.deckIndex = 0;
+function navigateTo(v){
+  state.view = v; state.viewProfileId = null;
+  if (v === 'discover') state.deckIndex = 0;
   try {
     if (location.protocol === 'file:'){
-      const newHash = '#' + view;
-      if (location.hash !== newHash) location.hash = newHash;
+      if (location.hash !== '#' + v) location.hash = '#' + v;
     } else {
-      history.pushState({}, '', computeBaseUrl() + '#' + view);
+      history.pushState({}, '', computeBaseUrl() + '#' + v);
     }
   } catch(e){}
-  render();
-  window.scrollTo(0, 0);
+  render(); window.scrollTo(0, 0);
 }
-function goToProfile(profileId){
-  if (!profileId) return;
-  state.view = 'profile';
-  state.viewProfileId = profileId;
+function goToProfile(pid){
+  if (!pid) return;
+  state.view = 'profile'; state.viewProfileId = pid;
   try {
-    if (location.protocol === 'file:'){
-      location.hash = '#/profile/' + profileId;
-    } else {
-      history.pushState({}, '', profileLink(profileId));
-    }
-  } catch(e){
-    try { location.hash = '#/profile/' + profileId; } catch(e2){}
-  }
-  render();
-  window.scrollTo(0, 0);
+    if (location.protocol === 'file:') location.hash = '#/profile/' + pid;
+    else history.pushState({}, '', profileLink(pid));
+  } catch(e){ try { location.hash = '#/profile/' + pid; } catch(e2){} }
+  render(); window.scrollTo(0, 0);
 }
-
 
 /* ================================================================
-   TOASTS
+   TOASTS / MODALS
    ================================================================ */
-function toast(message, type){
-  const root = $('#toastRoot');
-  if (!root) return;
+function toast(msg, type){
+  const root = $('#toastRoot'); if (!root) return;
   const el = document.createElement('div');
   el.className = 'toast toast-' + (type || 'info');
-  el.textContent = message;
+  el.textContent = msg;
   root.appendChild(el);
   requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => {
-    el.classList.remove('show');
-    setTimeout(() => el.remove(), 320);
-  }, 2800);
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 320); }, 3000);
+  dlog(type === 'error' ? 'err' : type === 'success' ? 'ok' : 'info', 'TOAST: ' + msg);
 }
-
-
-/* ================================================================
-   MODALS
-   ================================================================ */
 function escKeyHandler(e){ if (e.key === 'Escape') closeModal(); }
 function closeModal(){
-  const root = $('#modalRoot');
-  if (!root) return;
-  const wrap = root.querySelector('.modal-backdrop');
-  if (!wrap) return;
+  const root = $('#modalRoot'); if (!root) return;
+  const wrap = root.querySelector('.modal-backdrop'); if (!wrap) return;
   wrap.classList.remove('show');
   document.removeEventListener('keydown', escKeyHandler);
   setTimeout(() => wrap.remove(), 260);
@@ -572,9 +528,7 @@ function closeModal(){
 function openModal(opts){
   const o = opts || {};
   const root = $('#modalRoot');
-  const old = root.querySelector('.modal-backdrop');
-  if (old) old.remove();
-
+  const old = root.querySelector('.modal-backdrop'); if (old) old.remove();
   const wrap = document.createElement('div');
   wrap.className = 'modal-backdrop';
   wrap.innerHTML =
@@ -586,178 +540,178 @@ function openModal(opts){
       '<div class="modal-body">' + (o.body || '') + '</div>' +
       (o.footer ? '<div class="modal-foot">' + o.footer + '</div>' : '') +
     '</div>';
-
   root.appendChild(wrap);
   requestAnimationFrame(() => wrap.classList.add('show'));
-
   wrap.addEventListener('click', function(e){
     if (e.target === wrap || (e.target.dataset && e.target.dataset.close)) closeModal();
   });
   document.addEventListener('keydown', escKeyHandler);
-
   if (typeof o.onMount === 'function') o.onMount(wrap);
   return wrap;
 }
 
-
 /* ================================================================
-   ХРАНИЛИЩЕ
+   NOCODB CRUD
    ================================================================ */
 function tableUrl(table){
-  switch(table){
-    case 'users':         return CONFIG.usersTableUrl;
-    case 'profiles':      return CONFIG.profilesTableUrl;
-    case 'likes':         return CONFIG.likesTableUrl;
-    case 'matches':       return CONFIG.matchesTableUrl;
-    case 'comments':      return CONFIG.commentsTableUrl;
-    case 'notifications': return CONFIG.notificationsTableUrl;
-    default: throw new Error('Неизвестная таблица: ' + table);
-  }
+  const m = {
+    users:         CONFIG.usersTableUrl,
+    profiles:      CONFIG.profilesTableUrl,
+    likes:         CONFIG.likesTableUrl,
+    matches:       CONFIG.matchesTableUrl,
+    comments:      CONFIG.commentsTableUrl,
+    notifications: CONFIG.notificationsTableUrl
+  };
+  if (!m[table]) throw new Error('Неизвестная таблица: ' + table);
+  return m[table];
 }
 function ncHeaders(){
   const h = { 'Content-Type': 'application/json' };
-  if (CONFIG.apiToken){
-    h['xc-token'] = CONFIG.apiToken;
-  }
+  if (CONFIG.apiToken) h['xc-token'] = CONFIG.apiToken;
   return h;
 }
 
-function seedDemoDb(){
-  const now = nowIso();
-  const db = { users: [], profiles: [], likes: [], matches: [], comments: [], notifications: [] };
-  DEMO_PROFILES.forEach(function(p, i){
-    const uid = 'USER_' + (200001 + i);
-    const pid = 'PROFILE_' + (200001 + i);
-    db.users.push({
-      Id: i + 1,
-      user_id: uid, telegram_chat_id: '',
-      name: p.name, age: p.age, gender: p.gender, city: p.city,
-      [FIELD_CREATED]: now
-    });
-    db.profiles.push({
-      Id: i + 1,
-      profile_id: pid, user_id: uid,
-      name: p.name, age: p.age, gender: p.gender, looking_for: p.looking_for,
-      city: p.city, description: p.description, interests: p.interests,
-      photo_url: p.photo,
-      [FIELD_CREATED]: now, [FIELD_UPDATED]: now,
-      is_visible: true
-    });
-  });
-  return db;
-}
-function demoDb(){
-  let db = lsGet(DEMO_DB_KEY, null);
-  if (!db || !db.profiles || !db.profiles.length){
-    db = seedDemoDb();
-    lsSet(DEMO_DB_KEY, db);
-  }
-  return db;
-}
-function saveDemoDb(db){ lsSet(DEMO_DB_KEY, db); }
-
-async function parseNocoResponse(res, action){
+/* Разбор ответа */
+async function parseNoco(res, action){
   const text = await res.text();
   let json = null;
   try { json = text ? JSON.parse(text) : null; } catch(e){}
   if (!res.ok){
     const msg = (json && (json.msg || json.message || json.error)) || text || res.statusText;
-    console.error('[NocoDB] ' + action + ' ОШИБКА', res.status, msg, json);
+    dlog('err', 'NocoDB ' + action + ' ' + res.status + ': ' + msg);
     throw new Error('NocoDB ' + res.status + ': ' + msg);
   }
   return json;
 }
 
+/* ---------- LIST ---------- */
 async function dbList(table){
-  if (DEMO_MODE){
-    const db = demoDb();
-    return (db[table] || []).slice();
-  }
   const url = tableUrl(table) + '?limit=1000';
-  console.log('[NocoDB] GET', url);
+  dlog('info', 'GET ' + table);
   const res = await fetch(url, { method: 'GET', headers: ncHeaders() });
-  const json = await parseNocoResponse(res, 'GET ' + table);
+  const json = await parseNoco(res, 'GET ' + table);
   const list = (json && (json.list || json.records)) || [];
-  console.log('[NocoDB] GET ' + table + ' ->', list.length, 'записей');
+  dlog('ok', 'GET ' + table + ' → ' + list.length + ' записей');
   return list;
 }
 
+/* ---------- INSERT (с fallback) ---------- */
 async function dbInsert(table, record){
-  if (DEMO_MODE){
-    const db = demoDb();
-    const arr = db[table] || (db[table] = []);
-    const maxId = arr.reduce(function(m, r){
-      const id = getRecordId(r);
-      return Math.max(m, Number(id) || 0);
-    }, 0);
-    const rec = Object.assign({}, record);
-    rec.Id = maxId + 1;
-    arr.push(rec);
-    saveDemoDb(db);
-    return rec;
-  }
   const url = tableUrl(table);
-  console.log('[NocoDB] POST', url, record);
-  const res = await fetch(url, {
+  dlog('info', 'POST ' + table + ' → ' + JSON.stringify(record).slice(0, 200));
+
+  let res = await fetch(url, {
     method: 'POST',
     headers: ncHeaders(),
     body: JSON.stringify(record)
   });
-  const json = await parseNocoResponse(res, 'POST ' + table);
-  console.log('[NocoDB] POST ' + table + ' ->', json);
+  let text = await res.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch(e){}
+
+  /* Если ошибка 400 и она упоминает created_att / updated_att —
+     пробуем снова без этих полей */
+  if (!res.ok && res.status === 400){
+    const combined = (text + ' ' + JSON.stringify(json || {})).toLowerCase();
+    if (combined.indexOf('created_att') !== -1 ||
+        combined.indexOf('updated_att') !== -1 ||
+        combined.indexOf('created_at')  !== -1 ||
+        combined.indexOf('updated_at')  !== -1 ||
+        combined.indexOf('column') !== -1 ||
+        combined.indexOf('field') !== -1){
+
+      dlog('err', 'POST ' + table + ' 400 (проблема с датой). Повтор без ' + FIELD_CREATED + ' / ' + FIELD_UPDATED);
+      const copy = Object.assign({}, record);
+      delete copy[FIELD_CREATED];
+      delete copy[FIELD_UPDATED];
+
+      res = await fetch(url, {
+        method: 'POST',
+        headers: ncHeaders(),
+        body: JSON.stringify(copy)
+      });
+      text = await res.text();
+      try { json = text ? JSON.parse(text) : null; } catch(e){ json = null; }
+
+      if (res.ok){
+        dlog('ok', 'POST ' + table + ' → OK (без даты)');
+        return json;
+      }
+    }
+  }
+
+  if (!res.ok){
+    const msg = (json && (json.msg || json.message || json.error)) || text || res.statusText;
+    dlog('err', 'POST ' + table + ' ' + res.status + ': ' + msg);
+    throw new Error('NocoDB ' + res.status + ': ' + msg);
+  }
+
+  dlog('ok', 'POST ' + table + ' → OK');
   return json;
 }
 
+/* ---------- UPDATE ---------- */
 async function dbUpdate(table, id, patch){
-  if (DEMO_MODE){
-    const db = demoDb();
-    const arr = db[table] || [];
-    const idx = arr.findIndex(function(r){ return String(getRecordId(r)) === String(id); });
-    if (idx === -1) throw new Error('Запись не найдена');
-    arr[idx] = Object.assign({}, arr[idx], patch, { [FIELD_UPDATED]: nowIso() });
-    saveDemoDb(db);
-    return arr[idx];
-  }
   const payload = Object.assign({}, patch);
   payload[FIELD_ID] = id;
   const url = tableUrl(table);
-  console.log('[NocoDB] PATCH', url, payload);
-  const res = await fetch(url, {
+  dlog('info', 'PATCH ' + table + ' Id=' + id);
+
+  let res = await fetch(url, {
     method: 'PATCH',
     headers: ncHeaders(),
     body: JSON.stringify(payload)
   });
-  const json = await parseNocoResponse(res, 'PATCH ' + table);
-  console.log('[NocoDB] PATCH ' + table + ' ->', json);
+  let text = await res.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch(e){}
+
+  if (!res.ok && res.status === 400){
+    const combined = (text + ' ' + JSON.stringify(json || {})).toLowerCase();
+    if (combined.indexOf('updated_att') !== -1 || combined.indexOf('updated_at') !== -1){
+      dlog('err', 'PATCH 400 (проблема с ' + FIELD_UPDATED + '). Повтор без него');
+      const copy = Object.assign({}, patch);
+      copy[FIELD_ID] = id;
+      delete copy[FIELD_UPDATED];
+      res = await fetch(url, { method: 'PATCH', headers: ncHeaders(), body: JSON.stringify(copy) });
+      text = await res.text();
+      try { json = text ? JSON.parse(text) : null; } catch(e){ json = null; }
+      if (res.ok){ dlog('ok', 'PATCH ' + table + ' → OK (без даты)'); return json; }
+    }
+  }
+
+  if (!res.ok){
+    const msg = (json && (json.msg || json.message || json.error)) || text || res.statusText;
+    dlog('err', 'PATCH ' + table + ' ' + res.status + ': ' + msg);
+    throw new Error('NocoDB ' + res.status + ': ' + msg);
+  }
+  dlog('ok', 'PATCH ' + table + ' → OK');
   return json;
 }
 
+/* ---------- DELETE ---------- */
 async function dbDelete(table, id){
-  if (DEMO_MODE){
-    const db = demoDb();
-    const arr = db[table] || [];
-    const idx = arr.findIndex(function(r){ return String(getRecordId(r)) === String(id); });
-    if (idx === -1) return false;
-    arr.splice(idx, 1);
-    saveDemoDb(db);
-    return true;
-  }
   const url = tableUrl(table);
-  const body = JSON.stringify([{ [FIELD_ID]: id }]);
-  console.log('[NocoDB] DELETE', url, body);
+  dlog('info', 'DELETE ' + table + ' Id=' + id);
   const res = await fetch(url, {
     method: 'DELETE',
     headers: ncHeaders(),
-    body: body
+    body: JSON.stringify([{ [FIELD_ID]: id }])
   });
-  await parseNocoResponse(res, 'DELETE ' + table);
-  console.log('[NocoDB] DELETE ' + table + ' -> OK');
+  const text = await res.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch(e){}
+  if (!res.ok){
+    const msg = (json && (json.msg || json.message || json.error)) || text || res.statusText;
+    dlog('err', 'DELETE ' + table + ' ' + res.status + ': ' + msg);
+    throw new Error('NocoDB ' + res.status + ': ' + msg);
+  }
+  dlog('ok', 'DELETE ' + table + ' → OK');
   return true;
 }
 
-
 /* ================================================================
-   API ФУНКЦИИ
+   API-ФУНКЦИИ
    ================================================================ */
 async function createUser(data){
   const seq = nextSeq('user', 100001);
@@ -772,23 +726,18 @@ async function createUser(data){
     [FIELD_CREATED]: nowIso()
   };
   const created = await dbInsert('users', record);
-  if (!DEMO_MODE && !getRecordId(created)){
-    const list = await dbList('users');
-    return list.filter(function(u){ return u.user_id === userId; })[0] || record;
-  }
-  return created;
+  return Object.assign({}, created || {}, { user_id: userId });
 }
 async function getUser(userId){
   if (!userId) return null;
   const list = await dbList('users');
-  return list.filter(function(u){ return u.user_id === userId; })[0] || null;
+  return list.filter(u => u.user_id === userId)[0] || null;
 }
-
 async function createProfile(data){
   const seq = nextSeq('profile', 100001);
-  const profileId = 'PROFILE_' + seq;
+  const pid = 'PROFILE_' + seq;
   const record = {
-    profile_id: profileId,
+    profile_id: pid,
     user_id: data.user_id,
     name: String(data.name || '').trim(),
     age: Number(data.age),
@@ -803,16 +752,7 @@ async function createProfile(data){
     is_visible: data.is_visible !== false
   };
   const created = await dbInsert('profiles', record);
-  if (!DEMO_MODE && !getRecordId(created)){
-    const list = await dbList('profiles');
-    return list.filter(function(p){ return p.profile_id === profileId; })[0] || record;
-  }
-  return created;
-}
-async function getProfile(profileId){
-  if (!profileId) return null;
-  const list = await dbList('profiles');
-  return list.filter(function(p){ return p.profile_id === profileId; })[0] || null;
+  return Object.assign({}, created || {}, { profile_id: pid, user_id: data.user_id });
 }
 async function getProfiles(){ return await dbList('profiles'); }
 async function updateProfile(id, patch){
@@ -820,15 +760,12 @@ async function updateProfile(id, patch){
   p[FIELD_UPDATED] = nowIso();
   return await dbUpdate('profiles', id, p);
 }
-
 async function createLike(fromUserId, toUserId){
   if (!fromUserId || !toUserId) throw new Error('Не указаны пользователи');
   if (fromUserId === toUserId) throw new Error('Нельзя лайкнуть самого себя');
   const likes = await dbList('likes');
-  const exists = likes.filter(function(l){
-    return l.from_user_id === fromUserId && l.to_user_id === toUserId;
-  })[0];
-  if (exists) return exists;
+  const exists = likes.filter(l => l.from_user_id === fromUserId && l.to_user_id === toUserId)[0];
+  if (exists){ dlog('info', 'Лайк уже существует'); return exists; }
   return await dbInsert('likes', {
     from_user_id: fromUserId,
     to_user_id: toUserId,
@@ -837,161 +774,106 @@ async function createLike(fromUserId, toUserId){
 }
 async function removeLike(fromUserId, toUserId){
   const likes = await dbList('likes');
-  const like = likes.filter(function(l){
-    return l.from_user_id === fromUserId && l.to_user_id === toUserId;
-  })[0];
+  const like = likes.filter(l => l.from_user_id === fromUserId && l.to_user_id === toUserId)[0];
   if (!like) return false;
   await dbDelete('likes', getRecordId(like));
-
   const matches = await dbList('matches');
-  const m = matches.filter(function(x){
-    return (x.user1_id === fromUserId && x.user2_id === toUserId) ||
-           (x.user1_id === toUserId   && x.user2_id === fromUserId);
-  })[0];
+  const m = matches.filter(x =>
+    (x.user1_id === fromUserId && x.user2_id === toUserId) ||
+    (x.user1_id === toUserId   && x.user2_id === fromUserId))[0];
   if (m) await dbDelete('matches', getRecordId(m));
   return true;
 }
-async function checkMutualLike(fromUserId, toUserId){
+async function checkMutualLike(a, b){
   const likes = await dbList('likes');
-  return likes.filter(function(l){
-    return l.from_user_id === toUserId && l.to_user_id === fromUserId;
-  })[0] || null;
+  return likes.filter(l => l.from_user_id === b && l.to_user_id === a)[0] || null;
 }
-
-async function createMatch(user1, user2){
+async function createMatch(u1, u2){
   const matches = await dbList('matches');
-  const exists = matches.filter(function(m){
-    return (m.user1_id === user1 && m.user2_id === user2) ||
-           (m.user1_id === user2 && m.user2_id === user1);
-  })[0];
+  const exists = matches.filter(m =>
+    (m.user1_id === u1 && m.user2_id === u2) ||
+    (m.user1_id === u2 && m.user2_id === u1))[0];
   if (exists) return exists;
   return await dbInsert('matches', {
-    user1_id: user1,
-    user2_id: user2,
-    [FIELD_CREATED]: nowIso()
+    user1_id: u1, user2_id: u2, [FIELD_CREATED]: nowIso()
   });
 }
-
-async function createComment(data){
+async function createComment(d){
   return await dbInsert('comments', {
-    from_user_id: data.from_user_id,
-    to_user_id: data.to_user_id,
-    profile_id: data.profile_id,
-    text: String(data.text || ''),
+    from_user_id: d.from_user_id,
+    to_user_id: d.to_user_id,
+    profile_id: d.profile_id,
+    text: String(d.text || ''),
     [FIELD_CREATED]: nowIso()
   });
 }
-async function getComments(profileId){
-  const list = await dbList('comments');
-  return list.filter(function(c){ return c.profile_id === profileId; });
-}
-
-async function createNotification(data){
+async function createNotification(d){
   return await dbInsert('notifications', {
-    user_id: data.user_id,
-    from_user_id: data.from_user_id || '',
-    type: data.type || 'info',
-    message: data.message || '',
-    profile_id: data.profile_id || '',
-    is_read: data.is_read === true,
+    user_id: d.user_id,
+    from_user_id: d.from_user_id || '',
+    type: d.type || 'info',
+    message: d.message || '',
+    profile_id: d.profile_id || '',
+    is_read: d.is_read === true,
     [FIELD_CREATED]: nowIso()
   });
 }
-
 async function sendTelegramMessage(chatId, text){
-  if (!chatId){
-    console.warn('[Telegram] chatId пустой — пропускаем');
-    return null;
-  }
-  if (!CONFIG.telegramBotToken || CONFIG.telegramBotToken.indexOf('YOUR_') === 0){
-    console.warn('[Telegram] токен не настроен');
-    return null;
-  }
+  if (!chatId) return null;
+  if (!CONFIG.telegramBotToken || CONFIG.telegramBotToken.indexOf('YOUR_') === 0) return null;
   const url = 'https://api.telegram.org/bot' + CONFIG.telegramBotToken + '/sendMessage';
-  const body = { chat_id: String(chatId), text: String(text) };
-  console.log('[Telegram] POST', url, body);
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ chat_id: String(chatId), text: String(text) })
     });
     const json = await response.json();
-    console.log('[Telegram] ответ:', json);
-    if (!response.ok || json.ok === false){
-      console.error('[Telegram] ошибка:', json);
-    }
+    if (!response.ok || json.ok === false) dlog('err', 'Telegram: ' + JSON.stringify(json));
+    else dlog('ok', 'Telegram → OK');
     return json;
-  } catch(err){
-    console.error('[Telegram] ошибка сети:', err);
-    return null;
-  }
+  } catch(err){ dlog('err', 'Telegram сеть: ' + err.message); return null; }
 }
-
 
 /* ================================================================
    СЕССИЯ
    ================================================================ */
-function saveSession(){
-  lsSet(SESSION_KEY, { user: state.user, profile: state.profile, saved_at: nowIso() });
-}
+function saveSession(){ lsSet(SESSION_KEY, { user: state.user, profile: state.profile, saved_at: nowIso() }); }
 function loadSession(){
   const s = lsGet(SESSION_KEY, null);
-  if (s && s.user){
-    state.user = s.user;
-    state.profile = s.profile || null;
-  }
+  if (s && s.user){ state.user = s.user; state.profile = s.profile || null; }
 }
-
 async function refreshData(){
   try {
     state.profiles = await getProfiles();
     state.likes    = await dbList('likes');
     state.matches  = await dbList('matches');
-
     if (state.profile){
-      const fresh = state.profiles.filter(function(p){
-        return p.profile_id === state.profile.profile_id;
-      })[0];
+      const fresh = state.profiles.filter(p => p.profile_id === state.profile.profile_id)[0];
       if (fresh){ state.profile = fresh; saveSession(); }
     }
+    dlog('ok', 'Данные: профилей=' + state.profiles.length +
+                ', лайков=' + state.likes.length +
+                ', матчей=' + state.matches.length);
   } catch(err){
-    console.error('[refreshData]', err);
-    toast('Ошибка загрузки данных: ' + err.message, 'error');
+    dlog('err', 'refreshData: ' + err.message);
+    toast('Ошибка загрузки: ' + err.message, 'error');
   }
 }
-
 
 /* ================================================================
    ВСПОМОГАТЕЛЬНЫЕ
    ================================================================ */
-function profileByUserId(uid){
-  if (!uid) return null;
-  return state.profiles.filter(function(p){ return p.user_id === uid; })[0] || null;
-}
-function profileByProfileId(pid){
-  if (!pid) return null;
-  return state.profiles.filter(function(p){ return p.profile_id === pid; })[0] || null;
-}
-function isVisible(p){
-  return p && p.is_visible !== false && p.is_visible !== 0 && p.is_visible !== '0';
-}
+function profileByUserId(uid){ return uid ? state.profiles.filter(p => p.user_id === uid)[0] || null : null; }
+function profileByProfileId(pid){ return pid ? state.profiles.filter(p => p.profile_id === pid)[0] || null : null; }
+function isVisible(p){ return p && p.is_visible !== false && p.is_visible !== 0 && p.is_visible !== '0'; }
 function tagsHtml(interests){
   if (!interests) return '';
-  const arr = String(interests).split(',').map(function(s){ return s.trim(); })
-    .filter(function(s){ return s.length; }).slice(0, 10);
-  return arr.map(function(t){ return '<span class="tag">#' + esc(t) + '</span>'; }).join('');
+  return String(interests).split(',').map(s => s.trim()).filter(s => s.length).slice(0, 10)
+    .map(t => '<span class="tag">#' + esc(t) + '</span>').join('');
 }
-function genderLabel(g){
-  if (g === 'male') return 'Мужчина';
-  if (g === 'female') return 'Женщина';
-  return 'Не указан';
-}
-function lookingLabel(g){
-  if (g === 'male') return 'Мужчину';
-  if (g === 'female') return 'Женщину';
-  return 'Не важно';
-}
+function genderLabel(g){ return g === 'male' ? 'Мужчина' : g === 'female' ? 'Женщина' : 'Не указан'; }
+function lookingLabel(g){ return g === 'male' ? 'Мужчину' : g === 'female' ? 'Женщину' : 'Не важно'; }
 function genderOptions(sel){
   return '<option value="female"' + (sel === 'female' ? ' selected' : '') + '>Женщина</option>' +
          '<option value="male"'   + (sel === 'male'   ? ' selected' : '') + '>Мужчина</option>';
@@ -1002,27 +884,18 @@ function lookingOptions(sel){
          '<option value="any"'    + (sel === 'any'    ? ' selected' : '') + '>Не важно</option>';
 }
 
-
 /* ================================================================
-   АВТОРИЗАЦИЯ
+   РЕГИСТРАЦИЯ
    ================================================================ */
-function hideAuthOverlay(){
-  const ov = document.getElementById('authOverlay');
-  if (ov) ov.remove();
-}
+function hideAuthOverlay(){ const o = document.getElementById('authOverlay'); if (o) o.remove(); }
 
 function showAuthOverlay(){
   if (document.getElementById('authOverlay')) return;
 
-  const prefName     = platformName();
-  const prefChatId   = platformChatId();
-  const prefAvatar   = platformAvatarUrl();
-  const prefUsername = platformUsername();
-
-  const nameBadge  = prefName    ? '<span class="badge-auto">из Telegram</span>' : '';
-  const chatBadge  = prefChatId  ? '<span class="badge-auto">из Telegram</span>' : '';
-  const photoBadge = prefAvatar  ? '<span class="badge-auto">из Telegram</span>' : '';
-  const userLine   = prefUsername ? '<div style="font-size:12px;color:var(--muted);margin-top:-4px;">@' + esc(prefUsername) + '</div>' : '';
+  const prefName = platformName();
+  const prefChat = platformChatId();
+  const prefAvat = platformAvatarUrl();
+  const prefUser = platformUsername();
 
   const ov = document.createElement('div');
   ov.id = 'authOverlay';
@@ -1032,12 +905,10 @@ function showAuthOverlay(){
       '<div class="auth-logo">💖</div>' +
       '<h1>HeartLink</h1>' +
       '<p class="auth-sub">Создайте аккаунт, чтобы начать знакомиться</p>' +
-      userLine +
-      '<form id="regForm" class="form" novalidate style="margin-top:16px;">' +
-        '<label>Имя' + nameBadge +
-          '<input name="name" type="text" placeholder="Как вас зовут" maxlength="50" ' +
-            'autocomplete="given-name" value="' + esc(prefName) + '">' +
-        '</label>' +
+      (prefUser ? '<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:-16px;margin-bottom:16px;">@' + esc(prefUser) + '</div>' : '') +
+      '<form id="regForm" class="form" novalidate>' +
+        '<label>Имя' + (prefName ? '<span class="badge-auto">из Telegram</span>' : '') +
+          '<input name="name" type="text" placeholder="Как вас зовут" maxlength="50" value="' + esc(prefName) + '"></label>' +
         '<div class="row2">' +
           '<label>Возраст<input name="age" type="number" min="18" max="100" placeholder="18+"></label>' +
           '<label>Пол<select name="gender">' + genderOptions('female') + '</select></label>' +
@@ -1046,143 +917,100 @@ function showAuthOverlay(){
         '<label>О себе<textarea name="description" rows="3" maxlength="1000" placeholder="Пара слов о себе"></textarea></label>' +
         '<label>Кого ищу<select name="looking_for">' + lookingOptions('male') + '</select></label>' +
         '<div class="photo-picker">' +
-          (photoBadge ? '<div>' + photoBadge + '</div>' : '') +
-          '<img id="regPhotoPreview" src="' + esc(prefAvatar || FALLBACK_IMG) +
-            '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'" alt="">' +
-          '<label class="photo-btn">📷 Выбрать фото' +
-            '<input id="regPhotoInput" type="file" accept="image/*" hidden>' +
-          '</label>' +
+          '<img id="regPhotoPreview" src="' + esc(prefAvat || FALLBACK_IMG) + '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
+          '<label class="photo-btn">📷 Выбрать фото<input id="regPhotoInput" type="file" accept="image/*" hidden></label>' +
         '</div>' +
-        '<label>Telegram Chat ID' + chatBadge +
-          '<input name="telegram_chat_id" type="text" placeholder="например 123456789" maxlength="40" ' +
-            'value="' + esc(prefChatId) + '">' +
-        '</label>' +
+        '<label>Telegram Chat ID' + (prefChat ? '<span class="badge-auto">из Telegram</span>' : '') +
+          '<input name="telegram_chat_id" type="text" placeholder="123456789" maxlength="40" value="' + esc(prefChat) + '"></label>' +
         '<div class="err" id="regErr"></div>' +
         '<button class="btn-primary" type="submit">Создать аккаунт</button>' +
       '</form>' +
     '</div>';
-
   document.body.appendChild(ov);
 
-  let photoData = prefAvatar || '';
-
-  const input = $('#regPhotoInput', ov);
+  let photoData = prefAvat || '';
+  const fileInput = $('#regPhotoInput', ov);
   const preview = $('#regPhotoPreview', ov);
-
-  input.addEventListener('change', async function(){
-    const file = input.files && input.files[0];
-    if (!file) return;
-    try {
-      photoData = await fileToDataUrl(file);
-      preview.src = photoData;
-    } catch(err){
-      toast('Не удалось загрузить фото', 'error');
-    }
+  fileInput.addEventListener('change', async () => {
+    const f = fileInput.files && fileInput.files[0]; if (!f) return;
+    try { photoData = await fileToDataUrl(f); preview.src = photoData; }
+    catch(e){ toast('Не удалось загрузить фото', 'error'); }
   });
 
-  const form = $('#regForm', ov);
-  form.addEventListener('submit', async function(e){
+  $('#regForm', ov).addEventListener('submit', async (e) => {
     e.preventDefault();
-    const errBox = $('#regErr', ov);
-    errBox.textContent = '';
-
-    const fd = new FormData(form);
-    const name      = String(fd.get('name') || '').trim();
-    const age       = Number(fd.get('age'));
-    const city      = String(fd.get('city') || '').trim();
-    const gender    = fd.get('gender');
+    const errBox = $('#regErr', ov); errBox.textContent = '';
+    const fd = new FormData(e.target);
+    const name = String(fd.get('name') || '').trim();
+    const age = Number(fd.get('age'));
+    const city = String(fd.get('city') || '').trim();
+    const gender = fd.get('gender');
     const lookingFor = fd.get('looking_for');
     const description = String(fd.get('description') || '').trim();
-    const chatId    = String(fd.get('telegram_chat_id') || '').trim();
+    const chatId = String(fd.get('telegram_chat_id') || '').trim();
 
-    if (name.length < 2 || name.length > 50){
-      errBox.textContent = 'Имя должно быть от 2 до 50 символов.'; return;
-    }
-    if (!isFinite(age) || age < 18 || age > 100){
-      errBox.textContent = 'Возраст должен быть от 18 до 100 лет.'; return;
-    }
-    if (city.length < 2){
-      errBox.textContent = 'Укажите город.'; return;
-    }
-    if (description.length > 1000){
-      errBox.textContent = 'Описание не должно превышать 1000 символов.'; return;
-    }
+    if (name.length < 2 || name.length > 50){ errBox.textContent = 'Имя 2–50 символов.'; return; }
+    if (!isFinite(age) || age < 18 || age > 100){ errBox.textContent = 'Возраст 18–100.'; return; }
+    if (city.length < 2){ errBox.textContent = 'Укажите город.'; return; }
 
-    const btn = form.querySelector('button[type=submit]');
-    btn.disabled = true;
-    btn.textContent = 'Создаём аккаунт…';
+    const btn = e.target.querySelector('button[type=submit]');
+    btn.disabled = true; btn.textContent = 'Создаём…';
 
     try {
-      const user = await createUser({
-        name: name, age: age, gender: gender, city: city,
-        telegram_chat_id: chatId
-      });
-
+      const user = await createUser({ name, age, gender, city, telegram_chat_id: chatId });
       state.user = user;
       state.pendingRegistration = {
-        name: name, age: age, gender: gender, city: city,
-        looking_for: lookingFor, description: description,
-        photo_url: photoData || ''
+        name, age, gender, city, looking_for: lookingFor,
+        description, photo_url: photoData || ''
       };
       saveSession();
-
       hideAuthOverlay();
       toast('🎉 Аккаунт создан: ' + user.user_id, 'success');
-
       openProfileEditor(true);
       render();
     } catch(err){
-      console.error(err);
+      dlog('err', 'Регистрация: ' + err.message);
       errBox.textContent = 'Ошибка: ' + err.message;
-      btn.disabled = false;
-      btn.textContent = 'Создать аккаунт';
+      btn.disabled = false; btn.textContent = 'Создать аккаунт';
     }
   });
 }
 
-
 /* ================================================================
-   ИЗОБРАЖЕНИЯ
+   ФОТО
    ================================================================ */
 function fileToDataUrl(file, maxSize, quality){
-  maxSize = maxSize || 900;
-  quality = quality || 0.82;
-  return new Promise(function(resolve, reject){
+  maxSize = maxSize || 900; quality = quality || 0.82;
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = function(){
+    reader.onload = () => {
       const img = new Image();
-      img.onload = function(){
+      img.onload = () => {
         try {
           let w = img.width, h = img.height;
-          const scale = Math.min(1, maxSize / Math.max(w, h));
-          w = Math.max(1, Math.round(w * scale));
-          h = Math.max(1, Math.round(h * scale));
-          const canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        } catch(e){
-          resolve(reader.result);
-        }
+          const sc = Math.min(1, maxSize / Math.max(w, h));
+          w = Math.max(1, Math.round(w * sc)); h = Math.max(1, Math.round(h * sc));
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(c.toDataURL('image/jpeg', quality));
+        } catch(e){ resolve(reader.result); }
       };
-      img.onerror = function(){ reject(new Error('Не удалось прочитать изображение')); };
+      img.onerror = () => reject(new Error('Ошибка чтения изображения'));
       img.src = reader.result;
     };
-    reader.onerror = function(){ reject(new Error('Ошибка чтения файла')); };
+    reader.onerror = () => reject(new Error('Ошибка чтения файла'));
     reader.readAsDataURL(file);
   });
 }
 
-
 /* ================================================================
    РЕДАКТОР АНКЕТЫ
    ================================================================ */
-function openProfileEditor(isFirstTime){
+function openProfileEditor(isFirst){
   const p = state.profile || {};
   const pend = state.pendingRegistration || {};
   const u = state.user || {};
-
   const base = {
     name:        p.name        || pend.name        || u.name  || '',
     age:         p.age         || pend.age         || u.age   || '',
@@ -1194,18 +1022,14 @@ function openProfileEditor(isFirstTime){
     photo_url:   p.photo_url   || pend.photo_url   || '',
     is_visible:  p.is_visible !== false
   };
-
   let photoData = base.photo_url || '';
 
   openModal({
-    title: isFirstTime ? '📝 Создайте свою анкету' : '✏️ Редактировать анкету',
+    title: isFirst ? '📝 Создайте анкету' : '✏️ Редактировать',
     body:
       '<div class="photo-picker">' +
-        '<img id="pePreview" src="' + esc(photoData || FALLBACK_IMG) +
-          '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'" alt="">' +
-        '<label class="photo-btn">📷 Загрузить фото' +
-          '<input type="file" accept="image/*" id="pePhoto" hidden>' +
-        '</label>' +
+        '<img id="pePreview" src="' + esc(photoData || FALLBACK_IMG) + '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
+        '<label class="photo-btn">📷 Фото<input id="pePhoto" type="file" accept="image/*" hidden></label>' +
       '</div>' +
       '<div class="form">' +
         '<label>Имя<input id="peName" type="text" maxlength="50" value="' + esc(base.name) + '"></label>' +
@@ -1217,37 +1041,20 @@ function openProfileEditor(isFirstTime){
           '<label>Пол<select id="peGender">' + genderOptions(base.gender) + '</select></label>' +
           '<label>Кого ищу<select id="peLooking">' + lookingOptions(base.looking_for) + '</select></label>' +
         '</div>' +
-        '<label>Описание<textarea id="peDesc" rows="3" maxlength="1000" placeholder="Расскажите о себе">' +
-          esc(base.description) + '</textarea></label>' +
-        '<label>Интересы (через запятую)' +
-          '<input id="peInterests" type="text" maxlength="200" placeholder="путешествия, музыка, спорт" value="' +
-          esc(base.interests) + '">' +
-        '</label>' +
-        '<label class="check">' +
-          '<input type="checkbox" id="peVisible"' + (base.is_visible ? ' checked' : '') + '> Показывать анкету другим' +
-        '</label>' +
+        '<label>Описание<textarea id="peDesc" rows="3" maxlength="1000">' + esc(base.description) + '</textarea></label>' +
+        '<label>Интересы (через запятую)<input id="peInterests" type="text" maxlength="200" value="' + esc(base.interests) + '"></label>' +
+        '<label class="check"><input type="checkbox" id="peVisible"' + (base.is_visible ? ' checked' : '') + '> Показывать анкету другим</label>' +
         '<div class="err" id="peErr"></div>' +
       '</div>',
-    footer: '<button class="btn-primary" id="peSave" type="button">Сохранить анкету</button>',
-    onMount: function(wrap){
-      const photoInput = $('#pePhoto', wrap);
-      const preview = $('#pePreview', wrap);
-
-      photoInput.addEventListener('change', async function(){
-        const file = photoInput.files && photoInput.files[0];
-        if (!file) return;
-        try {
-          photoData = await fileToDataUrl(file);
-          preview.src = photoData;
-        } catch(err){
-          toast('Не удалось загрузить фото', 'error');
-        }
+    footer: '<button class="btn-primary" id="peSave" type="button">Сохранить</button>',
+    onMount: (wrap) => {
+      $('#pePhoto', wrap).addEventListener('change', async (e) => {
+        const f = e.target.files && e.target.files[0]; if (!f) return;
+        try { photoData = await fileToDataUrl(f); $('#pePreview', wrap).src = photoData; }
+        catch(err){ toast('Ошибка фото', 'error'); }
       });
-
-      $('#peSave', wrap).addEventListener('click', async function(){
-        const errBox = $('#peErr', wrap);
-        errBox.textContent = '';
-
+      $('#peSave', wrap).addEventListener('click', async () => {
+        const errBox = $('#peErr', wrap); errBox.textContent = '';
         const name = $('#peName', wrap).value.trim();
         const age = Number($('#peAge', wrap).value);
         const city = $('#peCity', wrap).value.trim();
@@ -1257,122 +1064,87 @@ function openProfileEditor(isFirstTime){
         const interests = $('#peInterests', wrap).value.trim();
         const visible = $('#peVisible', wrap).checked;
 
-        if (name.length < 2 || name.length > 50){
-          errBox.textContent = 'Имя должно быть от 2 до 50 символов.'; return;
-        }
-        if (!isFinite(age) || age < 18 || age > 100){
-          errBox.textContent = 'Возраст должен быть от 18 до 100 лет.'; return;
-        }
-        if (city.length < 2){
-          errBox.textContent = 'Укажите город.'; return;
-        }
-        if (description.length > 1000){
-          errBox.textContent = 'Описание не должно превышать 1000 символов.'; return;
-        }
+        if (name.length < 2 || name.length > 50){ errBox.textContent = 'Имя 2–50 символов.'; return; }
+        if (!isFinite(age) || age < 18 || age > 100){ errBox.textContent = 'Возраст 18–100.'; return; }
+        if (city.length < 2){ errBox.textContent = 'Укажите город.'; return; }
 
-        const btn = $('#peSave', wrap);
-        btn.disabled = true;
-        btn.textContent = 'Сохраняем…';
-
+        const btn = $('#peSave', wrap); btn.disabled = true; btn.textContent = 'Сохраняем…';
         try {
           if (state.profile && getRecordId(state.profile)){
-            const updated = await updateProfile(getRecordId(state.profile), {
-              name: name, age: age, city: city, gender: gender,
-              looking_for: lookingFor, description: description,
-              interests: interests, photo_url: photoData || FALLBACK_IMG,
+            await updateProfile(getRecordId(state.profile), {
+              name, age, city, gender, looking_for: lookingFor,
+              description, interests, photo_url: photoData || FALLBACK_IMG,
               is_visible: visible
             });
-            state.profile = Object.assign({}, state.profile, updated, {
-              name: name, age: age, city: city, gender: gender,
-              looking_for: lookingFor, description: description,
-              interests: interests, photo_url: photoData || FALLBACK_IMG,
+            state.profile = Object.assign({}, state.profile, {
+              name, age, city, gender, looking_for: lookingFor,
+              description, interests, photo_url: photoData || FALLBACK_IMG,
               is_visible: visible
             });
             toast('✏️ Анкета обновлена', 'success');
           } else {
             const created = await createProfile({
               user_id: state.user.user_id,
-              name: name, age: age, city: city, gender: gender,
-              looking_for: lookingFor, description: description,
-              interests: interests, photo_url: photoData || FALLBACK_IMG,
+              name, age, city, gender, looking_for: lookingFor,
+              description, interests, photo_url: photoData || FALLBACK_IMG,
               is_visible: visible
             });
             state.profile = created;
             toast('🎉 Анкета создана: ' + created.profile_id, 'success');
           }
-
           state.pendingRegistration = null;
           saveSession();
           closeModal();
           await refreshData();
           render();
         } catch(err){
-          console.error(err);
+          dlog('err', 'Сохранение анкеты: ' + err.message);
           errBox.textContent = 'Ошибка: ' + err.message;
-          btn.disabled = false;
-          btn.textContent = 'Сохранить анкету';
+          btn.disabled = false; btn.textContent = 'Сохранить';
         }
       });
     }
   });
 }
 
-
 /* ================================================================
-   ЛАЙК / МАТЧ / КОММЕНТАРИЙ
+   ЛАЙК
    ================================================================ */
 async function handleLike(profile){
   if (state.busy) return;
   if (!state.user){ showAuthOverlay(); return; }
   if (!profile) return;
-
   state.busy = true;
   try {
     const me = state.user;
-    if (profile.user_id === me.user_id){
-      toast('Нельзя лайкнуть самого себя', 'error');
-      return;
-    }
+    if (profile.user_id === me.user_id){ toast('Нельзя лайкнуть себя', 'error'); return; }
 
     const likes = await dbList('likes');
-    const already = likes.filter(function(l){
-      return l.from_user_id === me.user_id && l.to_user_id === profile.user_id;
-    })[0];
-    if (already){
-      toast('Вы уже лайкнули эту анкету', 'warn');
-      return;
-    }
+    const already = likes.filter(l => l.from_user_id === me.user_id && l.to_user_id === profile.user_id)[0];
+    if (already){ toast('Вы уже лайкнули эту анкету', 'warn'); return; }
 
     await createLike(me.user_id, profile.user_id);
     toast('❤️ Лайк отправлен', 'success');
 
     const myLink = state.profile ? profileLink(state.profile.profile_id) : '';
     const owner = await getUser(profile.user_id);
-
     if (owner && owner.telegram_chat_id){
-      const key = 'like_' + me.user_id + '_' + profile.user_id;
-      if (!wasSent(key)){
-        markSent(key);
-        await sendTelegramMessage(
-          owner.telegram_chat_id,
-          '❤️ Вам поставили лайк!\n\nОткрыть анкету: ' + (myLink || '(ссылка недоступна)')
-        );
+      const k = 'like_' + me.user_id + '_' + profile.user_id;
+      if (!wasSent(k)){
+        markSent(k);
+        await sendTelegramMessage(owner.telegram_chat_id,
+          '❤️ Вам поставили лайк!\n\nОткрыть анкету: ' + (myLink || '(ссылка недоступна)'));
       }
     }
-
     try {
       await createNotification({
-        user_id: profile.user_id,
-        from_user_id: me.user_id,
-        type: 'like',
-        message: '❤️ Вам поставили лайк',
-        profile_id: profile.profile_id,
-        is_read: false
+        user_id: profile.user_id, from_user_id: me.user_id,
+        type: 'like', message: '❤️ Вам поставили лайк',
+        profile_id: profile.profile_id, is_read: false
       });
-    } catch(e){ console.warn('Notification error:', e); }
+    } catch(e){ dlog('err', 'Notification: ' + e.message); }
 
     const mutual = await checkMutualLike(me.user_id, profile.user_id);
-
     if (mutual){
       await createMatch(me.user_id, profile.user_id);
       await notifyMatch(me, profile);
@@ -1381,189 +1153,130 @@ async function handleLike(profile){
       showMatchModal(profile);
       return;
     }
-
     await refreshData();
     render();
   } catch(err){
-    console.error(err);
+    dlog('err', 'handleLike: ' + err.message);
     toast('Ошибка: ' + err.message, 'error');
   } finally {
     state.busy = false;
   }
 }
-
 async function notifyMatch(me, profile){
   const myLink = state.profile ? profileLink(state.profile.profile_id) : '';
   const theirLink = profileLink(profile.profile_id);
-
   if (me.telegram_chat_id){
-    const key1 = 'match_' + me.user_id + '_' + profile.user_id;
-    if (!wasSent(key1)){
-      markSent(key1);
-      await sendTelegramMessage(
-        me.telegram_chat_id,
-        '💚 Взаимная симпатия!\n\nПользователь тоже поставил вам лайк.\n\nОткрыть анкету: ' + theirLink
-      );
+    const k1 = 'match_' + me.user_id + '_' + profile.user_id;
+    if (!wasSent(k1)){
+      markSent(k1);
+      await sendTelegramMessage(me.telegram_chat_id,
+        '💚 Взаимная симпатия!\n\nПользователь тоже поставил вам лайк.\n\nОткрыть анкету: ' + theirLink);
     }
   }
-
   const owner = await getUser(profile.user_id);
   if (owner && owner.telegram_chat_id){
-    const key2 = 'match_' + profile.user_id + '_' + me.user_id;
-    if (!wasSent(key2)){
-      markSent(key2);
-      await sendTelegramMessage(
-        owner.telegram_chat_id,
-        '💚 Взаимная симпатия!\n\nПользователь тоже поставил вам лайк.\n\nОткрыть анкету: ' + (myLink || theirLink)
-      );
+    const k2 = 'match_' + profile.user_id + '_' + me.user_id;
+    if (!wasSent(k2)){
+      markSent(k2);
+      await sendTelegramMessage(owner.telegram_chat_id,
+        '💚 Взаимная симпатия!\n\nПользователь тоже поставил вам лайк.\n\nОткрыть анкету: ' + (myLink || theirLink));
     }
   }
-
   try {
     await createNotification({
-      user_id: profile.user_id,
-      from_user_id: me.user_id,
-      type: 'match',
-      message: '💚 Взаимная симпатия',
-      profile_id: profile.profile_id,
-      is_read: false
+      user_id: profile.user_id, from_user_id: me.user_id,
+      type: 'match', message: '💚 Взаимная симпатия',
+      profile_id: profile.profile_id, is_read: false
     });
-  } catch(e){ console.warn('Notification error:', e); }
+  } catch(e){}
 }
-
 function showMatchModal(profile){
   openModal({
     title: '',
-    body:
-      '<div class="match-box">' +
+    body: '<div class="match-box">' +
         '<div class="match-heart">💚</div>' +
         '<h2>Взаимная симпатия!</h2>' +
         '<p>Вы понравились друг другу.</p>' +
         '<img class="match-photo" src="' + esc(profile.photo_url || FALLBACK_IMG) +
-          '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'" alt="">' +
-        '<div class="match-name">' + esc(profile.name) + ', ' + esc(profile.age) + '</div>' +
-      '</div>',
+          '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
+        '<div class="match-name">' + esc(profile.name) + ', ' + esc(profile.age) + '</div></div>',
     footer: '<button class="btn-primary" id="matchOpen" type="button">Открыть анкету</button>',
-    onMount: function(wrap){
-      $('#matchOpen', wrap).addEventListener('click', function(){
-        closeModal();
-        goToProfile(profile.profile_id);
-      });
-    }
+    onMount: (w) => { $('#matchOpen', w).addEventListener('click', () => { closeModal(); goToProfile(profile.profile_id); }); }
   });
 }
-
 function openCommentModal(profile){
   if (!state.user){ showAuthOverlay(); return; }
-  if (profile.user_id === state.user.user_id){
-    toast('Нельзя комментировать свою анкету', 'warn');
-    return;
-  }
-
+  if (profile.user_id === state.user.user_id){ toast('Нельзя комментировать себя', 'warn'); return; }
   openModal({
     title: '💬 Сообщение',
     body:
       '<div class="comment-target">' +
-        '<img src="' + esc(profile.photo_url || FALLBACK_IMG) +
-          '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'" alt="">' +
-        '<div><b>' + esc(profile.name) + ', ' + esc(profile.age) + '</b>' +
-        '<span>📍 ' + esc(profile.city) + '</span></div>' +
+        '<img src="' + esc(profile.photo_url || FALLBACK_IMG) + '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
+        '<div><b>' + esc(profile.name) + ', ' + esc(profile.age) + '</b><span>📍 ' + esc(profile.city) + '</span></div>' +
       '</div>' +
-      '<textarea id="commentText" rows="4" maxlength="500" ' +
-        'style="width:100%;padding:13px 14px;border-radius:14px;background:rgba(255,255,255,.05);' +
-        'border:1px solid rgba(255,255,255,.09);color:#f4f1fa;outline:none;resize:vertical;font-size:16px;" ' +
-        'placeholder="Напишите сообщение..."></textarea>' +
+      '<textarea id="commentText" rows="4" maxlength="500" style="width:100%;padding:13px 14px;border-radius:14px;' +
+        'background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:#f4f1fa;outline:none;' +
+        'resize:vertical;font-size:16px;" placeholder="Напишите сообщение..."></textarea>' +
       '<div class="counter"><span id="commentCount">0</span>/500</div>' +
       '<div class="err" id="commentErr"></div>',
     footer: '<button class="btn-primary" id="commentSend" type="button">Отправить</button>',
-    onMount: function(wrap){
-      const ta = $('#commentText', wrap);
-      const counter = $('#commentCount', wrap);
-      const errBox = $('#commentErr', wrap);
-
-      ta.addEventListener('input', function(){ counter.textContent = ta.value.length; });
-      setTimeout(function(){ ta.focus(); }, 250);
-
-      $('#commentSend', wrap).addEventListener('click', async function(){
-        const text = ta.value.trim();
-        errBox.textContent = '';
-        if (!text){ errBox.textContent = 'Сообщение не может быть пустым.'; return; }
-        if (text.length > 500){ errBox.textContent = 'Сообщение слишком длинное (максимум 500 символов).'; return; }
-
-        const btn = $('#commentSend', wrap);
-        btn.disabled = true;
-        btn.textContent = 'Отправляем…';
-
+    onMount: (w) => {
+      const ta = $('#commentText', w), c = $('#commentCount', w), errBox = $('#commentErr', w);
+      ta.addEventListener('input', () => c.textContent = ta.value.length);
+      setTimeout(() => ta.focus(), 250);
+      $('#commentSend', w).addEventListener('click', async () => {
+        const text = ta.value.trim(); errBox.textContent = '';
+        if (!text){ errBox.textContent = 'Пустое сообщение.'; return; }
+        if (text.length > 500){ errBox.textContent = 'Максимум 500 символов.'; return; }
+        const btn = $('#commentSend', w); btn.disabled = true; btn.textContent = 'Отправляем…';
         try {
           await createComment({
-            from_user_id: state.user.user_id,
-            to_user_id: profile.user_id,
-            profile_id: profile.profile_id,
-            text: text
+            from_user_id: state.user.user_id, to_user_id: profile.user_id,
+            profile_id: profile.profile_id, text
           });
-
           const owner = await getUser(profile.user_id);
           const myLink = state.profile ? profileLink(state.profile.profile_id) : '';
           if (owner && owner.telegram_chat_id){
-            await sendTelegramMessage(
-              owner.telegram_chat_id,
-              '💬 Вам написали сообщение:\n\n' + text + '\n\nОткрыть анкету: ' + (myLink || '(ссылка недоступна)')
-            );
+            await sendTelegramMessage(owner.telegram_chat_id,
+              '💬 Вам написали:\n\n' + text + '\n\nОткрыть анкету: ' + (myLink || '(ссылка недоступна)'));
           }
-
           try {
             await createNotification({
-              user_id: profile.user_id,
-              from_user_id: state.user.user_id,
-              type: 'comment',
-              message: '💬 Вам написали: ' + text.slice(0, 80),
-              profile_id: profile.profile_id,
-              is_read: false
+              user_id: profile.user_id, from_user_id: state.user.user_id,
+              type: 'comment', message: '💬 Вам написали: ' + text.slice(0, 80),
+              profile_id: profile.profile_id, is_read: false
             });
-          } catch(e){ console.warn('Notification error:', e); }
-
-          toast('💬 Сообщение отправлено', 'success');
-          closeModal();
+          } catch(e){}
+          toast('💬 Отправлено', 'success'); closeModal();
         } catch(err){
-          console.error(err);
           errBox.textContent = 'Ошибка: ' + err.message;
-          btn.disabled = false;
-          btn.textContent = 'Отправить';
+          btn.disabled = false; btn.textContent = 'Отправить';
         }
       });
     }
   });
 }
-
 function openUnlikeConfirm(profile){
   openModal({
     title: 'Убрать лайк?',
-    body: '<p class="muted-text">Вы действительно хотите убрать лайк с анкеты <b>' +
-          esc(profile.name) + '</b>? Взаимная симпатия (если была) тоже будет удалена.</p>',
-    footer:
-      '<div class="row2">' +
-        '<button class="btn-ghost" data-close="1" type="button">Отмена</button>' +
-        '<button class="btn-primary" id="unlikeYes" type="button">Убрать</button>' +
-      '</div>',
-    onMount: function(wrap){
-      $('#unlikeYes', wrap).addEventListener('click', async function(){
+    body: '<p class="muted-text">Убрать лайк с анкеты <b>' + esc(profile.name) + '</b>? Матч (если был) тоже удалится.</p>',
+    footer: '<div class="row2">' +
+      '<button class="btn-ghost" data-close="1" type="button">Отмена</button>' +
+      '<button class="btn-primary" id="unlikeYes" type="button">Убрать</button></div>',
+    onMount: (w) => {
+      $('#unlikeYes', w).addEventListener('click', async () => {
         try {
           await removeLike(state.user.user_id, profile.user_id);
-          toast('Лайк убран', 'success');
-          closeModal();
-          await refreshData();
-          render();
-        } catch(err){
-          toast('Ошибка: ' + err.message, 'error');
-        }
+          toast('Лайк убран', 'success'); closeModal();
+          await refreshData(); render();
+        } catch(err){ toast('Ошибка: ' + err.message, 'error'); }
       });
     }
   });
 }
 
-
 /* ================================================================
-   ССЫЛКА
+   ССЫЛКА / ВЫХОД
    ================================================================ */
 async function copyMyLink(){
   if (!state.profile){ toast('Сначала создайте анкету', 'warn'); return; }
@@ -1571,104 +1284,70 @@ async function copyMyLink(){
   try {
     if (navigator.clipboard && navigator.clipboard.writeText){
       await navigator.clipboard.writeText(link);
-      toast('📋 Ссылка скопирована', 'success');
-      return;
+      toast('📋 Ссылка скопирована', 'success'); return;
     }
     throw new Error('no clipboard');
   } catch(e){
     const ta = document.createElement('textarea');
-    ta.value = link;
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand('copy');
-      toast('📋 Ссылка скопирована', 'success');
-    } catch(err){
-      toast('Ссылка: ' + link, 'info');
-    }
+    ta.value = link; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('📋 Ссылка скопирована', 'success'); }
+    catch(err){ toast('Ссылка: ' + link, 'info'); }
     ta.remove();
   }
 }
-
-
-/* ================================================================
-   ВЫХОД
-   ================================================================ */
 function logout(){
   openModal({
-    title: 'Выйти из аккаунта?',
-    body: '<p class="muted-text">Сессия будет удалена.</p>',
-    footer:
-      '<div class="row2">' +
-        '<button class="btn-ghost" data-close="1" type="button">Отмена</button>' +
-        '<button class="btn-primary" id="logoutYes" type="button">Выйти</button>' +
-      '</div>',
-    onMount: function(wrap){
-      $('#logoutYes', wrap).addEventListener('click', function(){
+    title: 'Выйти?',
+    body: '<p class="muted-text">Сессия удалится.</p>',
+    footer: '<div class="row2">' +
+      '<button class="btn-ghost" data-close="1" type="button">Отмена</button>' +
+      '<button class="btn-primary" id="logoutYes" type="button">Выйти</button></div>',
+    onMount: (w) => {
+      $('#logoutYes', w).addEventListener('click', () => {
         lsDel(SESSION_KEY);
-        state.user = null;
-        state.profile = null;
-        state.pendingRegistration = null;
-        state.deckIndex = 0;
+        state.user = null; state.profile = null; state.pendingRegistration = null; state.deckIndex = 0;
         closeModal();
-        try {
-          if (location.protocol === 'file:'){ location.hash = ''; }
-          else { history.replaceState({}, '', computeBaseUrl()); }
-        } catch(e){}
-        state.view = 'discover';
-        render();
-        toast('Вы вышли из аккаунта', 'info');
+        try { if (location.protocol === 'file:') location.hash = ''; else history.replaceState({}, '', computeBaseUrl()); } catch(e){}
+        state.view = 'discover'; render();
+        toast('Вы вышли', 'info');
       });
     }
   });
 }
 
-
 /* ================================================================
-   ПРЕДСТАВЛЕНИЯ
+   VIEWS
    ================================================================ */
-
 function viewDiscover(){
-  const me = state.user;
-  if (!me) return '';
-
+  const me = state.user; if (!me) return '';
   const myLikes = {};
-  state.likes.forEach(function(l){
-    if (l.from_user_id === me.user_id) myLikes[l.to_user_id] = true;
-  });
+  state.likes.forEach(l => { if (l.from_user_id === me.user_id) myLikes[l.to_user_id] = true; });
 
-  let list = state.profiles.filter(function(p){
-    return p.user_id !== me.user_id && isVisible(p) && !myLikes[p.user_id];
-  });
+  let list = state.profiles.filter(p => p.user_id !== me.user_id && isVisible(p) && !myLikes[p.user_id]);
 
   const f = state.filters;
-  list = list.filter(function(p){
+  list = list.filter(p => {
     const age = Number(p.age) || 0;
-    if (age < f.ageFrom) return false;
-    if (age > f.ageTo) return false;
+    if (age < f.ageFrom || age > f.ageTo) return false;
     if (f.city && String(p.city || '').toLowerCase().indexOf(f.city.toLowerCase()) === -1) return false;
     if (f.gender && p.gender !== f.gender) return false;
     if (f.lookingFor && f.lookingFor !== 'any' && p.looking_for !== f.lookingFor && p.looking_for !== 'any') return false;
     return true;
   });
-
   state._deck = list;
   if (state.deckIndex >= list.length) state.deckIndex = 0;
   if (state.deckIndex < 0) state.deckIndex = 0;
 
   const filtersHtml =
     '<div class="filters' + (state.filtersOpen ? ' open' : '') + '">' +
-      '<button class="filters-toggle" data-act="toggleFilters" type="button">' +
-        '<span>🔎 Поиск и фильтры</span><span class="chev">▼</span>' +
-      '</button>' +
+      '<button class="filters-toggle" data-act="toggleFilters" type="button"><span>🔎 Фильтры</span><span class="chev">▼</span></button>' +
       '<div class="filters-body">' +
         '<div class="row2">' +
           '<label>Возраст от<input id="fAgeFrom" type="number" min="18" max="100" value="' + esc(f.ageFrom) + '"></label>' +
           '<label>Возраст до<input id="fAgeTo" type="number" min="18" max="100" value="' + esc(f.ageTo) + '"></label>' +
         '</div>' +
-        '<label>Город<input id="fCity" type="text" maxlength="60" placeholder="Любой" value="' + esc(f.city) + '"></label>' +
+        '<label>Город<input id="fCity" type="text" maxlength="60" value="' + esc(f.city) + '"></label>' +
         '<div class="row2">' +
           '<label>Пол<select id="fGender">' +
             '<option value=""' + (f.gender === '' ? ' selected' : '') + '>Любой</option>' +
@@ -1690,22 +1369,19 @@ function viewDiscover(){
 
   if (!list.length){
     return filtersHtml +
-      '<div class="empty">' +
-        '<div class="empty-icon">🔎</div>' +
-        '<h3>Анкеты закончились</h3>' +
-        '<p>Вы посмотрели все доступные анкеты. Попробуйте изменить фильтры или зайдите позже.</p>' +
-        '<button class="btn-primary" data-act="resetFilters" type="button">Сбросить фильтры</button>' +
-      '</div>';
+      '<div class="empty"><div class="empty-icon">🔎</div>' +
+      '<h3>Нет доступных анкет</h3>' +
+      '<p>Всего загружено анкет: <b>' + state.profiles.length + '</b>. Ваша анкета исключается автоматически, лайкнутые — тоже.</p>' +
+      '<p style="font-size:12px;">Если анкет 0 — создайте вторую анкету в NocoDB (Profiles) или откройте приложение в другом браузере и зарегистрируйтесь.</p>' +
+      '<button class="btn-primary" data-act="resetFilters" type="button">Сбросить фильтры</button></div>';
   }
 
   const p = list[state.deckIndex];
-
   return filtersHtml +
     '<div class="deck">' +
       '<div class="card" id="mainCard">' +
         '<div class="card-photo">' +
-          '<img src="' + esc(p.photo_url || FALLBACK_IMG) + '" alt="' + esc(p.name) + '" ' +
-            'onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
+          '<img src="' + esc(p.photo_url || FALLBACK_IMG) + '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
           '<div class="photo-shade"></div>' +
           '<div class="card-counter">' + (state.deckIndex + 1) + ' / ' + list.length + '</div>' +
         '</div>' +
@@ -1717,176 +1393,112 @@ function viewDiscover(){
         '</div>' +
       '</div>' +
       '<div class="deck-actions">' +
-        '<button class="act act-skip" data-act="skip" type="button" title="Пропустить">✕</button>' +
-        '<button class="act act-comment" data-act="comment" data-uid="' + esc(p.user_id) + '" type="button" title="Комментарий">💬</button>' +
-        '<button class="act act-like" data-act="like" data-uid="' + esc(p.user_id) + '" type="button" title="Нравится">❤️</button>' +
+        '<button class="act act-skip" data-act="skip" type="button">✕</button>' +
+        '<button class="act act-comment" data-act="comment" data-uid="' + esc(p.user_id) + '" type="button">💬</button>' +
+        '<button class="act act-like" data-act="like" data-uid="' + esc(p.user_id) + '" type="button">❤️</button>' +
       '</div>' +
-      '<button class="btn-open-profile" data-act="open" data-pid="' + esc(p.profile_id) + '" type="button">' +
-        '👤 Открыть профиль' +
-      '</button>' +
+      '<button class="btn-open-profile" data-act="open" data-pid="' + esc(p.profile_id) + '" type="button">👤 Открыть профиль</button>' +
     '</div>';
 }
 
 function viewLikes(){
-  const me = state.user;
-  if (!me) return '';
-
+  const me = state.user; if (!me) return '';
   const tab = state.likedTab;
   let items = [];
-
   if (tab === 'incoming'){
-    items = state.likes
-      .filter(function(l){ return l.to_user_id === me.user_id; })
-      .map(function(l){ return { profile: profileByUserId(l.from_user_id), like: l }; })
-      .filter(function(x){ return !!x.profile; });
+    items = state.likes.filter(l => l.to_user_id === me.user_id)
+      .map(l => ({ profile: profileByUserId(l.from_user_id), like: l }))
+      .filter(x => !!x.profile);
   } else if (tab === 'outgoing'){
-    items = state.likes
-      .filter(function(l){ return l.from_user_id === me.user_id; })
-      .map(function(l){ return { profile: profileByUserId(l.to_user_id), like: l }; })
-      .filter(function(x){ return !!x.profile; });
+    items = state.likes.filter(l => l.from_user_id === me.user_id)
+      .map(l => ({ profile: profileByUserId(l.to_user_id), like: l }))
+      .filter(x => !!x.profile);
   } else {
-    items = state.matches
-      .filter(function(m){ return m.user1_id === me.user_id || m.user2_id === me.user_id; })
-      .map(function(m){
+    items = state.matches.filter(m => m.user1_id === me.user_id || m.user2_id === me.user_id)
+      .map(m => {
         const other = m.user1_id === me.user_id ? m.user2_id : m.user1_id;
         return { profile: profileByUserId(other), match: m };
-      })
-      .filter(function(x){ return !!x.profile; });
+      }).filter(x => !!x.profile);
   }
-
-  const tabsHtml =
-    '<div class="tabs">' +
-      '<button class="tab' + (tab === 'incoming' ? ' active' : '') + '" data-act="tab" data-tab="incoming" type="button">Меня лайкнули</button>' +
-      '<button class="tab' + (tab === 'outgoing' ? ' active' : '') + '" data-act="tab" data-tab="outgoing" type="button">Я лайкнул</button>' +
-      '<button class="tab' + (tab === 'mutual' ? ' active' : '') + '" data-act="tab" data-tab="mutual" type="button">Взаимные</button>' +
-    '</div>';
-
+  const tabsHtml = '<div class="tabs">' +
+    '<button class="tab' + (tab === 'incoming' ? ' active' : '') + '" data-act="tab" data-tab="incoming" type="button">Меня лайкнули</button>' +
+    '<button class="tab' + (tab === 'outgoing' ? ' active' : '') + '" data-act="tab" data-tab="outgoing" type="button">Я лайкнул</button>' +
+    '<button class="tab' + (tab === 'mutual' ? ' active' : '') + '" data-act="tab" data-tab="mutual" type="button">Взаимные</button></div>';
   if (!items.length){
     const texts = {
-      incoming: ['💌', 'Пока никто не лайкнул', 'Создайте красивую анкету и делитесь ссылкой — лайки появятся здесь.'],
-      outgoing: ['❤️', 'Вы ещё никого не лайкнули', 'Перейдите в «Знакомства» и поставьте первый лайк.'],
-      mutual:   ['💚', 'Взаимных симпатий пока нет', 'Когда вы и другой человек лайкнете друг друга — это появится здесь.']
+      incoming: ['💌', 'Пока никто не лайкнул', 'Поделитесь ссылкой — лайки появятся здесь.'],
+      outgoing: ['❤️', 'Вы ещё никого не лайкнули', 'Перейдите в «Знакомства».'],
+      mutual:   ['💚', 'Взаимных пока нет', 'Когда совпадёт — появится здесь.']
     };
     const t = texts[tab];
-    return tabsHtml +
-      '<div class="empty">' +
-        '<div class="empty-icon">' + t[0] + '</div>' +
-        '<h3>' + t[1] + '</h3>' +
-        '<p>' + t[2] + '</p>' +
-      '</div>';
+    return tabsHtml + '<div class="empty"><div class="empty-icon">' + t[0] + '</div>' +
+      '<h3>' + t[1] + '</h3><p>' + t[2] + '</p></div>';
   }
-
-  const cards = items.map(function(item){
-    const p = item.profile;
-    let actionBtn = '';
-    if (tab === 'incoming'){
-      actionBtn = '<button data-act="like" data-uid="' + esc(p.user_id) + '" type="button" title="Ответить лайком">❤️</button>';
-    } else if (tab === 'outgoing'){
-      actionBtn = '<button data-act="unlike" data-uid="' + esc(p.user_id) + '" type="button" title="Убрать лайк">💔</button>';
-    } else {
-      actionBtn = '<button data-act="comment" data-uid="' + esc(p.user_id) + '" type="button" title="Написать">💬</button>';
-    }
-
+  const cards = items.map(item => {
+    const p = item.profile; let actionBtn = '';
+    if (tab === 'incoming') actionBtn = '<button data-act="like" data-uid="' + esc(p.user_id) + '" type="button">❤️</button>';
+    else if (tab === 'outgoing') actionBtn = '<button data-act="unlike" data-uid="' + esc(p.user_id) + '" type="button">💔</button>';
+    else actionBtn = '<button data-act="comment" data-uid="' + esc(p.user_id) + '" type="button">💬</button>';
     return '<div class="mini">' +
-      '<div class="mini-photo">' +
-        '<img src="' + esc(p.photo_url || FALLBACK_IMG) + '" alt="' + esc(p.name) + '" ' +
-          'onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
-      '</div>' +
-      '<div class="mini-body">' +
-        '<div class="mini-name">' + esc(p.name) + ', ' + esc(p.age) + '</div>' +
-        '<div class="mini-city">📍 ' + esc(p.city) + '</div>' +
-      '</div>' +
+      '<div class="mini-photo"><img src="' + esc(p.photo_url || FALLBACK_IMG) + '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'"></div>' +
+      '<div class="mini-body"><div class="mini-name">' + esc(p.name) + ', ' + esc(p.age) + '</div>' +
+      '<div class="mini-city">📍 ' + esc(p.city) + '</div></div>' +
       '<div class="mini-actions">' +
-        '<button data-act="open" data-pid="' + esc(p.profile_id) + '" type="button" title="Открыть профиль">👤</button>' +
-        actionBtn +
-      '</div>' +
-    '</div>';
+        '<button data-act="open" data-pid="' + esc(p.profile_id) + '" type="button">👤</button>' +
+        actionBtn + '</div></div>';
   }).join('');
-
   return tabsHtml + '<div class="grid">' + cards + '</div>';
 }
 
 function viewMatches(){
-  const me = state.user;
-  if (!me) return '';
-
-  const items = state.matches
-    .filter(function(m){ return m.user1_id === me.user_id || m.user2_id === me.user_id; })
-    .map(function(m){
+  const me = state.user; if (!me) return '';
+  const items = state.matches.filter(m => m.user1_id === me.user_id || m.user2_id === me.user_id)
+    .map(m => {
       const other = m.user1_id === me.user_id ? m.user2_id : m.user1_id;
       return { profile: profileByUserId(other), match: m };
-    })
-    .filter(function(x){ return !!x.profile; });
-
+    }).filter(x => !!x.profile);
   if (!items.length){
-    return '<div class="empty">' +
-      '<div class="empty-icon">💚</div>' +
-      '<h3>Взаимных симпатий пока нет</h3>' +
-      '<p>Ставьте лайки в разделе «Знакомства» — когда симпатия будет взаимной, она появится здесь.</p>' +
-    '</div>';
+    return '<div class="empty"><div class="empty-icon">💚</div>' +
+      '<h3>Взаимных пока нет</h3><p>Ставьте лайки — когда совпадёт, матч появится здесь.</p></div>';
   }
-
-  const cards = items.map(function(item){
+  const cards = items.map(item => {
     const p = item.profile;
     return '<div class="mini">' +
-      '<div class="mini-photo">' +
-        '<img src="' + esc(p.photo_url || FALLBACK_IMG) + '" alt="' + esc(p.name) + '" ' +
-          'onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
-      '</div>' +
-      '<div class="mini-body">' +
-        '<div class="mini-name">' + esc(p.name) + ', ' + esc(p.age) + '</div>' +
-        '<div class="mini-city">📍 ' + esc(p.city) + '</div>' +
-      '</div>' +
+      '<div class="mini-photo"><img src="' + esc(p.photo_url || FALLBACK_IMG) + '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'"></div>' +
+      '<div class="mini-body"><div class="mini-name">' + esc(p.name) + ', ' + esc(p.age) + '</div>' +
+      '<div class="mini-city">📍 ' + esc(p.city) + '</div></div>' +
       '<div class="mini-actions">' +
-        '<button data-act="open" data-pid="' + esc(p.profile_id) + '" type="button" title="Открыть профиль">👤</button>' +
-        '<button data-act="comment" data-uid="' + esc(p.user_id) + '" type="button" title="Написать">💬</button>' +
-      '</div>' +
-    '</div>';
+        '<button data-act="open" data-pid="' + esc(p.profile_id) + '" type="button">👤</button>' +
+        '<button data-act="comment" data-uid="' + esc(p.user_id) + '" type="button">💬</button>' +
+      '</div></div>';
   }).join('');
-
-  return '<div class="section-title">💚 Взаимные симпатии — ' + items.length + '</div>' +
-         '<div class="grid">' + cards + '</div>';
+  return '<div class="section-title">💚 Матчи — ' + items.length + '</div><div class="grid">' + cards + '</div>';
 }
 
 function viewMe(){
-  const me = state.user;
-  if (!me) return '';
+  const me = state.user; if (!me) return '';
   const p = state.profile;
-
   if (!p){
-    return '<div class="empty">' +
-      '<div class="empty-icon">📝</div>' +
-      '<h3>У вас пока нет анкеты</h3>' +
-      '<p>Создайте анкету, чтобы получать лайки и сообщения.</p>' +
-      '<button class="btn-primary" data-act="editProfile" type="button">Создать анкету</button>' +
-    '</div>';
+    return '<div class="empty"><div class="empty-icon">📝</div>' +
+      '<h3>Анкеты пока нет</h3><p>Создайте анкету.</p>' +
+      '<button class="btn-primary" data-act="editProfile" type="button">Создать</button></div>';
   }
-
-  const likesReceived = state.likes.filter(function(l){ return l.to_user_id === me.user_id; }).length;
-  const likesGiven    = state.likes.filter(function(l){ return l.from_user_id === me.user_id; }).length;
-  const matchCount    = state.matches.filter(function(m){
-    return m.user1_id === me.user_id || m.user2_id === me.user_id;
-  }).length;
-
+  const likesReceived = state.likes.filter(l => l.to_user_id === me.user_id).length;
+  const likesGiven = state.likes.filter(l => l.from_user_id === me.user_id).length;
+  const matchCount = state.matches.filter(m => m.user1_id === me.user_id || m.user2_id === me.user_id).length;
   const link = profileLink(p.profile_id);
-
   return '<div class="me">' +
-    '<div class="me-photo">' +
-      '<img src="' + esc(p.photo_url || FALLBACK_IMG) + '" alt="' + esc(p.name) + '" ' +
-        'onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
-    '</div>' +
+    '<div class="me-photo"><img src="' + esc(p.photo_url || FALLBACK_IMG) + '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'"></div>' +
     '<div class="me-info">' +
       '<h2>' + esc(p.name) + ', ' + esc(p.age) + '</h2>' +
       '<div class="city">📍 ' + esc(p.city) + ' · ' + genderLabel(p.gender) + ' · ищет: ' + lookingLabel(p.looking_for) + '</div>' +
       (p.description ? '<p class="desc">' + esc(p.description) + '</p>' : '') +
       '<div class="tags">' + tagsHtml(p.interests) + '</div>' +
-      '<div style="margin-top:14px;font-size:12.5px;color:var(--muted);word-break:break-all;">' +
-        '🆔 ' + esc(p.profile_id) + '<br>🔗 ' + esc(link) +
-      '</div>' +
+      '<div style="margin-top:14px;font-size:12.5px;color:var(--muted);word-break:break-all;">🆔 ' + esc(p.profile_id) + '<br>🔗 ' + esc(link) + '</div>' +
     '</div>' +
     '<div class="stats">' +
       '<div class="stat"><b>' + likesReceived + '</b><span>Лайков получено</span></div>' +
-      '<div class="stat"><b>' + matchCount + '</b><span>Взаимных симпатий</span></div>' +
+      '<div class="stat"><b>' + matchCount + '</b><span>Матчей</span></div>' +
     '</div>' +
     '<div class="stats" style="grid-template-columns:1fr;">' +
       '<div class="stat"><b>' + likesGiven + '</b><span>Лайков поставлено</span></div>' +
@@ -1895,59 +1507,41 @@ function viewMe(){
       '<button class="btn-primary" data-act="editProfile" type="button">✏️ Редактировать</button>' +
       '<button class="btn-ghost" data-act="copyLink" type="button">📋 Скопировать ссылку</button>' +
       '<button class="btn-ghost" data-act="openMine" type="button">🔗 Открыть анкету</button>' +
-      '<button class="btn-ghost" data-act="logout" type="button">🚪 Выйти из аккаунта</button>' +
+      '<button class="btn-ghost" data-act="logout" type="button">🚪 Выйти</button>' +
     '</div>' +
   '</div>';
 }
 
-function viewProfile(profileId){
-  const p = profileByProfileId(profileId);
-
+function viewProfile(pid){
+  const p = profileByProfileId(pid);
   if (!p){
-    return '<div class="empty">' +
-      '<div class="empty-icon">🔍</div>' +
-      '<h3>Анкета не найдена.</h3>' +
-      '<p>Возможно, ссылка неверна или анкета была удалена.</p>' +
-      '<button class="btn-primary" data-act="goHome" type="button">На главную</button>' +
-    '</div>';
+    return '<div class="empty"><div class="empty-icon">🔍</div>' +
+      '<h3>Анкета не найдена</h3><p>Возможно, ссылка неверна.</p>' +
+      '<button class="btn-primary" data-act="goHome" type="button">На главную</button></div>';
   }
-
   const me = state.user;
   const isMine = me && p.user_id === me.user_id;
-  const alreadyLiked = me && state.likes.some(function(l){
-    return l.from_user_id === me.user_id && l.to_user_id === p.user_id;
-  });
-
+  const alreadyLiked = me && state.likes.some(l => l.from_user_id === me.user_id && l.to_user_id === p.user_id);
   let actionsHtml = '';
   if (!me){
-    actionsHtml =
-      '<div class="actions-col">' +
-        '<button class="btn-primary" data-act="goHome" type="button">Войти, чтобы поставить лайк</button>' +
-      '</div>';
+    actionsHtml = '<div class="actions-col"><button class="btn-primary" data-act="goHome" type="button">Войти, чтобы лайкнуть</button></div>';
   } else if (isMine){
-    actionsHtml =
-      '<div class="actions-col">' +
-        '<button class="btn-ghost" data-act="copyLink" type="button">📋 Скопировать ссылку</button>' +
-        '<button class="btn-primary" data-act="editProfile" type="button">✏️ Редактировать</button>' +
-      '</div>';
+    actionsHtml = '<div class="actions-col">' +
+      '<button class="btn-ghost" data-act="copyLink" type="button">📋 Скопировать ссылку</button>' +
+      '<button class="btn-primary" data-act="editProfile" type="button">✏️ Редактировать</button></div>';
   } else {
-    actionsHtml =
-      '<div class="deck-actions">' +
-        '<button class="act act-comment" data-act="comment" data-uid="' + esc(p.user_id) + '" type="button" title="Комментарий">💬</button>' +
-        (alreadyLiked
-          ? '<button class="act act-like" data-act="unlike" data-uid="' + esc(p.user_id) + '" type="button" title="Убрать лайк">💔</button>'
-          : '<button class="act act-like" data-act="like" data-uid="' + esc(p.user_id) + '" type="button" title="Нравится">❤️</button>') +
-      '</div>' +
-      '<div style="text-align:center;margin-top:10px;font-size:12.5px;color:var(--muted);">' +
-        (alreadyLiked ? 'Вы уже лайкнули эту анкету' : 'Поставьте лайк, чтобы познакомиться') +
-      '</div>';
+    actionsHtml = '<div class="deck-actions">' +
+      '<button class="act act-comment" data-act="comment" data-uid="' + esc(p.user_id) + '" type="button">💬</button>' +
+      (alreadyLiked
+        ? '<button class="act act-like" data-act="unlike" data-uid="' + esc(p.user_id) + '" type="button">💔</button>'
+        : '<button class="act act-like" data-act="like" data-uid="' + esc(p.user_id) + '" type="button">❤️</button>') +
+      '</div><div style="text-align:center;margin-top:10px;font-size:12.5px;color:var(--muted);">' +
+      (alreadyLiked ? 'Вы уже лайкнули' : 'Поставьте лайк') + '</div>';
   }
-
   return '<div class="pv">' +
     '<div class="pv-photo">' +
       '<button class="pv-back" data-act="goHome" type="button">←</button>' +
-      '<img src="' + esc(p.photo_url || FALLBACK_IMG) + '" alt="' + esc(p.name) + '" ' +
-        'onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
+      '<img src="' + esc(p.photo_url || FALLBACK_IMG) + '" onerror="this.onerror=null;this.src=\'' + FALLBACK_IMG + '\'">' +
       '<div class="photo-shade"></div>' +
     '</div>' +
     '<div class="pv-body">' +
@@ -1957,206 +1551,141 @@ function viewProfile(profileId){
       '<div class="tags">' + tagsHtml(p.interests) + '</div>' +
       '<div style="margin-top:12px;font-size:12px;color:var(--muted);">🆔 ' + esc(p.profile_id) + '</div>' +
       actionsHtml +
-    '</div>' +
-  '</div>';
+    '</div></div>';
 }
-
 
 /* ================================================================
    RENDER
    ================================================================ */
 function render(){
   const view = document.getElementById('view');
-
   if (!state.user && state.view !== 'profile'){
-    showAuthOverlay();
-    view.innerHTML = '';
-    updateNav();
-    return;
+    showAuthOverlay(); view.innerHTML = ''; updateNav(); return;
   }
   hideAuthOverlay();
-
   if (state.user && !state.profile && state.view !== 'profile'){
     view.innerHTML =
-      '<div class="empty">' +
-        '<div class="empty-icon">📝</div>' +
-        '<h3>Остался последний шаг</h3>' +
-        '<p>Создайте анкету, чтобы вас могли найти другие пользователи.</p>' +
-        '<button class="btn-primary" data-act="editProfile" type="button">Создать анкету</button>' +
-      '</div>';
-    updateNav();
-    return;
+      '<div class="empty"><div class="empty-icon">📝</div>' +
+      '<h3>Остался последний шаг</h3>' +
+      '<p>Создайте анкету, чтобы вас могли найти.</p>' +
+      '<button class="btn-primary" data-act="editProfile" type="button">Создать анкету</button></div>';
+    updateNav(); return;
   }
-
   if (state.view === 'discover')      view.innerHTML = viewDiscover();
   else if (state.view === 'likes')    view.innerHTML = viewLikes();
   else if (state.view === 'matches')  view.innerHTML = viewMatches();
   else if (state.view === 'me')       view.innerHTML = viewMe();
   else if (state.view === 'profile')  view.innerHTML = viewProfile(state.viewProfileId);
   else                                view.innerHTML = viewDiscover();
-
   updateNav();
 }
-
 function updateNav(){
-  $$('#bottomNav .nav-btn').forEach(function(btn){
-    btn.classList.toggle('active', btn.dataset.view === state.view);
-  });
+  $$('#bottomNav .nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === state.view));
   const nav = document.getElementById('bottomNav');
-  if (nav){
-    nav.style.display = (!state.user && state.view === 'profile') ? 'none' : 'grid';
-  }
+  if (nav) nav.style.display = (!state.user && state.view === 'profile') ? 'none' : 'grid';
 }
 
-
 /* ================================================================
-   СОБЫТИЯ
+   EVENTS
    ================================================================ */
 async function onViewClick(e){
-  const el = e.target.closest('[data-act]');
-  if (!el) return;
+  const el = e.target.closest('[data-act]'); if (!el) return;
   const act = el.dataset.act;
 
-  if (act === 'toggleFilters'){
-    state.filtersOpen = !state.filtersOpen;
-    render();
-    return;
-  }
-
+  if (act === 'toggleFilters'){ state.filtersOpen = !state.filtersOpen; render(); return; }
   if (act === 'applyFilters'){
     const f = {
-      ageFrom: clampNum($('#fAgeFrom') ? $('#fAgeFrom').value : 18, 18, 100, 18),
-      ageTo: clampNum($('#fAgeTo') ? $('#fAgeTo').value : 100, 18, 100, 100),
-      city: ($('#fCity') ? $('#fCity').value : '').trim(),
-      gender: $('#fGender') ? $('#fGender').value : '',
-      lookingFor: $('#fLookingFor') ? $('#fLookingFor').value : ''
+      ageFrom: clampNum($('#fAgeFrom').value, 18, 100, 18),
+      ageTo: clampNum($('#fAgeTo').value, 18, 100, 100),
+      city: $('#fCity').value.trim(),
+      gender: $('#fGender').value,
+      lookingFor: $('#fLookingFor').value
     };
     if (f.ageFrom > f.ageTo){ const t = f.ageFrom; f.ageFrom = f.ageTo; f.ageTo = t; }
-    state.filters = f;
-    state.deckIndex = 0;
-    state.filtersOpen = true;
-    toast('Фильтры применены', 'success');
-    render();
-    return;
+    state.filters = f; state.deckIndex = 0; state.filtersOpen = true;
+    toast('Фильтры применены', 'success'); render(); return;
   }
-
   if (act === 'resetFilters'){
     state.filters = { ageFrom: 18, ageTo: 100, city: '', gender: '', lookingFor: '' };
-    state.deckIndex = 0;
-    render();
-    return;
+    state.deckIndex = 0; render(); return;
   }
-
-  if (act === 'tab'){
-    state.likedTab = el.dataset.tab || 'incoming';
-    render();
-    return;
-  }
-
+  if (act === 'tab'){ state.likedTab = el.dataset.tab || 'incoming'; render(); return; }
   if (act === 'goHome'){ navigateTo('discover'); return; }
-
   if (act === 'open'){ goToProfile(el.dataset.pid); return; }
-
-  if (act === 'comment'){
-    const p = profileByUserId(el.dataset.uid);
-    if (p) openCommentModal(p);
-    return;
-  }
-
-  if (act === 'skip'){
-    state.deckIndex++;
-    render();
-    window.scrollTo(0, 0);
-    return;
-  }
-
+  if (act === 'comment'){ const p = profileByUserId(el.dataset.uid); if (p) openCommentModal(p); return; }
+  if (act === 'skip'){ state.deckIndex++; render(); window.scrollTo(0, 0); return; }
   if (act === 'like'){
     if (!state.user){ showAuthOverlay(); return; }
-    const p = profileByUserId(el.dataset.uid);
-    if (!p) return;
+    const p = profileByUserId(el.dataset.uid); if (!p) return;
     const card = document.getElementById('mainCard');
-    if (card){
-      card.classList.add('fly-right');
-      await sleep(260);
-    }
-    await handleLike(p);
-    return;
+    if (card){ card.classList.add('fly-right'); await sleep(260); }
+    await handleLike(p); return;
   }
-
-  if (act === 'unlike'){
-    const p = profileByUserId(el.dataset.uid);
-    if (p) openUnlikeConfirm(p);
-    return;
-  }
-
+  if (act === 'unlike'){ const p = profileByUserId(el.dataset.uid); if (p) openUnlikeConfirm(p); return; }
   if (act === 'editProfile'){ openProfileEditor(false); return; }
   if (act === 'copyLink'){ copyMyLink(); return; }
-
-  if (act === 'openMine'){
-    if (state.profile) goToProfile(state.profile.profile_id);
-    return;
-  }
-
+  if (act === 'openMine'){ if (state.profile) goToProfile(state.profile.profile_id); return; }
   if (act === 'logout'){ logout(); return; }
 }
 
-
 /* ================================================================
-   ЗАПУСК
+   START
    ================================================================ */
 async function start(){
-  if (DEMO_MODE) demoDb();
-
   loadSession();
 
-  console.log('[HeartLink] DEMO_MODE =', DEMO_MODE);
-  console.log('[HeartLink] PLATFORM vars:', PLATFORM);
-  console.log('[HeartLink] apiToken starts with:', CONFIG.apiToken.slice(0, 8) + '...');
+  dlog('info', 'DEMO_MODE = ' + DEMO_MODE);
+  dlog('info', 'Токен: ' + CONFIG.apiToken.slice(0, 8) + '...');
+  if (Object.keys(PLATFORM).length) dlog('info', 'PLATFORM: ' + JSON.stringify(PLATFORM).slice(0, 200));
 
   document.getElementById('view').addEventListener('click', function(e){
-    onViewClick(e).catch(function(err){
-      console.error(err);
+    onViewClick(e).catch(err => {
+      dlog('err', 'UI: ' + err.message);
       toast('Ошибка: ' + err.message, 'error');
     });
   });
-
-  $$('#bottomNav .nav-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
+  $$('#bottomNav .nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
       if (!state.user){ showAuthOverlay(); return; }
       navigateTo(btn.dataset.view);
     });
   });
-
-  window.addEventListener('popstate', function(){
+  window.addEventListener('popstate', () => {
     const r = getRoute();
-    if (r.view === 'profile'){
-      state.view = 'profile';
-      state.viewProfileId = r.profileId;
-    } else {
-      state.view = r.view;
-      state.viewProfileId = null;
-    }
+    if (r.view === 'profile'){ state.view = 'profile'; state.viewProfileId = r.profileId; }
+    else { state.view = r.view; state.viewProfileId = null; }
     render();
   });
 
   await refreshData();
 
   const route = getRoute();
-  if (route.view === 'profile'){
-    state.view = 'profile';
-    state.viewProfileId = route.profileId;
-  } else {
-    state.view = route.view;
-    state.viewProfileId = null;
-  }
-
+  if (route.view === 'profile'){ state.view = 'profile'; state.viewProfileId = route.profileId; }
+  else { state.view = route.view; state.viewProfileId = null; }
   render();
 }
 
-document.addEventListener('DOMContentLoaded', function(){
-  start().catch(function(err){
-    console.error(err);
+document.addEventListener('DOMContentLoaded', () => {
+  /* Кнопка открытия/закрытия панели отладки */
+  const topEmoji = document.getElementById('topEmoji');
+  if (topEmoji) topEmoji.addEventListener('click', () => {
+    const p = document.getElementById('debugPanel');
+    p.classList.toggle('show');
+  });
+  const dbgClose = document.getElementById('dbgClose');
+  if (dbgClose) dbgClose.addEventListener('click', hideDebug);
+
+  /* Автопоказ панели отладки при ошибке */
+  const origErr = console.error;
+  console.error = function(){
+    origErr.apply(console, arguments);
+    showDebug();
+  };
+
+  start().catch(err => {
+    dlog('err', 'START: ' + err.message);
     toast('Ошибка запуска: ' + err.message, 'error');
+    showDebug();
   });
 });
 </script>
