@@ -1,228 +1,418 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
+<html lang="ru"><head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0d0b13">
-<title>HeartLink</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Secret Signal — знакомства</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-:root{--bg:#0d0b13;--card:#1b1729;--card-2:#241e35;--text:#f4f1fa;--muted:#9b93b2;
---accent:#ff4d79;--green:#28d17c;--danger:#ff5f5f;--border:rgba(255,255,255,.09);}
-html,body{height:100%;}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
-color:var(--text);background-color:#0d0b13;
-background-image:radial-gradient(900px 520px at 12% -12%,rgba(255,77,121,.25),transparent 62%),
-radial-gradient(820px 520px at 92% -4%,rgba(122,86,255,.22),transparent 62%);
-background-attachment:fixed;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
-button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;padding:0;}
-input,textarea,select{font-family:inherit;font-size:16px;}
-img{display:block;}
-h1,h2,h3{margin:0;}
-.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.muted-text{color:var(--muted);font-size:14.5px;line-height:1.5;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#000000;
+  --surface:#0f0f12;
+  --surface-2:#16161c;
+  --surface-3:#1e1e26;
+  --border:rgba(168,85,247,.18);
+  --border-soft:rgba(255,255,255,.06);
+  --text:#ffffff;
+  --text-dim:#8b8b96;
+  --text-muted:#5a5a66;
+  --purple:#a855f7;
+  --purple-light:#c084fc;
+  --purple-dark:#7c3aed;
+  --purple-glow:rgba(168,85,247,.35);
+  --grad:linear-gradient(135deg,#a855f7,#6366f1);
+  --grad-soft:linear-gradient(135deg,#7c3aed,#4f46e5);
+}
+html,body{width:100%;height:100%;background:#000;color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  overflow:hidden;position:fixed;top:0;left:0;touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;}
 
-#app{max-width:520px;margin:0 auto;padding:0 0 110px;min-height:100%;}
-#topbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;
-padding:14px 18px;background:linear-gradient(180deg,rgba(13,11,19,.96) 65%,rgba(13,11,19,0));
-backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
-.logo{font-weight:800;font-size:19px;
-background:linear-gradient(90deg,#ff4d79,#ff8a5b);-webkit-background-clip:text;background-clip:text;color:transparent;}
-#syncStatus{font-size:11px;font-weight:600;padding:4px 10px;border-radius:10px;
-background:rgba(255,255,255,.06);color:var(--muted);transition:.3s;}
-#syncStatus.ok{background:rgba(40,209,124,.18);color:#6ee9a4;}
-#syncStatus.err{background:rgba(255,95,95,.18);color:#ff8080;}
-#syncStatus.loading{background:rgba(255,190,80,.18);color:#ffd166;}
+#app{width:100%;height:100vh;height:100dvh;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;background:var(--bg);}
 
-#bottomNav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(520px,100%);
-display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0));
-background:rgba(20,16,30,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-border-top:1px solid var(--border);z-index:60;}
-.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:16px;
-color:var(--muted);transition:.2s;}
-.nav-btn span{font-size:20px;line-height:1;}
-.nav-btn em{font-style:normal;font-size:10.5px;font-weight:600;}
-.nav-btn.active{color:#fff;background:rgba(255,77,121,.14);}
+/* ============ TOPBAR ============ */
+#topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;
+  align-items:center;justify-content:space-between;padding:10px 16px;
+  background:linear-gradient(180deg,rgba(0,0,0,.95) 55%,rgba(0,0,0,0));
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-logo{width:32px;height:32px;object-fit:contain;
+  background:transparent;border:none;border-radius:0;box-shadow:none;
+  display:block;}
+.brand-name{font-weight:800;font-size:16px;letter-spacing:.2px;
+  background:linear-gradient(90deg,#c084fc,#a855f7 60%,#7c3aed);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  display:flex;align-items:center;gap:6px;}
+.brand-name small{font-weight:500;font-size:11px;color:var(--text-muted);
+  background:none;-webkit-text-fill-color:initial;letter-spacing:.4px;}
+#syncStatus{font-size:11px;font-weight:700;padding:5px 11px;border-radius:12px;
+  background:rgba(255,255,255,.05);color:var(--text-dim);
+  border:1px solid rgba(255,255,255,.06);transition:.3s;}
+#syncStatus.ok{background:rgba(168,85,247,.15);color:#c084fc;
+  border-color:rgba(168,85,247,.35);}
+#syncStatus.err{background:rgba(255,95,95,.12);color:#ff8080;
+  border-color:rgba(255,95,95,.25);}
+#syncStatus.loading{background:rgba(168,85,247,.1);color:#c084fc;
+  border-color:rgba(168,85,247,.25);animation:syncPulse 1.4s infinite;}
+@keyframes syncPulse{0%,100%{opacity:1;}50%{opacity:.65;}}
+
+/* ============ MAIN ============ */
+#main{flex:1;overflow:hidden;display:flex;flex-direction:column;
+  padding-top:52px;position:relative;background:var(--bg);}
+
+/* ============ BOTTOM NAV ============ */
+#bottomNav{position:fixed;bottom:0;left:0;right:0;z-index:60;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));
+  background:rgba(10,10,12,.92);backdrop-filter:blur(24px);
+  -webkit-backdrop-filter:blur(24px);
+  border-top:1px solid rgba(168,85,247,.14);}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:7px 4px;border-radius:12px;background:transparent;border:none;
+  color:var(--text-muted);cursor:pointer;transition:.2s;font-family:inherit;
+  position:relative;}
+.nav-btn span{font-size:19px;line-height:1;transition:transform .2s;}
+.nav-btn em{font-style:normal;font-size:10px;font-weight:600;letter-spacing:.1px;}
+.nav-btn.active{color:var(--purple-light);background:rgba(168,85,247,.14);}
+.nav-btn.active span{transform:translateY(-1px) scale(1.1);
+  filter:drop-shadow(0 0 6px rgba(168,85,247,.6));}
 .nav-btn:active{transform:scale(.94);}
 
-.filters{padding:0 16px 14px;}
-.filters-toggle{width:100%;padding:13px 16px;border-radius:18px;background:var(--card);
-border:1px solid var(--border);font-size:14px;font-weight:600;color:#d8d3e6;text-align:left;
-display:flex;align-items:center;justify-content:space-between;}
-.filters-toggle .chev{transition:.25s;color:var(--muted);font-size:12px;}
-.filters.open .filters-toggle .chev{transform:rotate(180deg);}
-.filters-body{display:none;flex-direction:column;gap:11px;margin-top:11px;padding:16px;border-radius:20px;
-background:var(--card);border:1px solid var(--border);}
-.filters.open .filters-body{display:flex;}
+/* ============ DISCOVER ============ */
+.discover{display:flex;flex-direction:column;height:100%;overflow:hidden;}
 
-.deck{padding:0 16px;}
-.card{position:relative;border-radius:28px;overflow:hidden;background:var(--card);border:1px solid var(--border);
-box-shadow:0 24px 60px rgba(0,0,0,.55);animation:cardIn .42s cubic-bezier(.2,.8,.25,1);}
-@keyframes cardIn{from{opacity:0;transform:translateY(18px) scale(.97);}to{opacity:1;transform:none;}}
-.card.fly-right{animation:flyRight .3s ease forwards;}
-@keyframes flyRight{to{opacity:0;transform:translateX(125%) rotate(14deg);}}
-.card-photo{position:relative;height:clamp(260px,46vh,430px);background:var(--card-2);}
-.card-photo img{width:100%;height:100%;object-fit:cover;}
-.photo-shade{position:absolute;left:0;right:0;bottom:0;height:45%;
-background:linear-gradient(180deg,transparent,rgba(20,16,30,.92));pointer-events:none;}
-.card-counter{position:absolute;top:12px;right:12px;padding:5px 11px;border-radius:20px;font-size:12px;
-font-weight:600;background:rgba(0,0,0,.45);}
-.card-body{padding:16px 18px 20px;}
-.card-body h2{font-size:23px;font-weight:800;line-height:1.15;}
-.card-city{color:var(--muted);font-size:13.5px;margin-top:4px;}
-.card-desc{margin:11px 0 0;font-size:14.5px;line-height:1.5;color:#d8d3e6;}
-.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
-.tag{font-size:12px;padding:5px 11px;border-radius:20px;background:rgba(255,77,121,.13);color:#ff9db6;font-weight:600;}
-.deck-actions{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:20px;}
-.act{width:64px;height:64px;border-radius:50%;font-size:26px;display:grid;place-items:center;
-background:var(--card);border:1px solid var(--border);box-shadow:0 10px 26px rgba(0,0,0,.45);
-transition:transform .15s ease, box-shadow .2s;-webkit-tap-highlight-color:transparent;user-select:none;}
-.act:active{transform:scale(.85);box-shadow:0 4px 12px rgba(0,0,0,.6);}
-.act-like{background:linear-gradient(135deg,#ff4d79,#ff7a4d);border-color:transparent;
-box-shadow:0 12px 30px rgba(255,77,121,.45);}
-.act-like:active{background:linear-gradient(135deg,#ff3050,#ff6030);}
-.act-skip{width:52px;height:52px;font-size:18px;color:var(--muted);}
-.act-comment{background:var(--card-2);}
-.btn-open-profile{display:block;width:100%;margin:16px 0 0;padding:14px;border-radius:18px;
-background:var(--card);border:1px solid var(--border);font-weight:600;font-size:15px;color:#d8d3e6;}
+.photos-grid{display:grid;grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;gap:3px;background:transparent;
+  aspect-ratio:1/1;width:100%;flex-shrink:0;padding:6px 8px;
+  border-radius:26px;overflow:hidden;}
+.photo-item{overflow:hidden;background:var(--surface-2);
+  border-radius:24px;cursor:pointer;position:relative;
+  transition:transform .3s ease;
+  border:1px solid rgba(168,85,247,.12);}
+.photo-item img{width:100%;height:100%;display:block;object-fit:cover;
+  background:var(--surface-2);pointer-events:none;}
+.photo-item--main{grid-row:1 / span 2;}
+.photo-item.expanded{position:fixed;inset:0;z-index:1000;border-radius:0!important;
+  background:rgba(0,0,0,.96);display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:none;}
+.photo-item.expanded img{width:100vw;height:100vh;object-fit:contain;}
+.close-expanded-btn{position:fixed;bottom:30px;left:50%;
+  transform:translateX(-50%);z-index:1001;background:rgba(168,85,247,.25);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border:1px solid rgba(168,85,247,.45);color:#fff;padding:12px 34px;
+  border-radius:30px;font-size:15px;font-weight:600;cursor:pointer;
+  letter-spacing:.3px;font-family:inherit;}
+.close-expanded-btn:active{transform:translateX(-50%) scale(.95);}
 
-.tabs{display:flex;gap:7px;padding:0 16px 14px;overflow-x:auto;scrollbar-width:none;}
+/* ============ INFO ============ */
+.info-wrapper{flex:1;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;padding-bottom:150px;
+  padding-bottom:calc(150px + env(safe-area-inset-bottom,0px));}
+.info-wrapper::-webkit-scrollbar{width:3px;}
+.info-wrapper::-webkit-scrollbar-thumb{background:rgba(168,85,247,.35);border-radius:10px;}
+.info-block{padding:18px 16px 22px;background:var(--surface);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-radius:26px 26px 0 0;border-top:1px solid rgba(168,85,247,.18);
+  box-shadow:0 -8px 30px rgba(168,85,247,.06);}
+
+.name-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.name{font-size:22px;font-weight:750;letter-spacing:-.3px;color:var(--text);
+  display:flex;align-items:center;gap:6px;}
+.name .age{font-weight:500;color:var(--text-dim);}
+.verified-badge{display:inline-grid;place-items:center;width:22px;height:22px;
+  border-radius:50%;background:var(--grad);color:#fff;font-size:13px;
+  font-weight:800;box-shadow:0 0 12px rgba(168,85,247,.55);}
+
+.chips-container{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+.chip{height:34px;padding:0 12px;border-radius:17px;
+  background:rgba(168,85,247,.08);color:#e5e5ee;
+  display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;
+  white-space:nowrap;border:1px solid rgba(168,85,247,.2);}
+.chip svg{width:16px;height:16px;stroke:#c084fc;fill:none;stroke-width:1.8;
+  flex-shrink:0;}
+.chip svg.filled{fill:#c084fc;stroke:none;}
+.bio-text{font-size:15.5px;line-height:1.5;color:#d4d4dc;margin-top:13px;
+  word-wrap:break-word;}
+
+/* ============ ACTION BAR ============ */
+.actions-bar{position:fixed;left:0;right:0;z-index:70;
+  bottom:calc(60px + env(safe-area-inset-bottom,0px));
+  padding:10px 16px;
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;
+  background:rgba(10,10,12,.94);backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid rgba(168,85,247,.18);
+  box-shadow:0 -8px 30px rgba(168,85,247,.08);}
+.action-btn{height:60px;border:none;border-radius:16px;display:grid;
+  place-items:center;font-size:26px;cursor:pointer;
+  transition:opacity .15s,transform .1s,box-shadow .2s;
+  color:#fff;border:1px solid rgba(255,255,255,.08);user-select:none;
+  font-family:inherit;position:relative;overflow:hidden;}
+.action-btn:active{opacity:.85;transform:scale(.94);}
+
+/* ✕ — сдержанная, тёмная */
+.action-btn--no{background:rgba(255,255,255,.05);color:#7a7a86;
+  border-color:rgba(255,255,255,.08);font-size:24px;}
+.action-btn--no:active{background:rgba(255,255,255,.1);}
+
+/* 💬 — комментарий, средняя с фиолетовым отблеском */
+.action-btn--comment{background:rgba(168,85,247,.14);color:#c084fc;
+  border-color:rgba(168,85,247,.3);font-size:24px;}
+.action-btn--comment:active{background:rgba(168,85,247,.24);}
+
+/* ❤️ — главная, яркая фиолетовая */
+.action-btn--yes{background:var(--grad);color:#fff;
+  border-color:transparent;
+  box-shadow:0 6px 24px rgba(168,85,247,.45),
+    inset 0 1px 0 rgba(255,255,255,.2);}
+.action-btn--yes::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent 60%);
+  pointer-events:none;}
+
+/* ============ LISTS / CARDS ============ */
+.list-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:12px 16px calc(80px + env(safe-area-inset-bottom,0px));}
+.tabs{display:flex;gap:7px;padding:0 16px 14px;overflow-x:auto;
+  scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
-.tab{padding:9px 16px;border-radius:20px;background:var(--card);border:1px solid var(--border);
-color:var(--muted);font-size:13.5px;font-weight:600;white-space:nowrap;}
-.tab.active{background:linear-gradient(135deg,#ff4d79,#ff7a4d);color:#fff;border-color:transparent;}
+.tab{padding:9px 16px;border-radius:17px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.07);color:var(--text-dim);
+  font-size:13px;font-weight:600;white-space:nowrap;cursor:pointer;
+  font-family:inherit;transition:.2s;}
+.tab.active{background:var(--grad);color:#fff;border-color:transparent;
+  box-shadow:0 4px 16px rgba(168,85,247,.4);}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:0 16px;}
-.mini{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;}
-.mini-photo{height:168px;background:var(--card-2);}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:12px;}
+.mini{background:var(--surface);border-radius:20px;overflow:hidden;
+  border:1px solid rgba(168,85,247,.14);
+  transition:transform .15s;}
+.mini:active{transform:scale(.98);}
+.mini-photo{height:160px;background:var(--surface-2);}
 .mini-photo img{width:100%;height:100%;object-fit:cover;}
-.mini-body{padding:10px 12px 6px;}
-.mini-name{font-weight:700;font-size:14.5px;}
-.mini-city{font-size:12px;color:var(--muted);margin-top:2px;}
+.mini-body{padding:10px 12px 4px;}
+.mini-name{font-weight:700;font-size:14px;color:var(--text);}
+.mini-city{font-size:12px;color:var(--text-dim);margin-top:2px;}
 .mini-actions{display:flex;gap:6px;padding:8px 10px 10px;}
-.mini-actions button{flex:1;padding:9px;border-radius:12px;background:var(--card-2);font-size:15px;}
+.mini-actions button{flex:1;padding:9px;border-radius:12px;
+  background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.22);
+  font-size:16px;cursor:pointer;color:#c084fc;transition:.15s;
+  font-family:inherit;}
+.mini-actions button:active{transform:scale(.94);
+  background:rgba(168,85,247,.22);}
 
-.me{padding:0 16px;}
-.me-photo{border-radius:26px;overflow:hidden;height:clamp(240px,40vh,380px);background:var(--card-2);border:1px solid var(--border);}
+/* ============ ME ============ */
+.me-card{background:var(--surface);border-radius:24px;padding:18px;
+  border:1px solid rgba(168,85,247,.18);margin-bottom:14px;
+  box-shadow:0 8px 30px rgba(168,85,247,.08);}
+.me-photo{border-radius:22px;overflow:hidden;aspect-ratio:1/1;
+  background:var(--surface-2);border:1px solid rgba(168,85,247,.15);}
 .me-photo img{width:100%;height:100%;object-fit:cover;}
 .me-info{margin-top:16px;}
-.me-info h2{font-size:24px;font-weight:800;}
-.me-info .city{color:var(--muted);font-size:14px;margin-top:4px;}
-.me-info .desc{margin-top:12px;font-size:14.5px;line-height:1.55;color:#d8d3e6;}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
-.stat{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;text-align:center;}
-.stat b{display:block;font-size:26px;font-weight:800;
-background:linear-gradient(90deg,#ff4d79,#ff8a5b);-webkit-background-clip:text;background-clip:text;color:transparent;}
-.stat span{font-size:12.5px;color:var(--muted);}
-.actions-col{display:flex;flex-direction:column;gap:10px;margin-top:18px;}
+.me-info h2{font-size:22px;font-weight:750;color:var(--text);}
+.me-info .city{color:var(--text-dim);font-size:14px;margin-top:4px;}
+.me-info .desc{margin-top:12px;font-size:15px;line-height:1.5;color:#d4d4dc;}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.stat{background:rgba(168,85,247,.07);border-radius:18px;padding:14px;
+  text-align:center;border:1px solid rgba(168,85,247,.14);}
+.stat b{display:block;font-size:24px;font-weight:800;
+  background:linear-gradient(90deg,#c084fc,#a855f7);
+  -webkit-background-clip:text;background-clip:text;color:transparent;}
+.stat span{font-size:12px;color:var(--text-dim);}
+.actions-col{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
 
-.pv{padding:0 16px;}
-.pv-photo{position:relative;border-radius:26px;overflow:hidden;height:clamp(300px,52vh,520px);background:var(--card-2);border:1px solid var(--border);}
-.pv-photo img{width:100%;height:100%;object-fit:cover;}
-.pv-back{position:absolute;top:14px;left:14px;width:42px;height:42px;border-radius:50%;
-background:rgba(0,0,0,.5);display:grid;place-items:center;font-size:18px;z-index:3;}
-.pv-body{padding:18px 4px 0;}
-.pv-body h2{font-size:25px;font-weight:800;}
-.pv-body .city{color:var(--muted);font-size:14px;margin-top:4px;}
-.pv-body .desc{margin-top:13px;font-size:15px;line-height:1.55;color:#d8d3e6;}
-
-.form{display:flex;flex-direction:column;gap:12px;}
-.form label{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted);font-weight:600;}
-.form input,.form textarea,.form select{width:100%;padding:13px 14px;border-radius:14px;
-background-color:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);outline:none;}
-.form input:focus,.form textarea:focus{border-color:var(--accent);}
-.form textarea{resize:vertical;min-height:80px;}
-.form select{appearance:none;-webkit-appearance:none;
-background-image:linear-gradient(45deg,transparent 50%,#9b93b2 50%),linear-gradient(135deg,#9b93b2 50%,transparent 50%);
-background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px,5px 5px;
-background-repeat:no-repeat;padding-right:38px;}
-option{background:#1b1729;color:#f4f1fa;}
-.form .check{flex-direction:row;align-items:center;gap:9px;font-size:13.5px;color:#d8d3e6;}
-.form .check input{width:18px;height:18px;accent-color:#ff4d79;padding:0;}
-
-.btn-primary{width:100%;padding:15px;border-radius:16px;font-weight:700;font-size:15.5px;color:#fff;
-background:linear-gradient(135deg,#ff4d79,#ff7a4d);box-shadow:0 12px 28px rgba(255,77,121,.35);transition:.15s;}
+.btn-primary{width:100%;padding:14px;border-radius:14px;font-weight:700;
+  font-size:15px;color:#fff;border:none;cursor:pointer;
+  background:var(--grad);
+  box-shadow:0 8px 24px rgba(168,85,247,.4);transition:.15s;font-family:inherit;
+  position:relative;overflow:hidden;}
+.btn-primary::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent 60%);
+  pointer-events:none;}
 .btn-primary:active{transform:scale(.97);}
-.btn-primary:disabled{opacity:.55;}
-.btn-ghost{width:100%;padding:15px;border-radius:16px;font-weight:600;font-size:15px;
-background:rgba(255,255,255,.06);border:1px solid var(--border);color:#d8d3e6;}
+.btn-primary:disabled{opacity:.5;}
+.btn-ghost{width:100%;padding:14px;border-radius:14px;font-weight:600;
+  font-size:15px;background:rgba(168,85,247,.08);
+  border:1px solid rgba(168,85,247,.2);
+  color:#c084fc;cursor:pointer;font-family:inherit;transition:.15s;}
+.btn-ghost:active{transform:scale(.97);background:rgba(168,85,247,.16);}
 
-.photo-picker{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:16px;}
-.photo-picker img{width:130px;height:130px;border-radius:50%;object-fit:cover;border:3px solid rgba(255,77,121,.4);background:var(--card-2);}
-.photo-btn{padding:10px 18px;border-radius:14px;background:rgba(255,255,255,.07);
-border:1px solid var(--border);font-size:13.5px;font-weight:600;cursor:pointer;display:inline-block;}
+/* ============ FORMS / MODALS ============ */
+.form{display:flex;flex-direction:column;gap:12px;}
+.form label{display:flex;flex-direction:column;gap:6px;font-size:13px;
+  color:var(--text-dim);font-weight:600;}
+.form input,.form textarea,.form select{width:100%;padding:13px 14px;
+  border-radius:14px;background:var(--surface-2);
+  border:1px solid rgba(168,85,247,.16);
+  color:var(--text);outline:none;font-family:inherit;font-size:16px;
+  transition:border-color .2s, box-shadow .2s;}
+.form input:focus,.form textarea:focus,.form select:focus{
+  border-color:rgba(168,85,247,.6);
+  box-shadow:0 0 0 3px rgba(168,85,247,.15);}
+.form textarea{resize:vertical;min-height:80px;}
+.form select{appearance:none;-webkit-appearance:none;padding-right:38px;
+  background-image:linear-gradient(45deg,transparent 50%,#c084fc 50%),
+    linear-gradient(135deg,#c084fc 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;
+  background-size:5px 5px;background-repeat:no-repeat;}
+.form select option{background:#16161c;color:#fff;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form .check{flex-direction:row;align-items:center;gap:9px;font-size:14px;
+  color:#d4d4dc;}
+.form .check input{width:18px;height:18px;accent-color:#a855f7;padding:0;}
 
-.modal-backdrop{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end;justify-content:center;
-background:rgba(5,4,10,.72);backdrop-filter:blur(6px);opacity:0;transition:.22s;}
+.modal-backdrop{position:fixed;inset:0;z-index:100;display:flex;
+  align-items:flex-end;justify-content:center;background:rgba(0,0,0,.75);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  opacity:0;transition:opacity .22s ease;}
 .modal-backdrop.show{opacity:1;}
-.modal{width:min(520px,100%);max-height:92vh;overflow-y:auto;background:#171323;border:1px solid var(--border);
-border-radius:26px 26px 0 0;padding:18px 18px calc(20px + env(safe-area-inset-bottom,0));
-transform:translateY(26px);transition:transform .28s cubic-bezier(.2,.8,.25,1);}
+.modal{width:min(520px,100%);max-height:92vh;overflow-y:auto;
+  background:var(--surface);border-radius:26px 26px 0 0;
+  border-top:1px solid rgba(168,85,247,.25);
+  box-shadow:0 -12px 40px rgba(168,85,247,.15);
+  padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));
+  transform:translateY(26px);transition:transform .28s cubic-bezier(.2,.8,.25,1);}
 .modal-backdrop.show .modal{transform:none;}
-@media (min-width:640px){.modal-backdrop{align-items:center;padding:24px;}.modal{border-radius:26px;max-height:88vh;}}
-.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
-.modal-head h3{font-size:18px;font-weight:800;}
-.modal-close{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.07);
-font-size:15px;color:var(--muted);display:grid;place-items:center;}
+@media (min-width:640px){
+  .modal-backdrop{align-items:center;padding:24px;}
+  .modal{border-radius:26px;max-height:88vh;
+    border:1px solid rgba(168,85,247,.25);}
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;gap:10px;}
+.modal-head h3{font-size:18px;font-weight:800;color:var(--text);}
+.modal-close{width:34px;height:34px;border-radius:50%;
+  background:rgba(168,85,247,.12);font-size:15px;color:#c084fc;border:none;
+  display:grid;place-items:center;cursor:pointer;font-family:inherit;}
+.modal-close:active{background:rgba(168,85,247,.22);}
 .modal-foot{margin-top:16px;}
-.err{color:var(--danger);font-size:13px;min-height:16px;font-weight:600;}
+.err{color:#ff8080;font-size:13px;min-height:16px;font-weight:600;}
+
+.photo-picker{display:flex;flex-direction:column;align-items:center;
+  gap:12px;margin-bottom:14px;}
+.photo-picker img{width:130px;height:130px;border-radius:50%;object-fit:cover;
+  border:3px solid rgba(168,85,247,.45);
+  box-shadow:0 0 20px rgba(168,85,247,.35);
+  background:var(--surface-2);}
+.photo-btn{padding:10px 20px;border-radius:14px;
+  background:rgba(168,85,247,.12);
+  border:1px solid rgba(168,85,247,.3);
+  font-size:13px;font-weight:600;cursor:pointer;display:inline-block;
+  color:#c084fc;transition:.15s;}
+.photo-btn:active{background:rgba(168,85,247,.22);}
 
 .comment-target{display:flex;gap:12px;align-items:center;margin-bottom:14px;}
-.comment-target img{width:52px;height:52px;border-radius:50%;object-fit:cover;background:var(--card-2);}
-.comment-target b{display:block;font-size:15px;}
-.comment-target span{font-size:12.5px;color:var(--muted);}
-.counter{text-align:right;font-size:12px;color:var(--muted);margin-top:6px;}
+.comment-target img{width:52px;height:52px;border-radius:50%;object-fit:cover;
+  background:var(--surface-2);border:2px solid rgba(168,85,247,.35);}
+.comment-target b{display:block;font-size:15px;color:var(--text);}
+.comment-target span{font-size:12.5px;color:var(--text-dim);}
+.counter{text-align:right;font-size:12px;color:var(--text-dim);margin-top:6px;}
 
-.match-box{text-align:center;padding:6px 0 0;}
-.match-heart{font-size:64px;line-height:1;}
-.match-box h2{margin:12px 0 6px;font-size:23px;font-weight:800;}
-.match-box p{margin:0 0 16px;color:var(--muted);font-size:14px;}
-.match-photo{width:120px;height:120px;border-radius:50%;object-fit:cover;margin:0 auto;
-border:3px solid rgba(40,209,124,.55);background:var(--card-2);}
-.match-name{margin-top:10px;font-weight:700;font-size:16px;}
+/* Match modal */
+.match-box{text-align:center;padding:8px 0 0;}
+.match-heart{font-size:70px;line-height:1;
+  filter:drop-shadow(0 0 20px rgba(168,85,247,.7));
+  animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+.match-box h2{margin:14px 0 6px;font-size:23px;font-weight:800;
+  background:linear-gradient(90deg,#c084fc,#a855f7);
+  -webkit-background-clip:text;background-clip:text;color:transparent;}
+.match-box p{margin:0 0 16px;color:var(--text-dim);font-size:14px;}
+.match-photo{width:120px;height:120px;border-radius:50%;object-fit:cover;
+  margin:0 auto;border:3px solid rgba(168,85,247,.6);
+  box-shadow:0 0 30px rgba(168,85,247,.5);
+  background:var(--surface-2);}
+.match-name{margin-top:10px;font-weight:700;font-size:16px;color:var(--text);}
 
-.auth-overlay{position:fixed;inset:0;z-index:150;overflow-y:auto;background-color:#0d0b13;
-background-image:radial-gradient(900px 520px at 12% -12%,rgba(255,77,121,.25),transparent 62%),
-radial-gradient(820px 520px at 92% -4%,rgba(122,86,255,.22),transparent 62%);
-padding:32px 18px calc(44px + env(safe-area-inset-bottom,0));}
+/* ============ AUTH ============ */
+.auth-overlay{position:fixed;inset:0;z-index:150;overflow-y:auto;
+  background:#000;
+  background-image:
+    radial-gradient(900px 520px at 15% -10%,rgba(168,85,247,.22),transparent 60%),
+    radial-gradient(820px 520px at 90% -5%,rgba(99,102,241,.15),transparent 60%);
+  padding:36px 18px calc(44px + env(safe-area-inset-bottom,0px));}
 .auth-card{max-width:480px;margin:0 auto;}
-.auth-logo{font-size:54px;text-align:center;line-height:1;}
-.auth-card h1{text-align:center;margin:8px 0 6px;font-size:27px;font-weight:800;}
-.auth-sub{text-align:center;color:var(--muted);font-size:14px;margin:0 0 24px;}
+.auth-logo-img{width:96px;height:96px;object-fit:contain;
+  display:block;margin:0 auto;
+  background:transparent;border:none;border-radius:0;box-shadow:none;}
+.auth-card h1{text-align:center;margin:16px 0 4px;font-size:28px;font-weight:800;
+  background:linear-gradient(90deg,#c084fc,#a855f7 55%,#7c3aed);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  letter-spacing:.3px;}
+.auth-card .tagline{text-align:center;font-size:11px;font-weight:600;
+  color:#6b21a8;letter-spacing:3px;text-transform:uppercase;margin:0 0 6px;}
+.auth-sub{text-align:center;color:var(--text-dim);font-size:14px;margin:0 0 24px;}
 
+/* ============ TOASTS ============ */
 #toastRoot{position:fixed;left:50%;transform:translateX(-50%);
-bottom:calc(100px + env(safe-area-inset-bottom,0));z-index:200;
-display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(440px,92vw);}
-.toast{width:100%;padding:13px 16px;border-radius:16px;font-size:14px;font-weight:600;text-align:center;
-background:rgba(30,24,44,.97);border:1px solid var(--border);color:#f4f1fa;
-box-shadow:0 14px 34px rgba(0,0,0,.5);opacity:0;transform:translateY(14px);transition:.28s;}
+  bottom:calc(120px + env(safe-area-inset-bottom,0px));z-index:200;
+  display:flex;flex-direction:column;gap:8px;align-items:center;
+  pointer-events:none;width:min(440px,92vw);}
+.toast{width:100%;padding:13px 16px;border-radius:14px;font-size:14px;
+  font-weight:600;text-align:center;background:rgba(22,22,28,.96);
+  color:#fff;border:1px solid rgba(168,85,247,.35);
+  box-shadow:0 14px 34px rgba(168,85,247,.25);
+  opacity:0;transform:translateY(14px);transition:.28s;}
 .toast.show{opacity:1;transform:none;}
-.toast-success{border-color:rgba(40,209,124,.5);}
-.toast-error{border-color:rgba(255,95,95,.55);}
-.toast-warn{border-color:rgba(255,190,80,.5);}
+.toast-success{border-color:rgba(168,85,247,.55);
+  box-shadow:0 14px 34px rgba(168,85,247,.4);}
+.toast-error{background:rgba(60,10,20,.96);border-color:rgba(255,95,95,.5);
+  box-shadow:0 14px 34px rgba(255,95,95,.3);}
+.toast-warn{background:rgba(60,45,10,.96);border-color:rgba(255,190,80,.45);}
 
-.empty{padding:60px 24px;text-align:center;color:var(--muted);}
-.empty-icon{font-size:52px;margin-bottom:12px;line-height:1;}
+/* ============ EMPTY ============ */
+.empty{padding:60px 24px;text-align:center;color:var(--text-dim);}
+.empty-icon{font-size:56px;margin-bottom:14px;line-height:1;
+  filter:drop-shadow(0 0 16px rgba(168,85,247,.4));}
 .empty h3{color:var(--text);margin:0 0 8px;font-size:19px;}
-.empty p{margin:0 0 20px;font-size:14px;line-height:1.5;}
+.empty p{margin:0 0 20px;font-size:14px;line-height:1.55;}
 .empty .btn-primary{max-width:280px;margin:0 auto;}
-.section-title{padding:0 16px 12px;font-size:13px;font-weight:700;color:var(--muted);
-text-transform:uppercase;letter-spacing:.8px;}
-.badge-auto{display:inline-block;margin-left:6px;font-size:10px;padding:2px 6px;border-radius:8px;
-background:rgba(40,209,124,.18);color:#6ee9a4;font-weight:700;}
+
+.section-title{padding:0 16px 12px;font-size:12px;font-weight:700;
+  color:var(--purple-light);text-transform:uppercase;letter-spacing:1.2px;}
+
+.badge-auto{display:inline-block;margin-left:6px;font-size:10px;padding:3px 7px;
+  border-radius:8px;background:rgba(168,85,247,.18);color:#c084fc;
+  font-weight:700;vertical-align:middle;border:1px solid rgba(168,85,247,.3);}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:480px){
+  .info-block{padding:14px 12px 22px;border-radius:22px 22px 0 0;}
+  .actions-bar{padding:8px 12px;gap:10px;}
+  .action-btn{height:56px;font-size:24px;}
+  .name{font-size:20px;}
+  .chip{font-size:12px;height:32px;padding:0 10px;}
+  .bio-text{font-size:15px;}
+  .photos-grid{border-radius:22px;padding:4px 6px;}
+  .photo-item{border-radius:22px;}
+  .brand-logo{width:28px;height:28px;}
+  .brand-name{font-size:14px;}
+}
+@media (max-width:380px){
+  .action-btn{height:50px;font-size:22px;}
+  .name{font-size:18px;}
+  .chip{font-size:11px;height:28px;padding:0 9px;}
+  .bio-text{font-size:14px;}
+  .photos-grid{border-radius:18px;}
+  .photo-item{border-radius:18px;}
+  .brand-name{font-size:13px;}
+  .brand-name small{display:none;}
+}
 </style>
 </head>
 <body>
 
 <div id="app">
   <header id="topbar">
-    <div class="logo">💖 HeartLink</div>
-    <div id="syncStatus">готово</div>
+    <div class="brand">
+      <img class="brand-logo" src="https://i.postimg.cc/7hk52csC/Secret-Signal-Ag-AD5ao-AAgq-X2Es.gif" alt="Secret Signal">
+      <div class="brand-name">Secret Signal <small>dating</small></div>
+    </div>
+    <div id="syncStatus" class="ok">готово</div>
   </header>
-  <main id="view"></main>
+  <main id="main"></main>
 </div>
 
-<nav id="bottomNav">
+<nav id="bottomNav" style="display:none;">
   <button class="nav-btn" data-view="discover"><span>🔎</span><em>Знакомства</em></button>
   <button class="nav-btn" data-view="likes"><span>❤️</span><em>Лайки</em></button>
   <button class="nav-btn" data-view="matches"><span>💚</span><em>Взаимные</em></button>
@@ -254,44 +444,41 @@ const FIELD_CREATED = 'created_att';
 const FIELD_UPDATED = 'updated_att';
 
 /* ================= UTILS ================= */
-const $  = (s, r) => (r || document).querySelector(s);
-const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
+const $  = (s,r) => (r||document).querySelector(s);
+const $$ = (s,r) => Array.prototype.slice.call((r||document).querySelectorAll(s));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const nowIso = () => new Date().toISOString();
 
 function esc(v){
-  return String(v == null ? '' : v)
+  return String(v==null?'':v)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
-function clampNum(v,min,max,def){ const n=Number(v); if(!isFinite(n))return def; return Math.min(max,Math.max(min,n)); }
-function lsGet(k,d){ try{ const r=localStorage.getItem(k); return r?JSON.parse(r):d; }catch(e){ return d; } }
-function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
-function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+function clampNum(v,min,max,def){const n=Number(v);if(!isFinite(n))return def;
+  return Math.min(max,Math.max(min,n));}
+function lsGet(k,d){try{const r=localStorage.getItem(k);return r?JSON.parse(r):d;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+function lsDel(k){try{localStorage.removeItem(k);}catch(e){}}
 
-const SESSION_KEY      = 'heartlink_session_v6';
-const SEQ_KEY          = 'heartlink_seq_v6';
-const SENT_KEY         = 'heartlink_sent_v6';
-const LOCAL_LIKES_KEY  = 'heartlink_local_likes_v6';
-const LOCAL_MATCH_KEY  = 'heartlink_local_matches_v6';
+const SESSION_KEY     = 'secret_signal_session_v1';
+const SEQ_KEY         = 'secret_signal_seq_v1';
+const SENT_KEY        = 'secret_signal_sent_v1';
+const LOCAL_LIKES_KEY = 'secret_signal_local_likes_v1';
 
-function nextSeq(n,s){ const a=lsGet(SEQ_KEY,{}); const c=Number(a[n])||(s-1); a[n]=c+1; lsSet(SEQ_KEY,a); return a[n]; }
-function wasSent(k){ return !!lsGet(SENT_KEY,{})[k]; }
-function markSent(k){ const s=lsGet(SENT_KEY,{}); s[k]=1; lsSet(SENT_KEY,s); }
-function getRecordId(r){ if(!r)return undefined; if(r.Id!=null)return r.Id; if(r.id!=null)return r.id; return undefined; }
+function nextSeq(n,s){const a=lsGet(SEQ_KEY,{});const c=Number(a[n])||(s-1);a[n]=c+1;lsSet(SEQ_KEY,a);return a[n];}
+function wasSent(k){return !!lsGet(SENT_KEY,{})[k];}
+function markSent(k){const s=lsGet(SENT_KEY,{});s[k]=1;lsSet(SENT_KEY,s);}
+function getRecordId(r){if(!r)return undefined;if(r.Id!=null)return r.Id;if(r.id!=null)return r.id;return undefined;}
 
-const FALLBACK_IMG = "data:image/svg+xml;utf8," + encodeURIComponent(
-  '<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800">' +
-  '<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">' +
-  '<stop offset="0" stop-color="#3a2b52"/><stop offset="1" stop-color="#1b1729"/></linearGradient></defs>' +
-  '<rect width="600" height="800" fill="url(#g)"/>' +
-  '<text x="300" y="430" font-size="120" text-anchor="middle" fill="#ffffff44" font-family="sans-serif">📷</text></svg>'
-);
+function svgPlaceholder(text, fill){
+  fill = fill || '#1e1e26';
+  return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23241434'/%3E%3Cstop offset='1' stop-color='%2316161c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='600' height='600' fill='url(%23g)'/%3E%3Ctext x='50%25' y='50%25' font-size='38' fill='%23a855f7' fill-opacity='0.55' font-family='sans-serif' text-anchor='middle' dy='.35em' font-weight='700'%3E"+encodeURIComponent(text)+"%3C/text%3E%3C/svg%3E";
+}
 
 /* ================= STATUS ================= */
 function setStatus(text, type){
   const el = document.getElementById('syncStatus');
-  if (!el) return;
+  if(!el) return;
   el.textContent = text;
   el.className = type || '';
 }
@@ -299,25 +486,27 @@ function setStatus(text, type){
 /* ================= PLATFORM ================= */
 function readPlatformVars(){
   const out={};
-  const set=(k,v)=>{ if(v==null)return; const s=String(v).trim(); if(!s)return; if(out[k]===undefined)out[k]=s; };
+  const set=(k,v)=>{if(v==null)return;const s=String(v).trim();if(!s)return;
+    if(out[k]===undefined)out[k]=s;};
   try{
     const tg=window.Telegram&&window.Telegram.WebApp;
     const u=tg&&tg.initDataUnsafe&&tg.initDataUnsafe.user;
     if(u){
-      set('USER_ID_TEXT',u.id); set('FIRST_NAME_TEXT',u.first_name);
-      set('LAST_NAME_TEXT',u.last_name); set('USERNAME_TEXT',u.username);
+      set('USER_ID_TEXT',u.id);set('FIRST_NAME_TEXT',u.first_name);
+      set('LAST_NAME_TEXT',u.last_name);set('USERNAME_TEXT',u.username);
       set('USER_AVATAR_URL',u.photo_url);
       const f=[u.first_name,u.last_name].filter(Boolean).join(' ');
-      set('FULL_NAME',f); set('FIRST_AND_LAST_NAME_TEXT',f);
+      set('FULL_NAME',f);set('FIRST_AND_LAST_NAME_TEXT',f);
     }
   }catch(e){}
-  try{ new URLSearchParams(location.search||'').forEach((v,k)=>set(k,v)); }catch(e){}
+  try{new URLSearchParams(location.search||'').forEach((v,k)=>set(k,v));}catch(e){}
   try{
-    const h=location.hash||''; const qi=h.indexOf('?');
+    const h=location.hash||'';const qi=h.indexOf('?');
     if(qi!==-1) new URLSearchParams(h.slice(qi+1)).forEach((v,k)=>set(k,v));
   }catch(e){}
   ['BROOT_VARS','PLATFORM_VARS','BOT_VARS','INIT_VARS','TG_USER_VARS'].forEach(n=>{
-    const o=window[n]; if(o&&typeof o==='object') for(const k in o) if(Object.prototype.hasOwnProperty.call(o,k)) set(k,o[k]);
+    const o=window[n];if(o&&typeof o==='object') for(const k in o)
+      if(Object.prototype.hasOwnProperty.call(o,k)) set(k,o[k]);
   });
   return out;
 }
@@ -330,12 +519,11 @@ const platformUsername = () => PLATFORM.USERNAME_TEXT||'';
 
 /* ================= STATE ================= */
 const state = {
-  user: null, profile: null, pendingRegistration: null,
-  view: 'discover', viewProfileId: null,
-  likedTab: 'incoming', deckIndex: 0, filtersOpen: false,
-  filters: { ageFrom:18, ageTo:100, city:'', gender:'', lookingFor:'' },
-  profiles: [], likes: [], matches: [], busy: false,
-  nocoOnline: false
+  user:null, profile:null, pendingRegistration:null,
+  view:'discover', viewProfileId:null,
+  likedTab:'incoming', deckIndex:0,
+  filters:{ageFrom:18,ageTo:100,city:'',gender:'',lookingFor:''},
+  profiles:[], likes:[], matches:[], busy:false, nocoOnline:false
 };
 
 /* ================= ROUTING ================= */
@@ -356,47 +544,47 @@ function profileLink(pid){
 function getRoute(){
   const path=location.pathname||'';
   let m=path.match(/\/(?:profile|p)\/([^\/?#]+)/i);
-  if(m) return { view:'profile', profileId:decodeURIComponent(m[1]) };
+  if(m) return {view:'profile',profileId:decodeURIComponent(m[1])};
   const hash=(location.hash||'').replace(/^#\/?/,'');
   m=hash.match(/^(?:profile|p)\/([^\/?#]+)/i);
-  if(m) return { view:'profile', profileId:decodeURIComponent(m[1]) };
-  if(['discover','likes','matches','me'].indexOf(hash)!==-1) return { view:hash };
-  return { view:'discover' };
+  if(m) return {view:'profile',profileId:decodeURIComponent(m[1])};
+  if(['discover','likes','matches','me'].indexOf(hash)!==-1) return {view:hash};
+  return {view:'discover'};
 }
 function navigateTo(v){
-  state.view=v; state.viewProfileId=null;
+  state.view=v;state.viewProfileId=null;
   if(v==='discover') state.deckIndex=0;
   try{
-    if(location.protocol==='file:'){ if(location.hash!=='#'+v) location.hash='#'+v; }
+    if(location.protocol==='file:'){if(location.hash!=='#'+v) location.hash='#'+v;}
     else history.pushState({},'','#'+v);
   }catch(e){}
-  render(); window.scrollTo(0,0);
+  render();window.scrollTo(0,0);
 }
 function goToProfile(pid){
   if(!pid) return;
-  state.view='profile'; state.viewProfileId=pid;
+  state.view='profile';state.viewProfileId=pid;
   try{
     if(location.protocol==='file:') location.hash='#/profile/'+pid;
     else history.pushState({},'',profileLink(pid));
-  }catch(e){ try{ location.hash='#/profile/'+pid; }catch(e2){} }
-  render(); window.scrollTo(0,0);
+  }catch(e){try{location.hash='#/profile/'+pid;}catch(e2){}}
+  render();window.scrollTo(0,0);
 }
 
 /* ================= TOAST / MODAL ================= */
 function toast(msg,type){
-  const root=$('#toastRoot'); if(!root)return;
+  const root=$('#toastRoot');if(!root)return;
   const el=document.createElement('div');
   el.className='toast toast-'+(type||'info');
   el.textContent=msg;
   root.appendChild(el);
   requestAnimationFrame(()=>el.classList.add('show'));
-  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),320); },3000);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),320);},3000);
   console.log('[toast:'+(type||'info')+'] '+msg);
 }
-function escKeyHandler(e){ if(e.key==='Escape') closeModal(); }
+function escKeyHandler(e){if(e.key==='Escape') closeModal();}
 function closeModal(){
-  const root=$('#modalRoot'); if(!root)return;
-  const wrap=root.querySelector('.modal-backdrop'); if(!wrap)return;
+  const root=$('#modalRoot');if(!root)return;
+  const wrap=root.querySelector('.modal-backdrop');if(!wrap)return;
   wrap.classList.remove('show');
   document.removeEventListener('keydown',escKeyHandler);
   setTimeout(()=>wrap.remove(),260);
@@ -404,110 +592,117 @@ function closeModal(){
 function openModal(opts){
   const o=opts||{};
   const root=$('#modalRoot');
-  const old=root.querySelector('.modal-backdrop'); if(old) old.remove();
+  const old=root.querySelector('.modal-backdrop');if(old) old.remove();
   const wrap=document.createElement('div');
   wrap.className='modal-backdrop';
-  wrap.innerHTML='<div class="modal"><div class="modal-head"><h3>'+(o.title||'')+'</h3>'+
-    '<button class="modal-close" data-close="1" type="button">✕</button></div>'+
+  wrap.innerHTML='<div class="modal"><div class="modal-head"><h3>'+(o.title||'')+
+    '</h3><button class="modal-close" data-close="1" type="button">✕</button></div>'+
     '<div class="modal-body">'+(o.body||'')+'</div>'+
     (o.footer?'<div class="modal-foot">'+o.footer+'</div>':'')+'</div>';
   root.appendChild(wrap);
   requestAnimationFrame(()=>wrap.classList.add('show'));
-  wrap.addEventListener('click',e=>{ if(e.target===wrap||(e.target.dataset&&e.target.dataset.close)) closeModal(); });
+  wrap.addEventListener('click',e=>{
+    if(e.target===wrap||(e.target.dataset&&e.target.dataset.close)) closeModal();
+  });
   document.addEventListener('keydown',escKeyHandler);
   if(typeof o.onMount==='function') o.onMount(wrap);
   return wrap;
 }
 
-/* ================= NOCODB (много стратегий) ================= */
+/* ================= PHOTO EXPAND ================= */
+window.expandPhoto = function(el){
+  if(el.classList.contains('expanded')){
+    el.classList.remove('expanded');
+    const btn=el.querySelector('.close-expanded-btn');if(btn) btn.remove();
+    return;
+  }
+  $$('.photo-item').forEach(p=>{
+    p.classList.remove('expanded');
+    const b=p.querySelector('.close-expanded-btn');if(b) b.remove();
+  });
+  el.classList.add('expanded');
+  const btn=document.createElement('button');
+  btn.className='close-expanded-btn';btn.textContent='Закрыть';
+  btn.onclick=function(e){e.stopPropagation();el.classList.remove('expanded');this.remove();};
+  el.appendChild(btn);
+};
+
+/* ================= NOCODB ================= */
 function tableUrl(t){
-  const m={
-    users:CONFIG.usersTableUrl, profiles:CONFIG.profilesTableUrl,
-    likes:CONFIG.likesTableUrl, matches:CONFIG.matchesTableUrl,
-    comments:CONFIG.commentsTableUrl, notifications:CONFIG.notificationsTableUrl
-  };
+  const m={users:CONFIG.usersTableUrl,profiles:CONFIG.profilesTableUrl,
+    likes:CONFIG.likesTableUrl,matches:CONFIG.matchesTableUrl,
+    comments:CONFIG.commentsTableUrl,notifications:CONFIG.notificationsTableUrl};
   if(!m[t]) throw new Error('Unknown table: '+t);
   return m[t];
 }
-
 async function fetchWithTimeout(url,opts,ms){
   ms=ms||15000;
   const ctrl=new AbortController();
   const t=setTimeout(()=>ctrl.abort(),ms);
-  try{
-    const res=await fetch(url,Object.assign({},opts,{signal:ctrl.signal}));
-    clearTimeout(t);
-    return res;
-  }catch(e){ clearTimeout(t); throw e; }
+  try{const res=await fetch(url,Object.assign({},opts,{signal:ctrl.signal}));
+    clearTimeout(t);return res;
+  }catch(e){clearTimeout(t);throw e;}
 }
-
 async function nocoRequest(method,url,body){
-  const token = CONFIG.apiToken;
-  const strategies = [
-    { name:'xc-token',     headers:{ 'Content-Type':'application/json', 'xc-token':token } },
-    { name:'bearer',       headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token } },
-    { name:'xc-token-qs',  headers:{ 'Content-Type':'application/json' }, qs:'?xc-token='+encodeURIComponent(token) }
+  const token=CONFIG.apiToken;
+  const strategies=[
+    {name:'xc-token',headers:{'Content-Type':'application/json','xc-token':token}},
+    {name:'bearer',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token}},
+    {name:'qs',headers:{'Content-Type':'application/json'},qs:'?xc-token='+encodeURIComponent(token)}
   ];
   let lastErr='';
   for(const s of strategies){
     try{
       const finalUrl = url + (s.qs ? (url.indexOf('?')===-1?'?':'&') + s.qs.slice(1) : '');
-      const opts = { method, headers:s.headers };
-      if(body) opts.body = JSON.stringify(body);
-      console.log('[NocoDB:'+s.name+'] '+method+' '+finalUrl);
-      const res = await fetchWithTimeout(finalUrl,opts,15000);
-      const text = await res.text();
-      let json=null; try{ json=text?JSON.parse(text):null; }catch(e){}
+      const opts={method,headers:s.headers};
+      if(body) opts.body=JSON.stringify(body);
+      console.log('[NocoDB:'+s.name+'] '+method+' '+finalUrl.slice(0,90));
+      const res=await fetchWithTimeout(finalUrl,opts,15000);
+      const text=await res.text();
+      let json=null;try{json=text?JSON.parse(text):null;}catch(e){}
       if(res.ok){
         console.log('[NocoDB:'+s.name+'] OK');
-        state.nocoOnline = true;
+        state.nocoOnline=true;
         return json;
       }
-      lastErr = res.status+': '+((json&&(json.msg||json.message||json.error))||text.slice(0,150));
+      lastErr=res.status+': '+((json&&(json.msg||json.message||json.error))||text.slice(0,150));
       console.warn('[NocoDB:'+s.name+'] '+lastErr);
-      if(res.status===401||res.status===403){ continue; }
-      if(res.status===400){ state.nocoOnline=true; throw new Error(lastErr); }
+      if(res.status===401||res.status===403) continue;
+      if(res.status===400){state.nocoOnline=true;throw new Error(lastErr);}
     }catch(e){
-      lastErr = e.message;
+      lastErr=e.message;
       console.warn('[NocoDB:'+s.name+'] exception: '+lastErr);
     }
   }
-  state.nocoOnline = false;
+  state.nocoOnline=false;
   throw new Error(lastErr||'NocoDB: все стратегии провалились');
 }
-
-async function dbList(t){ const r = await nocoRequest('GET',tableUrl(t)+'?limit=1000'); return (r&&(r.list||r.records))||[]; }
-
+async function dbList(t){
+  const r=await nocoRequest('GET',tableUrl(t)+'?limit=1000');
+  return (r&&(r.list||r.records))||[];
+}
 async function dbInsert(t,rec){
-  try{
-    return await nocoRequest('POST',tableUrl(t),rec);
-  }catch(e){
-    // Если ошибка из-за created_att — пробуем без него
-    if(String(e.message).indexOf('400')!==-1 || String(e.message).toLowerCase().indexOf('column')!==-1){
-      const copy=Object.assign({},rec);
-      delete copy[FIELD_CREATED];
-      delete copy[FIELD_UPDATED];
+  try{return await nocoRequest('POST',tableUrl(t),rec);}
+  catch(e){
+    if(String(e.message).indexOf('400')!==-1||String(e.message).toLowerCase().indexOf('column')!==-1){
+      const c=Object.assign({},rec);delete c[FIELD_CREATED];delete c[FIELD_UPDATED];
       console.warn('[NocoDB] повтор без '+FIELD_CREATED);
-      return await nocoRequest('POST',tableUrl(t),copy);
+      return await nocoRequest('POST',tableUrl(t),c);
     }
     throw e;
   }
 }
-
 async function dbUpdate(t,id,patch){
   const payload=Object.assign({},patch,{Id:id});
-  try{
-    return await nocoRequest('PATCH',tableUrl(t),payload);
-  }catch(e){
+  try{return await nocoRequest('PATCH',tableUrl(t),payload);}
+  catch(e){
     if(String(e.message).toLowerCase().indexOf('column')!==-1){
-      const c=Object.assign({},patch,{Id:id});
-      delete c[FIELD_UPDATED];
+      const c=Object.assign({},patch,{Id:id});delete c[FIELD_UPDATED];
       return await nocoRequest('PATCH',tableUrl(t),c);
     }
     throw e;
   }
 }
-
 async function dbDelete(t,id){
   await nocoRequest('DELETE',tableUrl(t),[{Id:id}]);
   return true;
@@ -516,208 +711,184 @@ async function dbDelete(t,id){
 /* ================= API ================= */
 async function createUser(d){
   const uid='USER_'+nextSeq('user',100001);
-  const rec={ user_id:uid, telegram_chat_id:String(d.telegram_chat_id||'').trim(),
-    name:String(d.name||'').trim(), age:Number(d.age), gender:d.gender,
-    city:String(d.city||'').trim(), [FIELD_CREATED]:nowIso() };
-  const c = await dbInsert('users',rec);
+  const rec={user_id:uid,telegram_chat_id:String(d.telegram_chat_id||'').trim(),
+    name:String(d.name||'').trim(),age:Number(d.age),gender:d.gender,
+    city:String(d.city||'').trim(),[FIELD_CREATED]:nowIso()};
+  const c=await dbInsert('users',rec);
   return Object.assign({},c||{},{user_id:uid});
 }
 async function getUser(uid){
   if(!uid) return null;
-  const list = await dbList('users');
-  return list.filter(u=>u.user_id===uid)[0] || null;
+  const list=await dbList('users');
+  return list.filter(u=>u.user_id===uid)[0]||null;
 }
 async function createProfile(d){
   const pid='PROFILE_'+nextSeq('profile',100001);
-  const rec={ profile_id:pid, user_id:d.user_id, name:String(d.name||'').trim(),
-    age:Number(d.age), gender:d.gender, looking_for:d.looking_for,
-    city:String(d.city||'').trim(), description:String(d.description||''),
-    interests:String(d.interests||''), photo_url:d.photo_url||FALLBACK_IMG,
-    [FIELD_CREATED]:nowIso(), [FIELD_UPDATED]:nowIso(),
-    is_visible:d.is_visible!==false };
+  const rec={profile_id:pid,user_id:d.user_id,name:String(d.name||'').trim(),
+    age:Number(d.age),gender:d.gender,looking_for:d.looking_for,
+    city:String(d.city||'').trim(),description:String(d.description||''),
+    interests:String(d.interests||''),photo_url:d.photo_url||svgPlaceholder('Фото'),
+    [FIELD_CREATED]:nowIso(),[FIELD_UPDATED]:nowIso(),
+    is_visible:d.is_visible!==false};
   const c=await dbInsert('profiles',rec);
-  return Object.assign({},c||{},{profile_id:pid, user_id:d.user_id});
+  return Object.assign({},c||{},{profile_id:pid,user_id:d.user_id});
 }
 async function updateProfile(id,patch){
-  const p=Object.assign({},patch); p[FIELD_UPDATED]=nowIso();
+  const p=Object.assign({},patch);p[FIELD_UPDATED]=nowIso();
   return await dbUpdate('profiles',id,p);
 }
 
-/* ================= LOCAL LIKES (fallback) ================= */
-function localLikesAll(){ return lsGet(LOCAL_LIKES_KEY, []); }
-function localLikesSave(arr){ lsSet(LOCAL_LIKES_KEY, arr); }
-function localLikesAdd(like){ const a=localLikesAll(); a.push(like); localLikesSave(a); }
-function localLikesRemove(id){ const a=localLikesAll().filter(l=>l.Id!==id); localLikesSave(a); }
+/* ================= LOCAL LIKES ================= */
+function localLikesAll(){return lsGet(LOCAL_LIKES_KEY,[]);}
+function localLikesSave(arr){lsSet(LOCAL_LIKES_KEY,arr);}
+function localLikesAdd(like){const a=localLikesAll();a.push(like);localLikesSave(a);}
+function localLikesRemove(id){localLikesSave(localLikesAll().filter(l=>l.Id!==id));}
 
-function localMatchesAll(){ return lsGet(LOCAL_MATCH_KEY, []); }
-function localMatchesSave(arr){ lsSet(LOCAL_MATCH_KEY, arr); }
-function localMatchesAdd(m){ const a=localMatchesAll(); a.push(m); localMatchesSave(a); }
-
-/* ================= LIKE (оптимистично) ================= */
+/* ================= LIKE ================= */
 async function handleLike(profile){
   if(state.busy) return;
-  if(!state.user){ showAuthOverlay(); return; }
+  if(!state.user){showAuthOverlay();return;}
   if(!profile) return;
-  const me = state.user;
-  if(profile.user_id===me.user_id){ toast('Нельзя лайкнуть себя','error'); return; }
-  const already = state.likes.filter(l=>l.from_user_id===me.user_id && l.to_user_id===profile.user_id)[0];
-  if(already){ toast('Вы уже лайкнули','warn'); return; }
+  const me=state.user;
+  if(profile.user_id===me.user_id){toast('Нельзя лайкнуть себя','error');return;}
+  const already=state.likes.filter(l=>l.from_user_id===me.user_id&&l.to_user_id===profile.user_id)[0];
+  if(already){toast('Вы уже лайкнули','warn');return;}
 
-  state.busy = true;
+  state.busy=true;
   setStatus('лайк…','loading');
 
-  /* 1. СОХРАНЯЕМ ЛОКАЛЬНО */
-  const localLike = {
-    Id: 'local_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
-    from_user_id: me.user_id,
-    to_user_id: profile.user_id,
-    [FIELD_CREATED]: nowIso(),
-    _local: true
+  const localLike={
+    Id:'local_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    from_user_id:me.user_id,to_user_id:profile.user_id,
+    [FIELD_CREATED]:nowIso(),_local:true
   };
   state.likes.push(localLike);
   localLikesAdd(localLike);
 
-  /* 2. ОБНОВЛЯЕМ UI СРАЗУ */
-  const card = document.getElementById('mainCard');
-  if(card){ card.classList.add('fly-right'); await sleep(280); }
   state.deckIndex++;
   render();
-  toast('❤️ Лайк отправлен','success');
+  toast('💜 Сигнал отправлен','success');
   setStatus('сохранено','ok');
-  console.log('[LIKE] локально: '+me.user_id+' → '+profile.user_id);
+  console.log('[LIKE] '+me.user_id+' → '+profile.user_id);
 
-  /* 3. СИНХРОНИЗАЦИЯ С NOCODB В ФОНЕ */
-  syncLikeInBackground(localLike, profile);
-  /* 4. ПРОВЕРКА ВЗАИМНОСТИ */
-  checkMutualInBackground(me, profile);
+  syncLikeInBackground(localLike,profile);
+  checkMutualInBackground(me,profile);
 
-  state.busy = false;
+  state.busy=false;
 }
-
-async function syncLikeInBackground(localLike, profile){
-  const body = { from_user_id: localLike.from_user_id, to_user_id: localLike.to_user_id };
+async function syncLikeInBackground(localLike,profile){
+  const body={from_user_id:localLike.from_user_id,to_user_id:localLike.to_user_id};
   try{
-    const result = await dbInsert('likes', Object.assign({},body,{ [FIELD_CREATED]: localLike[FIELD_CREATED] }));
-    console.log('[SYNC] лайк сохранён в NocoDB: ', result);
+    const result=await dbInsert('likes',Object.assign({},body,{[FIELD_CREATED]:localLike[FIELD_CREATED]}));
+    console.log('[SYNC] лайк сохранён:',result);
     setStatus('синхронизировано','ok');
     localLikesRemove(localLike.Id);
-    if(result && result.Id) localLike.Id = result.Id;
-    // Обновим из NocoDB
-    setTimeout(()=>{ refreshData().then(()=>render()); }, 500);
+    if(result && result.Id) localLike.Id=result.Id;
+    setTimeout(()=>refreshData().then(()=>render()),500);
   }catch(e){
-    console.error('[SYNC] не удалось сохранить лайк в NocoDB: '+e.message);
-    setStatus('локально (оффлайн)','err');
-    toast('Лайк сохранён локально. NocoDB недоступен.','warn');
+    console.error('[SYNC] не удалось: '+e.message);
+    setStatus('локально','err');
+    toast('Сигнал сохранён локально. NocoDB недоступен.','warn');
   }
 }
-
-async function checkMutualInBackground(me, profile){
+async function checkMutualInBackground(me,profile){
   try{
-    const likes = await dbList('likes');
-    const mutual = likes.filter(l=>l.from_user_id===profile.user_id && l.to_user_id===me.user_id)[0];
+    const likes=await dbList('likes');
+    const mutual=likes.filter(l=>l.from_user_id===profile.user_id&&l.to_user_id===me.user_id)[0];
     if(mutual){
-      try{ await dbInsert('matches',{ user1_id:me.user_id, user2_id:profile.user_id, [FIELD_CREATED]:nowIso() }); }
-      catch(e){ console.warn('match insert failed:', e.message); }
-      const myLink = state.profile ? profileLink(state.profile.profile_id) : '';
-      const theirLink = profileLink(profile.profile_id);
-      // Telegram
+      try{await dbInsert('matches',{user1_id:me.user_id,user2_id:profile.user_id,[FIELD_CREATED]:nowIso()});}
+      catch(e){console.warn('match insert:',e.message);}
+      const myLink=state.profile?profileLink(state.profile.profile_id):'';
+      const theirLink=profileLink(profile.profile_id);
       if(me.telegram_chat_id){
         const k1='match_'+me.user_id+'_'+profile.user_id;
-        if(!wasSent(k1)){ markSent(k1);
-          sendTelegramMessage(me.telegram_chat_id, '💚 Взаимная симпатия!\n\nОткрыть анкету: '+theirLink); }
+        if(!wasSent(k1)){markSent(k1);
+          sendTelegramMessage(me.telegram_chat_id,'💜 Взаимный сигнал!\n\nОткрыть анкету: '+theirLink);}
       }
-      const owner = await getUser(profile.user_id);
+      const owner=await getUser(profile.user_id);
       if(owner && owner.telegram_chat_id){
         const k2='match_'+profile.user_id+'_'+me.user_id;
-        if(!wasSent(k2)){ markSent(k2);
-          sendTelegramMessage(owner.telegram_chat_id, '💚 Взаимная симпатия!\n\nОткрыть анкету: '+(myLink||theirLink)); }
+        if(!wasSent(k2)){markSent(k2);
+          sendTelegramMessage(owner.telegram_chat_id,'💜 Взаимный сигнал!\n\nОткрыть анкету: '+(myLink||theirLink));}
       }
       showMatchModal(profile);
-      await refreshData();
-      render();
+      await refreshData();render();
     }
-  }catch(e){
-    console.warn('[MUTUAL] '+e.message);
-  }
+  }catch(e){console.warn('[MUTUAL] '+e.message);}
 }
-
 function showMatchModal(profile){
   openModal({
     title:'',
-    body:'<div class="match-box"><div class="match-heart">💚</div>'+
-      '<h2>Взаимная симпатия!</h2><p>Вы понравились друг другу.</p>'+
-      '<img class="match-photo" src="'+esc(profile.photo_url||FALLBACK_IMG)+'" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'">'+
+    body:'<div class="match-box"><div class="match-heart">💜</div>'+
+      '<h2>Взаимный сигнал!</h2><p>Вы понравились друг другу.</p>'+
+      '<img class="match-photo" src="'+esc(profile.photo_url||svgPlaceholder(profile.name))+'">'+
       '<div class="match-name">'+esc(profile.name)+', '+esc(profile.age)+'</div></div>',
     footer:'<button class="btn-primary" id="matchOpen" type="button">Открыть анкету</button>',
-    onMount:w=>{ $('#matchOpen',w).addEventListener('click',()=>{ closeModal(); goToProfile(profile.profile_id); }); }
+    onMount:w=>{$('#matchOpen',w).addEventListener('click',()=>{closeModal();
+      goToProfile(profile.profile_id);});}
   });
 }
 
-async function removeLikeNoco(from,to){
-  const likes = await dbList('likes');
-  const like = likes.filter(l=>l.from_user_id===from && l.to_user_id===to)[0];
-  if(!like) return false;
-  await dbDelete('likes', getRecordId(like));
-  const matches = await dbList('matches');
-  const m = matches.filter(x=>(x.user1_id===from&&x.user2_id===to)||(x.user1_id===to&&x.user2_id===from))[0];
-  if(m) await dbDelete('matches', getRecordId(m));
-  return true;
-}
-
 /* ================= TELEGRAM ================= */
-async function sendTelegramMessage(chatId, text){
+async function sendTelegramMessage(chatId,text){
   if(!chatId) return null;
   if(!CONFIG.telegramBotToken) return null;
   try{
     const url='https://api.telegram.org/bot'+CONFIG.telegramBotToken+'/sendMessage';
-    const res = await fetchWithTimeout(url,{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ chat_id:String(chatId), text:String(text) })
-    }, 10000);
-    const json = await res.json();
+    const res=await fetchWithTimeout(url,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({chat_id:String(chatId),text:String(text)})
+    },10000);
+    const json=await res.json();
     if(!res.ok||json.ok===false) console.warn('[Telegram] '+JSON.stringify(json));
     else console.log('[Telegram] OK');
     return json;
-  }catch(e){ console.warn('[Telegram] '+e.message); return null; }
+  }catch(e){console.warn('[Telegram] '+e.message);return null;}
 }
 
 /* ================= SESSION ================= */
-function saveSession(){ lsSet(SESSION_KEY,{ user:state.user, profile:state.profile, saved_at:nowIso() }); }
-function loadSession(){ const s=lsGet(SESSION_KEY,null); if(s&&s.user){ state.user=s.user; state.profile=s.profile||null; } }
+function saveSession(){lsSet(SESSION_KEY,{user:state.user,profile:state.profile,saved_at:nowIso()});}
+function loadSession(){const s=lsGet(SESSION_KEY,null);if(s&&s.user){state.user=s.user;state.profile=s.profile||null;}}
 
 async function refreshData(){
-  const out = { profiles:[], likes:[], matches:[] };
-  try{ out.profiles = await dbList('profiles'); }catch(e){ console.warn('profiles load fail: '+e.message); }
-  try{ out.likes = await dbList('likes'); }catch(e){ console.warn('likes load fail: '+e.message); }
-  try{ out.matches = await dbList('matches'); }catch(e){ console.warn('matches load fail: '+e.message); }
+  const out={profiles:[],likes:[],matches:[]};
+  try{out.profiles=await dbList('profiles');}catch(e){console.warn('profiles: '+e.message);}
+  try{out.likes=await dbList('likes');}catch(e){console.warn('likes: '+e.message);}
+  try{out.matches=await dbList('matches');}catch(e){console.warn('matches: '+e.message);}
 
-  // Мержим локальные и серверные лайки (локальные — только те, что ещё не синхронизированы)
-  const localLikes = localLikesAll();
-  const serverLikeKeys = new Set(out.likes.map(l=>l.from_user_id+'|'+l.to_user_id));
-  const pendingLocal = localLikes.filter(l=>!serverLikeKeys.has(l.from_user_id+'|'+l.to_user_id));
+  const localLikes=localLikesAll();
+  const serverKeys=new Set(out.likes.map(l=>l.from_user_id+'|'+l.to_user_id));
+  const pending=localLikes.filter(l=>!serverKeys.has(l.from_user_id+'|'+l.to_user_id));
 
-  state.profiles = out.profiles.length ? out.profiles : state.profiles;
-  state.likes = out.likes.concat(pendingLocal);
-  state.matches = out.matches.concat(localMatchesAll());
+  state.profiles=out.profiles.length?out.profiles:state.profiles;
+  state.likes=out.likes.concat(pending);
+  state.matches=out.matches;
 
   if(state.profile){
-    const fresh = state.profiles.filter(p=>p.profile_id===state.profile.profile_id)[0];
-    if(fresh){ state.profile=fresh; saveSession(); }
+    const fresh=state.profiles.filter(p=>p.profile_id===state.profile.profile_id)[0];
+    if(fresh){state.profile=fresh;saveSession();}
   }
-  console.log('[DATA] профилей='+state.profiles.length+' лайков='+state.likes.length+' (из них локальных '+pendingLocal.length+')');
+  console.log('[DATA] профилей='+state.profiles.length+' лайков='+state.likes.length);
 }
 
 /* ================= MISC ================= */
-function profileByUserId(uid){ return uid ? state.profiles.filter(p=>p.user_id===uid)[0]||null : null; }
-function profileByProfileId(pid){ return pid ? state.profiles.filter(p=>p.profile_id===pid)[0]||null : null; }
-function isVisible(p){ return p && p.is_visible!==false && p.is_visible!==0 && p.is_visible!=='0'; }
-function tagsHtml(i){
-  if(!i) return '';
-  return String(i).split(',').map(s=>s.trim()).filter(s=>s.length).slice(0,10)
-    .map(t=>'<span class="tag">#'+esc(t)+'</span>').join('');
+function profileByUserId(uid){return uid?state.profiles.filter(p=>p.user_id===uid)[0]||null:null;}
+function profileByProfileId(pid){return pid?state.profiles.filter(p=>p.profile_id===pid)[0]||null:null;}
+function isVisible(p){return p&&p.is_visible!==false&&p.is_visible!==0&&p.is_visible!=='0';}
+
+function chipIcon(name){
+  const base='width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  const icons={
+    city:'<svg '+base+'><path d="M12 21s7-6.2 7-11A7 7 0 0 0 5 10c0 4.8 7 11 7 11Z"></path><circle cx="12" cy="10" r="2.2"></circle></svg>',
+    gender:'<svg '+base+'><circle cx="12" cy="12" r="5"></circle><path d="M12 3v4M12 17v4M5 12H3M21 12h-2"></path></svg>',
+    age:'<svg '+base+'><rect x="3" y="5" width="18" height="16" rx="3"></rect><path d="M8 3v4M16 3v4M3 10h18"></path></svg>',
+    looking:'<svg '+base+'><path d="m12 20 8-8-8-8-8 8Z"></path></svg>',
+    star:'<svg width="16" height="16" viewBox="0 0 24 24" fill="#c084fc" stroke="none"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"></path></svg>'
+  };
+  return icons[name]||'';
 }
-const genderLabel = g => g==='male'?'Мужчина':g==='female'?'Женщина':'Не указан';
-const lookingLabel = g => g==='male'?'Мужчину':g==='female'?'Женщину':'Не важно';
+const genderLabel = g => g==='male'?'Мужчина':g==='female'?'Женщина':'';
+const lookingLabel = g => g==='male'?'ищет Мужчину':g==='female'?'ищет Женщину':'';
 const genderOptions = sel => '<option value="female"'+(sel==='female'?' selected':'')+'>Женщина</option>'+
   '<option value="male"'+(sel==='male'?' selected':'')+'>Мужчина</option>';
 const lookingOptions = sel => '<option value="male"'+(sel==='male'?' selected':'')+'>Мужчину</option>'+
@@ -725,74 +896,75 @@ const lookingOptions = sel => '<option value="male"'+(sel==='male'?' selected':'
   '<option value="any"'+(sel==='any'?' selected':'')+'>Не важно</option>';
 
 /* ================= AUTH ================= */
-function hideAuthOverlay(){ const o=document.getElementById('authOverlay'); if(o) o.remove(); }
+function hideAuthOverlay(){const o=document.getElementById('authOverlay');if(o) o.remove();}
 function showAuthOverlay(){
   if(document.getElementById('authOverlay')) return;
-  const prefName=platformName(), prefChat=platformChatId();
-  const prefAvat=platformAvatarUrl(), prefUser=platformUsername();
+  const prefName=platformName(),prefChat=platformChatId();
+  const prefAvat=platformAvatarUrl(),prefUser=platformUsername();
   const ov=document.createElement('div');
-  ov.id='authOverlay'; ov.className='auth-overlay';
+  ov.id='authOverlay';ov.className='auth-overlay';
   ov.innerHTML=
-    '<div class="auth-card"><div class="auth-logo">💖</div><h1>HeartLink</h1>'+
-    '<p class="auth-sub">Создайте аккаунт</p>'+
-    (prefUser?'<div style="font-size:12px;color:var(--muted);text-align:center;margin-top:-16px;margin-bottom:16px;">@'+esc(prefUser)+'</div>':'')+
-    '<form id="regForm" class="form" novalidate>'+
-      '<label>Имя'+(prefName?'<span class="badge-auto">из Telegram</span>':'')+'<input name="name" type="text" maxlength="50" value="'+esc(prefName)+'"></label>'+
-      '<div class="row2"><label>Возраст<input name="age" type="number" min="18" max="100"></label>'+
-      '<label>Пол<select name="gender">'+genderOptions('female')+'</select></label></div>'+
-      '<label>Город<input name="city" type="text" maxlength="60"></label>'+
-      '<label>О себе<textarea name="description" rows="3" maxlength="1000"></textarea></label>'+
-      '<label>Кого ищу<select name="looking_for">'+lookingOptions('male')+'</select></label>'+
-      '<div class="photo-picker">'+
-        '<img id="regPhotoPreview" src="'+esc(prefAvat||FALLBACK_IMG)+'" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'">'+
-        '<label class="photo-btn">📷 Фото<input id="regPhotoInput" type="file" accept="image/*" hidden></label>'+
-      '</div>'+
-      '<label>Telegram Chat ID'+(prefChat?'<span class="badge-auto">из Telegram</span>':'')+'<input name="telegram_chat_id" type="text" maxlength="40" value="'+esc(prefChat)+'"></label>'+
-      '<div class="err" id="regErr"></div>'+
-      '<button class="btn-primary" type="submit">Создать аккаунт</button>'+
-    '</form></div>';
+    '<div class="auth-card">'+
+      '<img class="auth-logo-img" src="https://i.postimg.cc/7hk52csC/Secret-Signal-Ag-AD5ao-AAgq-X2Es.gif" alt="Secret Signal">'+
+      '<div class="tagline">SECRET SIGNAL</div>'+
+      '<h1>Secret Signal</h1>'+
+      '<p class="auth-sub">Создайте аккаунт, чтобы начать знакомиться</p>'+
+      (prefUser?'<div style="font-size:12px;color:#8b8b96;text-align:center;margin-top:-16px;margin-bottom:16px;">@'+esc(prefUser)+'</div>':'')+
+      '<form id="regForm" class="form" novalidate>'+
+        '<label>Имя'+(prefName?'<span class="badge-auto">из Telegram</span>':'')+
+          '<input name="name" type="text" maxlength="50" value="'+esc(prefName)+'"></label>'+
+        '<div class="row2"><label>Возраст<input name="age" type="number" min="18" max="100" placeholder="18+"></label>'+
+          '<label>Пол<select name="gender">'+genderOptions('female')+'</select></label></div>'+
+        '<label>Город<input name="city" type="text" maxlength="60" placeholder="Москва"></label>'+
+        '<label>О себе<textarea name="description" rows="3" maxlength="1000" placeholder="Пара слов о себе"></textarea></label>'+
+        '<label>Кого ищу<select name="looking_for">'+lookingOptions('male')+'</select></label>'+
+        '<div class="photo-picker"><img id="regPhotoPreview" src="'+esc(prefAvat||svgPlaceholder('Фото'))+'">'+
+          '<label class="photo-btn">📷 Выбрать фото<input id="regPhotoInput" type="file" accept="image/*" hidden></label></div>'+
+        '<label>Telegram Chat ID'+(prefChat?'<span class="badge-auto">из Telegram</span>':'')+
+          '<input name="telegram_chat_id" type="text" maxlength="40" value="'+esc(prefChat)+'"></label>'+
+        '<div class="err" id="regErr"></div>'+
+        '<button class="btn-primary" type="submit">Создать аккаунт</button></form></div>';
   document.body.appendChild(ov);
-  let photoData = prefAvat || '';
-  $('#regPhotoInput',ov).addEventListener('change', async e=>{
-    const f=e.target.files&&e.target.files[0]; if(!f)return;
-    try{ photoData=await fileToDataUrl(f); $('#regPhotoPreview',ov).src=photoData; }
-    catch(err){ toast('Ошибка фото','error'); }
+  let photoData=prefAvat||'';
+  $('#regPhotoInput',ov).addEventListener('change',async e=>{
+    const f=e.target.files&&e.target.files[0];if(!f)return;
+    try{photoData=await fileToDataUrl(f);$('#regPhotoPreview',ov).src=photoData;}
+    catch(err){toast('Ошибка фото','error');}
   });
-  $('#regForm',ov).addEventListener('submit', async e=>{
+  $('#regForm',ov).addEventListener('submit',async e=>{
     e.preventDefault();
-    const errBox=$('#regErr',ov); errBox.textContent='';
+    const errBox=$('#regErr',ov);errBox.textContent='';
     const fd=new FormData(e.target);
     const name=String(fd.get('name')||'').trim();
     const age=Number(fd.get('age'));
     const city=String(fd.get('city')||'').trim();
-    const gender=fd.get('gender'), lookingFor=fd.get('looking_for');
+    const gender=fd.get('gender'),lookingFor=fd.get('looking_for');
     const description=String(fd.get('description')||'').trim();
     const chatId=String(fd.get('telegram_chat_id')||'').trim();
-    if(name.length<2||name.length>50){ errBox.textContent='Имя 2–50.'; return; }
-    if(!isFinite(age)||age<18||age>100){ errBox.textContent='Возраст 18–100.'; return; }
-    if(city.length<2){ errBox.textContent='Укажите город.'; return; }
+    if(name.length<2||name.length>50){errBox.textContent='Имя 2–50 символов.';return;}
+    if(!isFinite(age)||age<18||age>100){errBox.textContent='Возраст 18–100.';return;}
+    if(city.length<2){errBox.textContent='Укажите город.';return;}
     const btn=e.target.querySelector('button[type=submit]');
-    btn.disabled=true; btn.textContent='Создаём…';
+    btn.disabled=true;btn.textContent='Создаём…';
     setStatus('регистрация…','loading');
     try{
-      const user = await createUser({ name,age,gender,city,telegram_chat_id:chatId });
+      const user=await createUser({name,age,gender,city,telegram_chat_id:chatId});
       state.user=user;
-      state.pendingRegistration={ name,age,gender,city,looking_for:lookingFor,description,photo_url:photoData||'' };
-      saveSession(); hideAuthOverlay();
+      state.pendingRegistration={name,age,gender,city,looking_for:lookingFor,
+        description,photo_url:photoData||''};
+      saveSession();hideAuthOverlay();
       toast('🎉 Аккаунт создан: '+user.user_id,'success');
       setStatus('готово','ok');
-      openProfileEditor(true); render();
+      openProfileEditor(true);render();
     }catch(err){
-      console.error('Registration: '+err.message);
       errBox.textContent='Ошибка: '+err.message;
-      btn.disabled=false; btn.textContent='Создать аккаунт';
+      btn.disabled=false;btn.textContent='Создать аккаунт';
       setStatus('ошибка','err');
     }
   });
 }
-
 function fileToDataUrl(file,maxSize,quality){
-  maxSize=maxSize||900; quality=quality||0.82;
+  maxSize=maxSize||900;quality=quality||0.82;
   return new Promise((resolve,reject)=>{
     const r=new FileReader();
     r.onload=()=>{
@@ -801,11 +973,11 @@ function fileToDataUrl(file,maxSize,quality){
         try{
           let w=img.width,h=img.height;
           const sc=Math.min(1,maxSize/Math.max(w,h));
-          w=Math.max(1,Math.round(w*sc)); h=Math.max(1,Math.round(h*sc));
-          const c=document.createElement('canvas'); c.width=w; c.height=h;
+          w=Math.max(1,Math.round(w*sc));h=Math.max(1,Math.round(h*sc));
+          const c=document.createElement('canvas');c.width=w;c.height=h;
           c.getContext('2d').drawImage(img,0,0,w,h);
           resolve(c.toDataURL('image/jpeg',quality));
-        }catch(e){ resolve(r.result); }
+        }catch(e){resolve(r.result);}
       };
       img.onerror=()=>reject(new Error('Ошибка чтения'));
       img.src=r.result;
@@ -817,7 +989,7 @@ function fileToDataUrl(file,maxSize,quality){
 
 /* ================= PROFILE EDITOR ================= */
 function openProfileEditor(isFirst){
-  const p=state.profile||{}, pend=state.pendingRegistration||{}, u=state.user||{};
+  const p=state.profile||{},pend=state.pendingRegistration||{},u=state.user||{};
   const base={
     name:p.name||pend.name||u.name||'',
     age:p.age||pend.age||u.age||'',
@@ -829,11 +1001,11 @@ function openProfileEditor(isFirst){
     photo_url:p.photo_url||pend.photo_url||'',
     is_visible:p.is_visible!==false
   };
-  let photoData = base.photo_url || '';
+  let photoData=base.photo_url||'';
   openModal({
     title:isFirst?'📝 Создайте анкету':'✏️ Редактировать',
     body:
-      '<div class="photo-picker"><img id="pePreview" src="'+esc(photoData||FALLBACK_IMG)+'" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'">'+
+      '<div class="photo-picker"><img id="pePreview" src="'+esc(photoData||svgPlaceholder('Фото'))+'">'+
         '<label class="photo-btn">📷 Фото<input id="pePhoto" type="file" accept="image/*" hidden></label></div>'+
       '<div class="form">'+
         '<label>Имя<input id="peName" type="text" maxlength="50" value="'+esc(base.name)+'"></label>'+
@@ -842,18 +1014,18 @@ function openProfileEditor(isFirst){
         '<div class="row2"><label>Пол<select id="peGender">'+genderOptions(base.gender)+'</select></label>'+
         '<label>Кого ищу<select id="peLooking">'+lookingOptions(base.looking_for)+'</select></label></div>'+
         '<label>Описание<textarea id="peDesc" rows="3" maxlength="1000">'+esc(base.description)+'</textarea></label>'+
-        '<label>Интересы<input id="peInterests" type="text" maxlength="200" value="'+esc(base.interests)+'"></label>'+
-        '<label class="check"><input type="checkbox" id="peVisible"'+(base.is_visible?' checked':'')+'> Показывать анкету</label>'+
+        '<label>Интересы (через запятую)<input id="peInterests" type="text" maxlength="200" value="'+esc(base.interests)+'"></label>'+
+        '<label class="check"><input type="checkbox" id="peVisible"'+(base.is_visible?' checked':'')+'> Показывать анкету другим</label>'+
         '<div class="err" id="peErr"></div></div>',
     footer:'<button class="btn-primary" id="peSave" type="button">Сохранить</button>',
     onMount:w=>{
-      $('#pePhoto',w).addEventListener('change', async e=>{
-        const f=e.target.files&&e.target.files[0]; if(!f)return;
-        try{ photoData=await fileToDataUrl(f); $('#pePreview',w).src=photoData; }
-        catch(err){ toast('Ошибка фото','error'); }
+      $('#pePhoto',w).addEventListener('change',async e=>{
+        const f=e.target.files&&e.target.files[0];if(!f)return;
+        try{photoData=await fileToDataUrl(f);$('#pePreview',w).src=photoData;}
+        catch(err){toast('Ошибка фото','error');}
       });
-      $('#peSave',w).addEventListener('click', async ()=>{
-        const errBox=$('#peErr',w); errBox.textContent='';
+      $('#peSave',w).addEventListener('click',async ()=>{
+        const errBox=$('#peErr',w);errBox.textContent='';
         const name=$('#peName',w).value.trim();
         const age=Number($('#peAge',w).value);
         const city=$('#peCity',w).value.trim();
@@ -862,28 +1034,33 @@ function openProfileEditor(isFirst){
         const description=$('#peDesc',w).value.trim();
         const interests=$('#peInterests',w).value.trim();
         const visible=$('#peVisible',w).checked;
-        if(name.length<2||name.length>50){ errBox.textContent='Имя 2–50.'; return; }
-        if(!isFinite(age)||age<18||age>100){ errBox.textContent='Возраст 18–100.'; return; }
-        if(city.length<2){ errBox.textContent='Город обязателен.'; return; }
-        const btn=$('#peSave',w); btn.disabled=true; btn.textContent='Сохраняем…';
+        if(name.length<2||name.length>50){errBox.textContent='Имя 2–50.';return;}
+        if(!isFinite(age)||age<18||age>100){errBox.textContent='Возраст 18–100.';return;}
+        if(city.length<2){errBox.textContent='Город обязателен.';return;}
+        const btn=$('#peSave',w);btn.disabled=true;btn.textContent='Сохраняем…';
         setStatus('сохранение…','loading');
         try{
           if(state.profile && getRecordId(state.profile)){
-            await updateProfile(getRecordId(state.profile),{ name,age,city,gender,looking_for:lookingFor,description,interests,photo_url:photoData||FALLBACK_IMG,is_visible:visible });
-            state.profile=Object.assign({},state.profile,{ name,age,city,gender,looking_for:lookingFor,description,interests,photo_url:photoData||FALLBACK_IMG,is_visible:visible });
+            await updateProfile(getRecordId(state.profile),{name,age,city,gender,
+              looking_for:lookingFor,description,interests,
+              photo_url:photoData||svgPlaceholder('Фото'),is_visible:visible});
+            state.profile=Object.assign({},state.profile,{name,age,city,gender,
+              looking_for:lookingFor,description,interests,
+              photo_url:photoData||svgPlaceholder('Фото'),is_visible:visible});
             toast('✏️ Обновлено','success');
           }else{
-            const created = await createProfile({ user_id:state.user.user_id, name,age,city,gender,looking_for:lookingFor,description,interests,photo_url:photoData||FALLBACK_IMG,is_visible:visible });
+            const created=await createProfile({user_id:state.user.user_id,name,age,city,
+              gender,looking_for:lookingFor,description,interests,
+              photo_url:photoData||svgPlaceholder('Фото'),is_visible:visible});
             state.profile=created;
             toast('🎉 Анкета создана: '+created.profile_id,'success');
           }
           state.pendingRegistration=null;
-          saveSession(); setStatus('готово','ok'); closeModal();
-          await refreshData(); render();
+          saveSession();setStatus('готово','ok');closeModal();
+          await refreshData();render();
         }catch(err){
-          console.error('saveProfile: '+err.message);
           errBox.textContent='Ошибка: '+err.message;
-          btn.disabled=false; btn.textContent='Сохранить';
+          btn.disabled=false;btn.textContent='Сохранить';
           setStatus('ошибка','err');
         }
       });
@@ -893,39 +1070,45 @@ function openProfileEditor(isFirst){
 
 /* ================= COMMENT ================= */
 function openCommentModal(profile){
-  if(!state.user){ showAuthOverlay(); return; }
-  if(profile.user_id===state.user.user_id){ toast('Это ваша анкета','warn'); return; }
+  if(!state.user){showAuthOverlay();return;}
+  if(profile.user_id===state.user.user_id){toast('Это ваша анкета','warn');return;}
   openModal({
     title:'💬 Сообщение',
-    body:'<div class="comment-target"><img src="'+esc(profile.photo_url||FALLBACK_IMG)+'" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'">'+
+    body:'<div class="comment-target"><img src="'+esc(profile.photo_url||svgPlaceholder(profile.name))+'">'+
       '<div><b>'+esc(profile.name)+', '+esc(profile.age)+'</b><span>📍 '+esc(profile.city)+'</span></div></div>'+
-      '<textarea id="commentText" rows="4" maxlength="500" style="width:100%;padding:13px 14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);color:#f4f1fa;outline:none;font-size:16px;" placeholder="Напишите сообщение..."></textarea>'+
-      '<div class="counter"><span id="commentCount">0</span>/500</div><div class="err" id="commentErr"></div>',
+      '<textarea id="commentText" rows="4" maxlength="500" style="width:100%;padding:13px 14px;'+
+        'border-radius:14px;background:#16161c;border:1px solid rgba(168,85,247,.16);color:#fff;'+
+        'outline:none;font-size:16px;font-family:inherit;resize:vertical;" placeholder="Напишите сообщение..."></textarea>'+
+      '<div class="counter"><span id="commentCount">0</span>/500</div>'+
+      '<div class="err" id="commentErr"></div>',
     footer:'<button class="btn-primary" id="commentSend" type="button">Отправить</button>',
     onMount:w=>{
-      const ta=$('#commentText',w), c=$('#commentCount',w), errBox=$('#commentErr',w);
+      const ta=$('#commentText',w),c=$('#commentCount',w),errBox=$('#commentErr',w);
       ta.addEventListener('input',()=>c.textContent=ta.value.length);
       setTimeout(()=>ta.focus(),250);
-      $('#commentSend',w).addEventListener('click', async ()=>{
-        const text=ta.value.trim(); errBox.textContent='';
-        if(!text){ errBox.textContent='Пустое сообщение.'; return; }
-        if(text.length>500){ errBox.textContent='Максимум 500.'; return; }
-        const btn=$('#commentSend',w); btn.disabled=true; btn.textContent='Отправляем…';
+      $('#commentSend',w).addEventListener('click',async ()=>{
+        const text=ta.value.trim();errBox.textContent='';
+        if(!text){errBox.textContent='Пустое сообщение.';return;}
+        if(text.length>500){errBox.textContent='Максимум 500 символов.';return;}
+        const btn=$('#commentSend',w);btn.disabled=true;btn.textContent='Отправляем…';
         try{
-          await dbInsert('comments',{ from_user_id:state.user.user_id, to_user_id:profile.user_id,
-            profile_id:profile.profile_id, text, [FIELD_CREATED]:nowIso() });
-          const owner = await getUser(profile.user_id);
-          const myLink = state.profile ? profileLink(state.profile.profile_id) : '';
+          await dbInsert('comments',{from_user_id:state.user.user_id,
+            to_user_id:profile.user_id,profile_id:profile.profile_id,
+            text,[FIELD_CREATED]:nowIso()});
+          const owner=await getUser(profile.user_id);
+          const myLink=state.profile?profileLink(state.profile.profile_id):'';
           if(owner && owner.telegram_chat_id){
-            await sendTelegramMessage(owner.telegram_chat_id, '💬 Вам написали:\n\n'+text+'\n\nОткрыть анкету: '+(myLink||'(нет)'));
+            await sendTelegramMessage(owner.telegram_chat_id,
+              '💬 Вам написали:\n\n'+text+'\n\nОткрыть анкету: '+(myLink||'(нет)'));
           }
-          try{ await dbInsert('notifications',{ user_id:profile.user_id, from_user_id:state.user.user_id,
-            type:'comment', message:'💬 Вам написали: '+text.slice(0,80),
-            profile_id:profile.profile_id, is_read:false, [FIELD_CREATED]:nowIso() }); }catch(e){}
-          toast('💬 Отправлено','success'); closeModal();
+          try{await dbInsert('notifications',{user_id:profile.user_id,
+            from_user_id:state.user.user_id,type:'comment',
+            message:'💬 Вам написали: '+text.slice(0,80),
+            profile_id:profile.profile_id,is_read:false,[FIELD_CREATED]:nowIso()});}catch(e){}
+          toast('💬 Отправлено','success');closeModal();
         }catch(err){
           errBox.textContent='Ошибка: '+err.message;
-          btn.disabled=false; btn.textContent='Отправить';
+          btn.disabled=false;btn.textContent='Отправить';
         }
       });
     }
@@ -934,48 +1117,63 @@ function openCommentModal(profile){
 
 function openUnlikeConfirm(profile){
   openModal({
-    title:'Убрать лайк?',
-    body:'<p class="muted-text">Убрать лайк с <b>'+esc(profile.name)+'</b>?</p>',
+    title:'Убрать сигнал?',
+    body:'<p style="color:#8b8b96;font-size:14.5px;line-height:1.5;">Убрать сигнал с <b style="color:#fff;">'+
+      esc(profile.name)+'</b>?</p>',
     footer:'<div class="row2"><button class="btn-ghost" data-close="1" type="button">Отмена</button>'+
       '<button class="btn-primary" id="unlikeYes" type="button">Убрать</button></div>',
     onMount:w=>{
-      $('#unlikeYes',w).addEventListener('click', async ()=>{
+      $('#unlikeYes',w).addEventListener('click',async ()=>{
         try{
-          await removeLikeNoco(state.user.user_id, profile.user_id);
-          state.likes = state.likes.filter(l=>!(l.from_user_id===state.user.user_id && l.to_user_id===profile.user_id));
-          toast('Лайк убран','success'); closeModal(); render();
-        }catch(err){ toast('Ошибка: '+err.message,'error'); }
+          const likes=await dbList('likes');
+          const like=likes.filter(l=>l.from_user_id===state.user.user_id&&
+            l.to_user_id===profile.user_id)[0];
+          if(like) await dbDelete('likes',getRecordId(like));
+          const matches=await dbList('matches');
+          const m=matches.filter(x=>(x.user1_id===state.user.user_id&&x.user2_id===profile.user_id)||
+            (x.user1_id===profile.user_id&&x.user2_id===state.user.user_id))[0];
+          if(m) await dbDelete('matches',getRecordId(m));
+          state.likes=state.likes.filter(l=>!(l.from_user_id===state.user.user_id&&
+            l.to_user_id===profile.user_id));
+          toast('Сигнал убран','success');closeModal();await refreshData();render();
+        }catch(err){toast('Ошибка: '+err.message,'error');}
       });
     }
   });
 }
 
 async function copyMyLink(){
-  if(!state.profile){ toast('Сначала создайте анкету','warn'); return; }
-  const link = profileLink(state.profile.profile_id);
+  if(!state.profile){toast('Сначала создайте анкету','warn');return;}
+  const link=profileLink(state.profile.profile_id);
   try{
-    if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(link); toast('📋 Скопировано','success'); return; }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(link);toast('📋 Скопировано','success');return;
+    }
     throw new Error('no');
   }catch(e){
-    const ta=document.createElement('textarea'); ta.value=link; ta.style.position='fixed'; ta.style.opacity='0';
-    document.body.appendChild(ta); ta.select();
-    try{ document.execCommand('copy'); toast('📋 Скопировано','success'); }catch(err){ toast('Ссылка: '+link,'info'); }
+    const ta=document.createElement('textarea');ta.value=link;
+    ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');toast('📋 Скопировано','success');}
+    catch(err){toast('Ссылка: '+link,'info');}
     ta.remove();
   }
 }
 
 function logout(){
   openModal({
-    title:'Выйти?', body:'<p class="muted-text">Сессия удалится.</p>',
+    title:'Выйти?',
+    body:'<p style="color:#8b8b96;font-size:14.5px;">Сессия будет удалена.</p>',
     footer:'<div class="row2"><button class="btn-ghost" data-close="1" type="button">Отмена</button>'+
       '<button class="btn-primary" id="logoutYes" type="button">Выйти</button></div>',
     onMount:w=>{
       $('#logoutYes',w).addEventListener('click',()=>{
         lsDel(SESSION_KEY);
-        state.user=null; state.profile=null; state.pendingRegistration=null; state.deckIndex=0;
+        state.user=null;state.profile=null;state.pendingRegistration=null;state.deckIndex=0;
         closeModal();
-        try{ if(location.protocol==='file:') location.hash=''; else history.replaceState({},'','#'); }catch(e){}
-        state.view='discover'; render(); toast('Вы вышли','info');
+        try{if(location.protocol==='file:') location.hash='';
+          else history.replaceState({},'','#');}catch(e){}
+        state.view='discover';render();toast('Вы вышли','info');
       });
     }
   });
@@ -983,288 +1181,296 @@ function logout(){
 
 /* ================= VIEWS ================= */
 function viewDiscover(){
-  const me=state.user; if(!me) return '';
+  const me=state.user;if(!me) return '';
   const myLikes={};
-  state.likes.forEach(l=>{ if(l.from_user_id===me.user_id) myLikes[l.to_user_id]=true; });
-  let list = state.profiles.filter(p=>p.user_id!==me.user_id && isVisible(p) && !myLikes[p.user_id]);
-  const f=state.filters;
-  list=list.filter(p=>{
-    const age=Number(p.age)||0;
-    if(age<f.ageFrom||age>f.ageTo) return false;
-    if(f.city && String(p.city||'').toLowerCase().indexOf(f.city.toLowerCase())===-1) return false;
-    if(f.gender && p.gender!==f.gender) return false;
-    if(f.lookingFor && f.lookingFor!=='any' && p.looking_for!==f.lookingFor && p.looking_for!=='any') return false;
-    return true;
-  });
-  if(state.deckIndex>=list.length) state.deckIndex=0;
-  if(state.deckIndex<0) state.deckIndex=0;
-
-  const filtersHtml =
-    '<div class="filters'+(state.filtersOpen?' open':'')+'">'+
-      '<button class="filters-toggle" data-act="toggleFilters" type="button"><span>🔎 Фильтры</span><span class="chev">▼</span></button>'+
-      '<div class="filters-body">'+
-        '<div class="row2"><label>Возраст от<input id="fAgeFrom" type="number" min="18" max="100" value="'+esc(f.ageFrom)+'"></label>'+
-        '<label>Возраст до<input id="fAgeTo" type="number" min="18" max="100" value="'+esc(f.ageTo)+'"></label></div>'+
-        '<label>Город<input id="fCity" type="text" maxlength="60" value="'+esc(f.city)+'"></label>'+
-        '<div class="row2"><label>Пол<select id="fGender"><option value="">Любой</option><option value="female"'+(f.gender==='female'?' selected':'')+'>Женщина</option><option value="male"'+(f.gender==='male'?' selected':'')+'>Мужчина</option></select></label>'+
-        '<label>Кого ищет<select id="fLookingFor"><option value="">Любой</option><option value="male"'+(f.lookingFor==='male'?' selected':'')+'>Мужчину</option><option value="female"'+(f.lookingFor==='female'?' selected':'')+'>Женщину</option></select></label></div>'+
-        '<div class="row2"><button class="btn-ghost" data-act="resetFilters" type="button">Сбросить</button>'+
-        '<button class="btn-primary" data-act="applyFilters" type="button">Применить</button></div>'+
-      '</div></div>';
+  state.likes.forEach(l=>{if(l.from_user_id===me.user_id) myLikes[l.to_user_id]=true;});
+  let list=state.profiles.filter(p=>p.user_id!==me.user_id&&isVisible(p)&&!myLikes[p.user_id]);
 
   if(!list.length){
-    return filtersHtml+
-      '<div class="empty"><div class="empty-icon">🔎</div>'+
-      '<h3>Нет анкет для показа</h3>'+
-      '<p>Всего в базе: <b>'+state.profiles.length+'</b> анкет.</p>'+
-      '<p style="font-size:12px;color:#aaa;">Зарегистрируйтесь во втором браузере, чтобы создать вторую анкету. Либо добавьте запись вручную в NocoDB → таблица Profiles.</p>'+
-      '<button class="btn-primary" data-act="resetFilters" type="button">Сбросить фильтры</button></div>';
+    return '<div class="list-scroll"><div class="empty"><div class="empty-icon">📡</div>'+
+      '<h3>Нет сигналов</h3>'+
+      '<p>Всего анкет: <b>'+state.profiles.length+'</b>.<br>'+
+      'Зарегистрируйте вторую анкету или добавьте запись в NocoDB → Profiles.</p></div></div>';
   }
-  const p = list[state.deckIndex];
-  return filtersHtml+
-    '<div class="deck"><div class="card" id="mainCard">'+
-      '<div class="card-photo"><img src="'+esc(p.photo_url||FALLBACK_IMG)+'" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'">'+
-        '<div class="photo-shade"></div><div class="card-counter">'+(state.deckIndex+1)+' / '+list.length+'</div></div>'+
-      '<div class="card-body"><h2>'+esc(p.name)+', '+esc(p.age)+'</h2>'+
-        '<div class="card-city">📍 '+esc(p.city)+'</div>'+
-        (p.description?'<p class="card-desc">'+esc(p.description)+'</p>':'')+
-        '<div class="tags">'+tagsHtml(p.interests)+'</div></div></div>'+
-      '<div class="deck-actions">'+
-        '<button class="act act-skip" data-act="skip" type="button">✕</button>'+
-        '<button class="act act-comment" data-act="comment" data-uid="'+esc(p.user_id)+'" type="button">💬</button>'+
-        '<button class="act act-like" data-act="like" data-uid="'+esc(p.user_id)+'" type="button">❤️</button>'+
-      '</div>'+
-      '<button class="btn-open-profile" data-act="open" data-pid="'+esc(p.profile_id)+'" type="button">👤 Открыть профиль</button></div>';
+  if(state.deckIndex>=list.length) state.deckIndex=0;
+  const p=list[state.deckIndex];
+
+  const photo = p.photo_url || svgPlaceholder(p.name||'Фото');
+  const chipCity = p.city ? '<div class="chip">'+chipIcon('city')+esc(p.city)+'</div>' : '';
+  const chipAge = p.age ? '<div class="chip">'+chipIcon('age')+esc(p.age)+' лет</div>' : '';
+  const chipGender = p.gender ? '<div class="chip">'+chipIcon('gender')+esc(genderLabel(p.gender))+'</div>' : '';
+  const chipLooking = p.looking_for && p.looking_for!=='any' ?
+    '<div class="chip">'+chipIcon('looking')+esc(lookingLabel(p.looking_for))+'</div>' : '';
+  const interests = p.interests ? String(p.interests).split(',').map(s=>s.trim())
+    .filter(s=>s.length).slice(0,5).map(t=>'<div class="chip">'+chipIcon('star')+esc(t)+'</div>').join('') : '';
+
+  return '<div class="discover">'+
+    '<section class="photos-grid">'+
+      '<div class="photo-item photo-item--main" onclick="expandPhoto(this)">'+
+        '<img src="'+esc(photo)+'" alt="'+esc(p.name)+'"></div>'+
+      '<div class="photo-item" onclick="expandPhoto(this)">'+
+        '<img src="'+esc(photo)+'" alt=""></div>'+
+      '<div class="photo-item" onclick="expandPhoto(this)">'+
+        '<img src="'+svgPlaceholder(p.city||'—','#241434')+'" alt=""></div>'+
+    '</section>'+
+    '<div class="info-wrapper"><div class="info-block">'+
+      '<div class="name-row"><div class="name"><span>'+esc(p.name)+', <span class="age">'+esc(p.age)+'</span></span></div></div>'+
+      '<div class="chips-container">'+chipCity+chipAge+chipGender+chipLooking+interests+'</div>'+
+      (p.description?'<div class="bio-text">'+esc(p.description)+'</div>':'')+
+    '</div></div>'+
+    '<footer class="actions-bar">'+
+      '<button class="action-btn action-btn--no" data-act="skip" type="button" aria-label="Пропустить">✕</button>'+
+      '<button class="action-btn action-btn--comment" data-act="comment" data-uid="'+esc(p.user_id)+'" type="button" aria-label="Комментарий">💬</button>'+
+      '<button class="action-btn action-btn--yes" data-act="like" data-uid="'+esc(p.user_id)+'" type="button" aria-label="Нравится">💜</button>'+
+    '</footer></div>';
 }
 
 function viewLikes(){
-  const me=state.user; if(!me) return '';
-  const tab=state.likedTab; let items=[];
+  const me=state.user;if(!me) return '';
+  const tab=state.likedTab;let items=[];
   if(tab==='incoming'){
-    items = state.likes.filter(l=>l.to_user_id===me.user_id)
-      .map(l=>({ profile:profileByUserId(l.from_user_id), like:l }))
+    items=state.likes.filter(l=>l.to_user_id===me.user_id)
+      .map(l=>({profile:profileByUserId(l.from_user_id),like:l}))
       .filter(x=>!!x.profile);
   }else if(tab==='outgoing'){
-    items = state.likes.filter(l=>l.from_user_id===me.user_id)
-      .map(l=>({ profile:profileByUserId(l.to_user_id), like:l }))
+    items=state.likes.filter(l=>l.from_user_id===me.user_id)
+      .map(l=>({profile:profileByUserId(l.to_user_id),like:l}))
       .filter(x=>!!x.profile);
   }else{
-    items = state.matches.filter(m=>m.user1_id===me.user_id||m.user2_id===me.user_id)
-      .map(m=>{ const other=m.user1_id===me.user_id?m.user2_id:m.user1_id;
-        return { profile:profileByUserId(other), match:m }; })
+    items=state.matches.filter(m=>m.user1_id===me.user_id||m.user2_id===me.user_id)
+      .map(m=>{const other=m.user1_id===me.user_id?m.user2_id:m.user1_id;
+        return {profile:profileByUserId(other),match:m};})
       .filter(x=>!!x.profile);
   }
-  const tabsHtml = '<div class="tabs">'+
-    '<button class="tab'+(tab==='incoming'?' active':'')+'" data-act="tab" data-tab="incoming" type="button">Меня лайкнули</button>'+
-    '<button class="tab'+(tab==='outgoing'?' active':'')+'" data-act="tab" data-tab="outgoing" type="button">Я лайкнул</button>'+
+  const tabsHtml='<div class="tabs">'+
+    '<button class="tab'+(tab==='incoming'?' active':'')+'" data-act="tab" data-tab="incoming" type="button">Мне сигналили</button>'+
+    '<button class="tab'+(tab==='outgoing'?' active':'')+'" data-act="tab" data-tab="outgoing" type="button">Я сигналил</button>'+
     '<button class="tab'+(tab==='mutual'?' active':'')+'" data-act="tab" data-tab="mutual" type="button">Взаимные</button></div>';
   if(!items.length){
-    const t={ incoming:['💌','Пока никто не лайкнул','Поделитесь ссылкой.'],
-      outgoing:['❤️','Вы ещё никого не лайкнули','Перейдите в «Знакомства».'],
-      mutual:['💚','Взаимных пока нет','Когда совпадёт — появится здесь.'] }[tab];
-    return tabsHtml+'<div class="empty"><div class="empty-icon">'+t[0]+'</div><h3>'+t[1]+'</h3><p>'+t[2]+'</p></div>';
+    const t={incoming:['📡','Пока нет сигналов','Поделитесь ссылкой на анкету.'],
+      outgoing:['💜','Вы ещё никому не сигналили','Перейдите в «Знакомства».'],
+      mutual:['💚','Взаимных пока нет','Когда совпадёт — появится здесь.']}[tab];
+    return '<div class="list-scroll">'+tabsHtml+
+      '<div class="empty"><div class="empty-icon">'+t[0]+'</div><h3>'+t[1]+'</h3><p>'+t[2]+'</p></div></div>';
   }
-  const cards = items.map(it=>{
-    const p=it.profile; let btn='';
-    if(tab==='incoming') btn='<button data-act="like" data-uid="'+esc(p.user_id)+'" type="button">❤️</button>';
+  const cards=items.map(it=>{
+    const p=it.profile;let btn='';
+    if(tab==='incoming') btn='<button data-act="like" data-uid="'+esc(p.user_id)+'" type="button">💜</button>';
     else if(tab==='outgoing') btn='<button data-act="unlike" data-uid="'+esc(p.user_id)+'" type="button">💔</button>';
     else btn='<button data-act="comment" data-uid="'+esc(p.user_id)+'" type="button">💬</button>';
-    return '<div class="mini"><div class="mini-photo"><img src="'+esc(p.photo_url||FALLBACK_IMG)+'" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'"></div>'+
-      '<div class="mini-body"><div class="mini-name">'+esc(p.name)+', '+esc(p.age)+'</div><div class="mini-city">📍 '+esc(p.city)+'</div></div>'+
+    return '<div class="mini"><div class="mini-photo"><img src="'+esc(p.photo_url||svgPlaceholder(p.name))+'"></div>'+
+      '<div class="mini-body"><div class="mini-name">'+esc(p.name)+', '+esc(p.age)+'</div>'+
+      '<div class="mini-city">📍 '+esc(p.city)+'</div></div>'+
       '<div class="mini-actions"><button data-act="open" data-pid="'+esc(p.profile_id)+'" type="button">👤</button>'+btn+'</div></div>';
   }).join('');
-  return tabsHtml+'<div class="grid">'+cards+'</div>';
+  return '<div class="list-scroll">'+tabsHtml+'<div class="grid">'+cards+'</div></div>';
 }
 
 function viewMatches(){
-  const me=state.user; if(!me) return '';
-  const items = state.matches.filter(m=>m.user1_id===me.user_id||m.user2_id===me.user_id)
-    .map(m=>{ const other=m.user1_id===me.user_id?m.user2_id:m.user1_id;
-      return { profile:profileByUserId(other), match:m }; })
+  const me=state.user;if(!me) return '';
+  const items=state.matches.filter(m=>m.user1_id===me.user_id||m.user2_id===me.user_id)
+    .map(m=>{const other=m.user1_id===me.user_id?m.user2_id:m.user1_id;
+      return {profile:profileByUserId(other),match:m};})
     .filter(x=>!!x.profile);
-  if(!items.length) return '<div class="empty"><div class="empty-icon">💚</div><h3>Взаимных пока нет</h3><p>Ставьте лайки.</p></div>';
-  const cards = items.map(it=>{
+  if(!items.length){
+    return '<div class="list-scroll"><div class="empty"><div class="empty-icon">💜</div>'+
+      '<h3>Взаимных пока нет</h3><p>Отправляйте сигналы — когда совпадёт, матч появится здесь.</p></div></div>';
+  }
+  const cards=items.map(it=>{
     const p=it.profile;
-    return '<div class="mini"><div class="mini-photo"><img src="'+esc(p.photo_url||FALLBACK_IMG)+'" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'"></div>'+
-      '<div class="mini-body"><div class="mini-name">'+esc(p.name)+', '+esc(p.age)+'</div><div class="mini-city">📍 '+esc(p.city)+'</div></div>'+
+    return '<div class="mini"><div class="mini-photo"><img src="'+esc(p.photo_url||svgPlaceholder(p.name))+'"></div>'+
+      '<div class="mini-body"><div class="mini-name">'+esc(p.name)+', '+esc(p.age)+'</div>'+
+      '<div class="mini-city">📍 '+esc(p.city)+'</div></div>'+
       '<div class="mini-actions"><button data-act="open" data-pid="'+esc(p.profile_id)+'" type="button">👤</button>'+
       '<button data-act="comment" data-uid="'+esc(p.user_id)+'" type="button">💬</button></div></div>';
   }).join('');
-  return '<div class="section-title">💚 Матчи — '+items.length+'</div><div class="grid">'+cards+'</div>';
+  return '<div class="list-scroll"><div class="section-title">💜 Взаимные сигналы — '+items.length+'</div>'+
+    '<div class="grid">'+cards+'</div></div>';
 }
 
 function viewMe(){
-  const me=state.user; if(!me) return '';
+  const me=state.user;if(!me) return '';
   const p=state.profile;
-  if(!p) return '<div class="empty"><div class="empty-icon">📝</div><h3>Анкеты пока нет</h3><p>Создайте анкету.</p>'+
-    '<button class="btn-primary" data-act="editProfile" type="button">Создать</button></div>';
-  const likesR = state.likes.filter(l=>l.to_user_id===me.user_id).length;
-  const likesG = state.likes.filter(l=>l.from_user_id===me.user_id).length;
-  const mc = state.matches.filter(m=>m.user1_id===me.user_id||m.user2_id===me.user_id).length;
-  const link = profileLink(p.profile_id);
-  return '<div class="me"><div class="me-photo"><img src="'+esc(p.photo_url||FALLBACK_IMG)+'" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'"></div>'+
+  if(!p){
+    return '<div class="list-scroll"><div class="empty"><div class="empty-icon">📝</div>'+
+      '<h3>Анкеты пока нет</h3><p>Создайте анкету, чтобы вас могли найти.</p>'+
+      '<button class="btn-primary" data-act="editProfile" type="button">Создать анкету</button></div></div>';
+  }
+  const likesR=state.likes.filter(l=>l.to_user_id===me.user_id).length;
+  const likesG=state.likes.filter(l=>l.from_user_id===me.user_id).length;
+  const mc=state.matches.filter(m=>m.user1_id===me.user_id||m.user2_id===me.user_id).length;
+  const link=profileLink(p.profile_id);
+
+  const chipCity=p.city?'<div class="chip">'+chipIcon('city')+esc(p.city)+'</div>':'';
+  const chipAge=p.age?'<div class="chip">'+chipIcon('age')+esc(p.age)+' лет</div>':'';
+  const chipGender=p.gender?'<div class="chip">'+chipIcon('gender')+esc(genderLabel(p.gender))+'</div>':'';
+  const interests=p.interests?String(p.interests).split(',').map(s=>s.trim())
+    .filter(s=>s.length).slice(0,5).map(t=>'<div class="chip">'+chipIcon('star')+esc(t)+'</div>').join(''):'';
+
+  return '<div class="list-scroll"><div class="me-card">'+
+    '<div class="me-photo"><img src="'+esc(p.photo_url||svgPlaceholder(p.name))+'"></div>'+
     '<div class="me-info"><h2>'+esc(p.name)+', '+esc(p.age)+'</h2>'+
-      '<div class="city">📍 '+esc(p.city)+' · '+genderLabel(p.gender)+' · ищет: '+lookingLabel(p.looking_for)+'</div>'+
+      '<div class="chips-container" style="margin-top:10px;">'+chipCity+chipAge+chipGender+interests+'</div>'+
       (p.description?'<p class="desc">'+esc(p.description)+'</p>':'')+
-      '<div class="tags">'+tagsHtml(p.interests)+'</div>'+
-      '<div style="margin-top:14px;font-size:12.5px;color:var(--muted);word-break:break-all;">🆔 '+esc(p.profile_id)+'<br>🔗 '+esc(link)+'</div></div>'+
-    '<div class="stats"><div class="stat"><b>'+likesR+'</b><span>Лайков получено</span></div>'+
-      '<div class="stat"><b>'+mc+'</b><span>Матчей</span></div></div>'+
-    '<div class="stats" style="grid-template-columns:1fr;"><div class="stat"><b>'+likesG+'</b><span>Лайков поставлено</span></div></div>'+
+      '<div style="margin-top:12px;font-size:12px;color:#5a5a66;word-break:break-all;">'+
+        '🆔 '+esc(p.profile_id)+'<br>🔗 '+esc(link)+'</div></div>'+
+    '<div class="stats"><div class="stat"><b>'+likesR+'</b><span>Сигналов получено</span></div>'+
+      '<div class="stat"><b>'+mc+'</b><span>Взаимных</span></div></div>'+
+    '<div class="stats" style="grid-template-columns:1fr;"><div class="stat"><b>'+likesG+'</b>'+
+      '<span>Сигналов отправлено</span></div></div>'+
     '<div class="actions-col">'+
       '<button class="btn-primary" data-act="editProfile" type="button">✏️ Редактировать</button>'+
       '<button class="btn-ghost" data-act="copyLink" type="button">📋 Скопировать ссылку</button>'+
       '<button class="btn-ghost" data-act="openMine" type="button">🔗 Открыть анкету</button>'+
-      '<button class="btn-ghost" data-act="logout" type="button">🚪 Выйти</button></div></div>';
+      '<button class="btn-ghost" data-act="logout" type="button">🚪 Выйти</button>'+
+    '</div></div></div>';
 }
 
 function viewProfile(pid){
   const p=profileByProfileId(pid);
-  if(!p) return '<div class="empty"><div class="empty-icon">🔍</div><h3>Анкета не найдена</h3><p>Возможно, ссылка неверна.</p>'+
-    '<button class="btn-primary" data-act="goHome" type="button">На главную</button></div>';
-  const me=state.user;
-  const isMine = me && p.user_id===me.user_id;
-  const alreadyLiked = me && state.likes.some(l=>l.from_user_id===me.user_id && l.to_user_id===p.user_id);
-  let actionsHtml='';
-  if(!me){
-    actionsHtml='<div class="actions-col"><button class="btn-primary" data-act="goHome" type="button">Войти, чтобы лайкнуть</button></div>';
-  }else if(isMine){
-    actionsHtml='<div class="actions-col"><button class="btn-ghost" data-act="copyLink" type="button">📋 Скопировать ссылку</button>'+
-      '<button class="btn-primary" data-act="editProfile" type="button">✏️ Редактировать</button></div>';
-  }else{
-    actionsHtml='<div class="deck-actions">'+
-      '<button class="act act-comment" data-act="comment" data-uid="'+esc(p.user_id)+'" type="button">💬</button>'+
-      (alreadyLiked
-        ? '<button class="act act-like" data-act="unlike" data-uid="'+esc(p.user_id)+'" type="button">💔</button>'
-        : '<button class="act act-like" data-act="like" data-uid="'+esc(p.user_id)+'" type="button">❤️</button>')+
-      '</div><div style="text-align:center;margin-top:10px;font-size:12.5px;color:var(--muted);">'+
-      (alreadyLiked?'Вы уже лайкнули':'Поставьте лайк')+'</div>';
+  if(!p){
+    return '<div class="list-scroll"><div class="empty"><div class="empty-icon">🔍</div>'+
+      '<h3>Анкета не найдена</h3><p>Возможно, ссылка неверна.</p>'+
+      '<button class="btn-primary" data-act="goHome" type="button">На главную</button></div></div>';
   }
-  return '<div class="pv"><div class="pv-photo">'+
-    '<button class="pv-back" data-act="goHome" type="button">←</button>'+
-    '<img src="'+esc(p.photo_url||FALLBACK_IMG)+'" onerror="this.onerror=null;this.src=\''+FALLBACK_IMG+'\'">'+
-    '<div class="photo-shade"></div></div>'+
-    '<div class="pv-body"><h2>'+esc(p.name)+', '+esc(p.age)+'</h2>'+
-      '<div class="city">📍 '+esc(p.city)+' · '+genderLabel(p.gender)+' · ищет: '+lookingLabel(p.looking_for)+'</div>'+
-      (p.description?'<p class="desc">'+esc(p.description)+'</p>':'')+
-      '<div class="tags">'+tagsHtml(p.interests)+'</div>'+
-      '<div style="margin-top:12px;font-size:12px;color:var(--muted);">🆔 '+esc(p.profile_id)+'</div>'+
-      actionsHtml+'</div></div>';
+  const me=state.user;
+  const isMine=me && p.user_id===me.user_id;
+  const alreadyLiked=me && state.likes.some(l=>l.from_user_id===me.user_id&&l.to_user_id===p.user_id);
+  let footer='';
+  if(me && !isMine){
+    footer='<footer class="actions-bar">'+
+      '<button class="action-btn action-btn--no" data-act="goHome" type="button">←</button>'+
+      '<button class="action-btn action-btn--comment" data-act="comment" data-uid="'+esc(p.user_id)+'" type="button">💬</button>'+
+      (alreadyLiked
+        ? '<button class="action-btn action-btn--no" data-act="unlike" data-uid="'+esc(p.user_id)+'" type="button">💔</button>'
+        : '<button class="action-btn action-btn--yes" data-act="like" data-uid="'+esc(p.user_id)+'" type="button">💜</button>')+
+      '</footer>';
+  }
+  const chipCity=p.city?'<div class="chip">'+chipIcon('city')+esc(p.city)+'</div>':'';
+  const chipAge=p.age?'<div class="chip">'+chipIcon('age')+esc(p.age)+' лет</div>':'';
+  const chipGender=p.gender?'<div class="chip">'+chipIcon('gender')+esc(genderLabel(p.gender))+'</div>':'';
+  const chipLooking=p.looking_for&&p.looking_for!=='any'?'<div class="chip">'+chipIcon('looking')+esc(lookingLabel(p.looking_for))+'</div>':'';
+  const interests=p.interests?String(p.interests).split(',').map(s=>s.trim())
+    .filter(s=>s.length).slice(0,5).map(t=>'<div class="chip">'+chipIcon('star')+esc(t)+'</div>').join(''):'';
+  const photo=p.photo_url||svgPlaceholder(p.name||'Фото');
+
+  return '<div class="discover">'+
+    '<section class="photos-grid">'+
+      '<div class="photo-item photo-item--main" onclick="expandPhoto(this)"><img src="'+esc(photo)+'"></div>'+
+      '<div class="photo-item" onclick="expandPhoto(this)"><img src="'+esc(photo)+'"></div>'+
+      '<div class="photo-item" onclick="expandPhoto(this)"><img src="'+svgPlaceholder(p.city||'—','#241434')+'"></div>'+
+    '</section>'+
+    '<div class="info-wrapper"><div class="info-block">'+
+      '<div class="name-row"><div class="name"><span>'+esc(p.name)+', <span class="age">'+esc(p.age)+'</span></span></div></div>'+
+      '<div class="chips-container">'+chipCity+chipAge+chipGender+chipLooking+interests+'</div>'+
+      (p.description?'<div class="bio-text">'+esc(p.description)+'</div>':'')+
+      '<div style="margin-top:12px;font-size:12px;color:#5a5a66;">🆔 '+esc(p.profile_id)+'</div>'+
+    '</div></div>'+footer+'</div>';
 }
 
 /* ================= RENDER ================= */
 function render(){
-  const view = document.getElementById('view');
-  if(!state.user && state.view!=='profile'){ showAuthOverlay(); view.innerHTML=''; updateNav(); return; }
-  hideAuthOverlay();
-  if(state.user && !state.profile && state.view!=='profile'){
-    view.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><h3>Остался последний шаг</h3>'+
-      '<p>Создайте анкету, чтобы вас могли найти.</p>'+
-      '<button class="btn-primary" data-act="editProfile" type="button">Создать анкету</button></div>';
-    updateNav(); return;
+  const main=document.getElementById('main');
+  const nav=document.getElementById('bottomNav');
+
+  if(!state.user && state.view!=='profile'){
+    showAuthOverlay();main.innerHTML='';nav.style.display='none';return;
   }
-  if(state.view==='discover') view.innerHTML = viewDiscover();
-  else if(state.view==='likes') view.innerHTML = viewLikes();
-  else if(state.view==='matches') view.innerHTML = viewMatches();
-  else if(state.view==='me') view.innerHTML = viewMe();
-  else if(state.view==='profile') view.innerHTML = viewProfile(state.viewProfileId);
-  else view.innerHTML = viewDiscover();
+  hideAuthOverlay();
+  nav.style.display='grid';
+
+  if(state.user && !state.profile && state.view!=='profile'){
+    main.innerHTML='<div class="list-scroll"><div class="empty"><div class="empty-icon">📝</div>'+
+      '<h3>Остался последний шаг</h3><p>Создайте анкету, чтобы вас могли найти другие.</p>'+
+      '<button class="btn-primary" data-act="editProfile" type="button">Создать анкету</button></div></div>';
+    updateNav();return;
+  }
+
+  if(state.view==='discover') main.innerHTML=viewDiscover();
+  else if(state.view==='likes') main.innerHTML=viewLikes();
+  else if(state.view==='matches') main.innerHTML=viewMatches();
+  else if(state.view==='me') main.innerHTML=viewMe();
+  else if(state.view==='profile') main.innerHTML=viewProfile(state.viewProfileId);
+  else main.innerHTML=viewDiscover();
+
   updateNav();
 }
 function updateNav(){
   $$('#bottomNav .nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===state.view));
-  const nav = document.getElementById('bottomNav');
-  if(nav) nav.style.display = (!state.user && state.view==='profile') ? 'none' : 'grid';
 }
 
 /* ================= EVENTS ================= */
-async function onViewClick(e){
-  const el = e.target.closest('[data-act]');
+async function onMainClick(e){
+  const el=e.target.closest('[data-act]');
   if(!el) return;
-  const act = el.dataset.act;
+  const act=el.dataset.act;
   console.log('[CLICK] '+act);
 
-  if(act==='toggleFilters'){ state.filtersOpen=!state.filtersOpen; render(); return; }
-  if(act==='applyFilters'){
-    const f={
-      ageFrom:clampNum($('#fAgeFrom').value,18,100,18),
-      ageTo:clampNum($('#fAgeTo').value,18,100,100),
-      city:$('#fCity').value.trim(),
-      gender:$('#fGender').value,
-      lookingFor:$('#fLookingFor').value
-    };
-    if(f.ageFrom>f.ageTo){ const t=f.ageFrom; f.ageFrom=f.ageTo; f.ageTo=t; }
-    state.filters=f; state.deckIndex=0; state.filtersOpen=true;
-    toast('Фильтры применены','success'); render(); return;
-  }
-  if(act==='resetFilters'){
-    state.filters={ ageFrom:18,ageTo:100,city:'',gender:'',lookingFor:'' };
-    state.deckIndex=0; render(); return;
-  }
-  if(act==='tab'){ state.likedTab=el.dataset.tab||'incoming'; render(); return; }
-  if(act==='goHome'){ navigateTo('discover'); return; }
-  if(act==='open'){ goToProfile(el.dataset.pid); return; }
-  if(act==='comment'){ const p=profileByUserId(el.dataset.uid); if(p) openCommentModal(p); return; }
-  if(act==='skip'){ state.deckIndex++; render(); window.scrollTo(0,0); return; }
+  if(act==='tab'){state.likedTab=el.dataset.tab||'incoming';render();return;}
+  if(act==='goHome'){navigateTo('discover');return;}
+  if(act==='open'){goToProfile(el.dataset.pid);return;}
+  if(act==='comment'){const p=profileByUserId(el.dataset.uid);if(p) openCommentModal(p);return;}
+  if(act==='skip'){state.deckIndex++;render();window.scrollTo(0,0);return;}
   if(act==='like'){
-    if(!state.user){ showAuthOverlay(); return; }
-    const p = profileByUserId(el.dataset.uid);
-    if(!p){ toast('Профиль не найден','error'); return; }
+    if(!state.user){showAuthOverlay();return;}
+    const p=profileByUserId(el.dataset.uid);
+    if(!p){toast('Профиль не найден','error');return;}
     await handleLike(p);
     return;
   }
-  if(act==='unlike'){ const p=profileByUserId(el.dataset.uid); if(p) openUnlikeConfirm(p); return; }
-  if(act==='editProfile'){ openProfileEditor(false); return; }
-  if(act==='copyLink'){ copyMyLink(); return; }
-  if(act==='openMine'){ if(state.profile) goToProfile(state.profile.profile_id); return; }
-  if(act==='logout'){ logout(); return; }
+  if(act==='unlike'){const p=profileByUserId(el.dataset.uid);if(p) openUnlikeConfirm(p);return;}
+  if(act==='editProfile'){openProfileEditor(false);return;}
+  if(act==='copyLink'){copyMyLink();return;}
+  if(act==='openMine'){if(state.profile) goToProfile(state.profile.profile_id);return;}
+  if(act==='logout'){logout();return;}
 }
 
 /* ================= START ================= */
 async function start(){
   loadSession();
-  console.log('=== HeartLink DEMO_MODE='+DEMO_MODE+' ===');
+  console.log('=== Secret Signal ===');
+  console.log('DEMO_MODE='+DEMO_MODE);
   if(Object.keys(PLATFORM).length) console.log('PLATFORM:', PLATFORM);
 
-  document.getElementById('view').addEventListener('click', function(e){
-    onViewClick(e).catch(err=>{
+  document.getElementById('main').addEventListener('click', function(e){
+    onMainClick(e).catch(err=>{
       console.error('[UI] '+err.message);
       toast('Ошибка: '+err.message,'error');
     });
   });
 
   $$('#bottomNav .nav-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      if(!state.user){ showAuthOverlay(); return; }
+    btn.addEventListener('click',()=>{
+      if(!state.user){showAuthOverlay();return;}
       navigateTo(btn.dataset.view);
     });
   });
 
-  window.addEventListener('popstate', ()=>{
+  window.addEventListener('popstate',()=>{
     const r=getRoute();
-    if(r.view==='profile'){ state.view='profile'; state.viewProfileId=r.profileId; }
-    else { state.view=r.view; state.viewProfileId=null; }
+    if(r.view==='profile'){state.view='profile';state.viewProfileId=r.profileId;}
+    else{state.view=r.view;state.viewProfileId=null;}
     render();
   });
 
   setStatus('загрузка…','loading');
   await refreshData();
   if(state.nocoOnline) setStatus('готово','ok');
-  else setStatus('оффлайн','err');
+  else setStatus('локально','err');
 
-  const route = getRoute();
-  if(route.view==='profile'){ state.view='profile'; state.viewProfileId=route.profileId; }
-  else { state.view=route.view; state.viewProfileId=null; }
+  const route=getRoute();
+  if(route.view==='profile'){state.view='profile';state.viewProfileId=route.profileId;}
+  else{state.view=route.view;state.viewProfileId=null;}
   render();
-  console.log('=== Приложение запущено ===');
+  console.log('=== Secret Signal запущен ===');
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded',()=>{
   start().catch(err=>{
     console.error('START FAILED: '+err.message);
     toast('Ошибка запуска: '+err.message,'error');
   });
 });
 </script>
-</body>
-</html>
+
+<div id="authOverlay" class="auth-overlay"><div class="auth-card"><img class="auth-logo-img" src="https://i.postimg.cc/7hk52csC/Secret-Signal-Ag-AD5ao-AAgq-X2Es.gif" alt="Secret Signal"><h1>Secret Signal</h1><p class="auth-sub">Создайте аккаунт, чтобы начать знакомиться</p><form id="regForm" class="form" novalidate=""><label>Имя<input name="name" type="text" maxlength="50" value=""></label><div class="row2"><label>Возраст<input name="age" type="number" min="18" max="100" placeholder="18+"></label><label>Пол<select name="gender"><option value="female" selected="">Женщина</option><option value="male">Мужчина</option></select></label></div><label>Город<input name="city" type="text" maxlength="60" placeholder="Москва"></label><label>О себе<textarea name="description" rows="3" maxlength="1000" placeholder="Пара слов о себе"></textarea></label><label>Кого ищу<select name="looking_for"><option value="male" selected="">Мужчину</option><option value="female">Женщину</option><option value="any">Не важно</option></select></label><div class="photo-picker"><img id="regPhotoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23241434'/%3E%3Cstop offset='1' stop-color='%2316161c'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='600' height='600' fill='url(%23g)'/%3E%3Ctext x='50%25' y='50%25' font-size='38' fill='%23a855f7' fill-opacity='0.55' font-family='sans-serif' text-anchor='middle' dy='.35em' font-weight='700'%3E%D0%A4%D0%BE%D1%82%D0%BE%3C/text%3E%3C/svg%3E"><label class="photo-btn">📷 Выбрать фото<input id="regPhotoInput" type="file" accept="image/*" hidden=""></label></div><label>Telegram Chat ID<input name="telegram_chat_id" type="text" maxlength="40" value=""></label><div class="err" id="regErr"></div><button class="btn-primary" type="submit">Создать аккаунт</button></form></div></div></body></html>
